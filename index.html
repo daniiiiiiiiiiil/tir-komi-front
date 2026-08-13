@@ -6,15 +6,28 @@
     <title>Обучение на охранника в Сыктывкаре — Институт международных связей и делового сотрудничества | практика на тире</title>
     <meta name="description" content="Обучение на охранника в Сыктывкаре: образование по профессии «охранник», обучение охраны и обучение на оружие проводит Институт международных связей и делового сотрудничества. Практические стрелковые занятия — на тире «Институт международных связей и делового сотрудничества», ул. Карла Маркса, 228/3. Телефон 8-8212-314060.">
     <meta name="keywords" content="обучение на охранника Сыктывкар, обучение охраны Сыктывкар, Институт международных связей и делового сотрудничества, Институт международных связей и делового сотрудничества Сыктывкар, образование по профессии охранник, обучение на оружие Сыктывкар, тир Сыктывкар">
-    <link rel="canonical" href="https://example.com/">
+    <link rel="canonical" href="https://tir-komi-site.vercel.app/">
     <meta name="robots" content="index, follow">
+
+    <meta name="yandex-verification" content="469ff02baa3373b5" />
+    <meta name="google-site-verification" content="ptplu1o3_4VU2vb54UeH0zVeNC_wQEhIDb5AnxQi3Qc" />
 
     <meta property="og:type" content="website">
     <meta property="og:locale" content="ru_RU">
     <meta property="og:title" content="Обучение на охранника в Сыктывкаре — Институт международных связей и делового сотрудничества">
     <meta property="og:description" content="Образование по профессии «охранник», обучение охраны и обучение на оружие в Сыктывкаре. Практика — на тире «Институт международных связей и делового сотрудничества».">
     <meta property="og:image" content="/assets/main.jpg">
-    <meta property="og:url" content="https://example.com/">
+    <meta property="og:url" content="https://tir-komi-site.vercel.app/">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Обучение на охранника в Сыктывкаре — ИМСДС">
+    <meta name="twitter:description" content="Образование по профессии «охранник», обучение на оружие. Практика на тире, Карла Маркса 228/3.">
+    <meta name="twitter:image" content="https://tir-komi-site.vercel.app/assets/main.jpg">
+
+    <meta name="geo.region" content="RU-KO">
+    <meta name="geo.placename" content="Сыктывкар">
+    <meta name="geo.position" content="61.659996;50.822636">
+    <meta name="ICBM" content="61.659996, 50.822636">
 
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='none' stroke='%23c69a4a' stroke-width='2'/%3E%3Cline x1='16' y1='4' x2='16' y2='10' stroke='%23c69a4a' stroke-width='2'/%3E%3Cline x1='16' y1='22' x2='16' y2='28' stroke='%23c69a4a' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='2' fill='%23c69a4a'/%3E%3C/svg%3E">
 
@@ -1263,25 +1276,63 @@
     <script type="application/ld+json">
         {
             "@context": "https://schema.org",
-            "@type": "EducationalOrganization",
-            "name": "Обучение на охранника — Институт международных связей и делового сотрудничества",
-            "description": "Обучение на охранника, обучение охраны и обучение обращению с оружием в Сыктывкаре. Институт международных связей и делового сотрудничества. Практические стрелковые занятия проходят на тире «Институт международных связей и делового сотрудничества».",
-            "address": {
-                "@type": "PostalAddress",
-                "streetAddress": "ул. Карла Маркса, д. 228/3 (вход со стороны шлагбаума)",
-                "addressLocality": "Сыктывкар",
-                "addressCountry": "RU"
-            },
-            "geo": {
-                "@type": "GeoCoordinates",
-                "latitude": 61.659996,
-                "longitude": 50.822636
-            },
-            "aggregateRating": {
-                "@type": "AggregateRating",
-                "ratingValue": "5.0",
-                "reviewCount": "1"
-            }
+            "@graph": [
+                {
+                    "@type": "EducationalOrganization",
+                    "@id": "https://tir-komi-site.vercel.app/#organization",
+                    "name": "Институт международных связей и делового сотрудничества",
+                    "url": "https://tir-komi-site.vercel.app/",
+                    "image": "https://tir-komi-site.vercel.app/assets/main.jpg",
+                    "telephone": "+7-8212-314060",
+                    "email": "tirkomi@yandex.ru",
+                    "address": {
+                        "@type": "PostalAddress",
+                        "streetAddress": "ул. Карла Маркса, д. 228/3",
+                        "addressLocality": "Сыктывкар",
+                        "addressRegion": "Республика Коми",
+                        "addressCountry": "RU"
+                    },
+                    "geo": {
+                        "@type": "GeoCoordinates",
+                        "latitude": 61.659996,
+                        "longitude": 50.822636
+                    },
+                    "openingHoursSpecification": {
+                        "@type": "OpeningHoursSpecification",
+                        "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday"],
+                        "opens": "09:00",
+                        "closes": "17:00"
+                    }
+                },
+                {
+                    "@type": "Course",
+                    "name": "Обучение на охранника",
+                    "description": "Образование по профессии «охранник»: правовая подготовка, тактика действий, курс обучения на оружие и итоговая аттестация.",
+                    "provider": {
+                        "@id": "https://tir-komi-site.vercel.app/#organization"
+                    },
+                    "hasCourseInstance": {
+                        "@type": "CourseInstance",
+                        "courseMode": "onsite",
+                        "location": {
+                            "@type": "Place",
+                            "name": "Институт международных связей и делового сотрудничества",
+                            "address": "г. Сыктывкар, ул. Карла Маркса, 228/3"
+                        }
+                    }
+                },
+                {
+                    "@type": "BreadcrumbList",
+                    "itemListElement": [
+                        {
+                            "@type": "ListItem",
+                            "position": 1,
+                            "name": "Главная",
+                            "item": "https://tir-komi-site.vercel.app/"
+                        }
+                    ]
+                }
+            ]
         }
     </script>
 </head>
