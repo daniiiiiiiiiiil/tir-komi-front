@@ -452,10 +452,28 @@
             .logo{
                 max-width: calc(100vw - 90px);
                 font-size: clamp(0.85rem, 2.5vw, 1.1rem);
+                min-width: 0;
+                overflow: hidden;
             }
             .logo .logo-mark {
                 width: clamp(24px, 4vw, 30px);
                 height: clamp(24px, 4vw, 30px);
+            }
+            .logo > span:not(.logo-mark){
+                display: block;
+                min-width: 0;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+            }
+            .logo small{
+                display: inline;
+                margin-left: .5em;
+                margin-top: 0;
+                white-space: nowrap;
+            }
+            .burger{
+                flex-shrink: 0;
             }
             .info-section {
                 padding: 80px 0 60px;
@@ -479,8 +497,12 @@
         }
 
         @media (max-width: 480px) {
-            .logo small {
-                font-size: 0.4rem;
+            .logo{
+                max-width: calc(100vw - 76px);
+                font-size: 0.76rem;
+            }
+            .logo small{
+                display: none;
             }
             .info-block {
                 padding: 12px 14px;

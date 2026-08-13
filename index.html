@@ -503,11 +503,30 @@
             .logo{
                 max-width: calc(100vw - 90px);
                 font-size: clamp(0.85rem, 2.5vw, 1.1rem);
+                min-width: 0;
+                overflow: hidden;
             }
             .logo .logo-mark {
                 width: clamp(24px, 4vw, 30px);
                 height: clamp(24px, 4vw, 30px);
             }
+            .logo > span:not(.logo-mark){
+                display: block;
+                min-width: 0;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+            }
+            .logo small{
+                display: inline;
+                margin-left: .5em;
+                margin-top: 0;
+                white-space: nowrap;
+            }
+            .burger{
+                flex-shrink: 0;
+            }
+
             .nav-desktop,.header-cta{display:none;}
             .burger{display:block;}
             .hero-hud{display:none;}
@@ -609,8 +628,12 @@
         }
 
         @media (max-width: 480px) {
-            .logo small {
-                font-size: 0.4rem;
+            .logo{
+                max-width: calc(100vw - 76px);
+                font-size: 0.76rem;
+            }
+            .logo small{
+                display: none;
             }
             .hero h1 {
                 font-size: clamp(1.6rem, 5vw, 2.4rem);
@@ -1627,78 +1650,11 @@
     </div>
 </div>
 
+
 <script>
     const API_BASE = window.__API_BASE__ || 'https://tir-komi.onrender.com/api/v1';
 
-    // ===== КЕШИРОВАНИЕ В LOCALSTORAGE (НАВСЕГДА) =====
-    const Cache = {
-        // Получить данные из кеша (без проверки срока годности)
-        get(key) {
-            try {
-                const raw = localStorage.getItem(`cache_${key}`);
-                if (!raw) return null;
-                return JSON.parse(raw);
-            } catch (e) {
-                return null;
-            }
-        },
-
-        // Сохранить данные в кеш (навсегда)
-        set(key, data) {
-            try {
-                localStorage.setItem(`cache_${key}`, JSON.stringify(data));
-            } catch (e) {
-                console.warn('Cache set error:', e);
-            }
-        },
-
-        // Проверить, есть ли данные в кеше
-        has(key) {
-            return localStorage.getItem(`cache_${key}`) !== null;
-        },
-
-        // Очистить кеш для конкретного ключа
-        invalidate(key) {
-            localStorage.removeItem(`cache_${key}`);
-        },
-
-        // Очистить весь кеш
-        clear() {
-            const keys = Object.keys(localStorage);
-            keys.forEach(key => {
-                if (key.startsWith('cache_')) {
-                    localStorage.removeItem(key);
-                }
-            });
-        },
-
-        // Получить все ключи кеша
-        keys() {
-            const result = [];
-            const keys = Object.keys(localStorage);
-            keys.forEach(key => {
-                if (key.startsWith('cache_')) {
-                    result.push(key.replace('cache_', ''));
-                }
-            });
-            return result;
-        }
-    };
-
-    // ===== API ЗАПРОСЫ С КЕШИРОВАНИЕМ (НАВСЕГДА) =====
-    async function apiRequest(path, { method = 'GET', body, headers, useCache = true, cacheKey, forceRefresh = false, ...rest } = {}) {
-        // Для GET-запросов с кешированием
-        if (method === 'GET' && useCache && !forceRefresh) {
-            const key = cacheKey || path.replace(/\?.*$/, '').replace(/\//g, '_');
-            const cached = Cache.get(key);
-
-            if (cached !== null) {
-                // Возвращаем кешированные данные (навсегда)
-                return cached;
-            }
-        }
-
-        // Выполняем запрос
+    async function apiRequest(path, { method = 'GET', body, headers, ...rest } = {}) {
         const res = await fetch(API_BASE + path, {
             method,
             credentials: 'include',
@@ -1724,12 +1680,6 @@
             throw err;
         }
 
-        // Сохраняем в кеш для GET-запросов (навсегда)
-        if (method === 'GET' && useCache) {
-            const key = cacheKey || path.replace(/\?.*$/, '').replace(/\//g, '_');
-            Cache.set(key, data);
-        }
-
         return data;
     }
 
@@ -1743,147 +1693,90 @@
         });
     }
 
-    // ===== API СЕРВИСЫ =====
     const Api = {
         advertisements: {
-            list: (limit = 20, offset = 0) => apiRequest(`/advertisements?limit=${limit}&offset=${offset}`, {
-                useCache: true,
-                cacheKey: 'advertisements'
-            }),
-            get: (id) => apiRequest(`/advertisements/${id}`, {
-                useCache: true,
-                cacheKey: `advertisement_${id}`
-            }),
+            list: (limit = 20, offset = 0) => apiRequest(`/advertisements?limit=${limit}&offset=${offset}`),
+            get: (id) => apiRequest(`/advertisements/${id}`),
             create: (payload) => apiRequest('/advertisements', {
                 method: 'POST',
-                body: payload,
-                useCache: false
+                body: payload
             }),
             update: (id, patch) => apiRequest(`/advertisements/${id}`, {
                 method: 'PATCH',
-                body: patch,
-                useCache: false
+                body: patch
             }),
             remove: (id) => apiRequest(`/advertisements/${id}`, {
-                method: 'DELETE',
-                useCache: false
+                method: 'DELETE'
             }),
-            // Принудительно обновить кеш
-            refresh: () => {
-                Cache.invalidate('advertisements');
-                return Api.advertisements.list();
-            }
+            refresh: () => Api.advertisements.list()
         },
 
         materials: {
-            list: (limit = 20, offset = 0) => apiRequest(`/materials?limit=${limit}&offset=${offset}`, {
-                useCache: true,
-                cacheKey: 'materials'
-            }),
-            get: (id) => apiRequest(`/materials/${id}`, {
-                useCache: true,
-                cacheKey: `material_${id}`
-            }),
+            list: (limit = 20, offset = 0) => apiRequest(`/materials?limit=${limit}&offset=${offset}`),
+            get: (id) => apiRequest(`/materials/${id}`),
             create: (payload) => apiRequest('/materials', {
                 method: 'POST',
-                body: payload,
-                useCache: false
+                body: payload
             }),
             update: (id, patch) => apiRequest(`/materials/${id}`, {
                 method: 'PATCH',
-                body: patch,
-                useCache: false
+                body: patch
             }),
             remove: (id) => apiRequest(`/materials/${id}`, {
-                method: 'DELETE',
-                useCache: false
+                method: 'DELETE'
             }),
-            refresh: () => {
-                Cache.invalidate('materials');
-                return Api.materials.list();
-            }
+            refresh: () => Api.materials.list()
         },
 
         vacancies: {
-            list: (limit = 20, offset = 0) => apiRequest(`/vacancies?limit=${limit}&offset=${offset}`, {
-                useCache: true,
-                cacheKey: 'vacancies'
-            }),
-            get: (id) => apiRequest(`/vacancies/${id}`, {
-                useCache: true,
-                cacheKey: `vacancy_${id}`
-            }),
+            list: (limit = 20, offset = 0) => apiRequest(`/vacancies?limit=${limit}&offset=${offset}`),
+            get: (id) => apiRequest(`/vacancies/${id}`),
             create: (payload) => apiRequest('/vacancies', {
                 method: 'POST',
-                body: payload,
-                useCache: false
+                body: payload
             }),
             update: (id, patch) => apiRequest(`/vacancies/${id}`, {
                 method: 'PATCH',
-                body: patch,
-                useCache: false
+                body: patch
             }),
             remove: (id) => apiRequest(`/vacancies/${id}`, {
-                method: 'DELETE',
-                useCache: false
+                method: 'DELETE'
             }),
-            refresh: () => {
-                Cache.invalidate('vacancies');
-                return Api.vacancies.list();
-            }
+            refresh: () => Api.vacancies.list()
         },
 
         reviews: {
-            list: (limit = 20, offset = 0) => apiRequest(`/reviews?limit=${limit}&offset=${offset}`, {
-                useCache: true,
-                cacheKey: 'reviews'
-            }),
-            byRating: (rating, limit = 20, offset = 0) => apiRequest(`/reviews/rating/${rating}?limit=${limit}&offset=${offset}`, {
-                useCache: true,
-                cacheKey: `reviews_rating_${rating}`
-            }),
-            get: (id) => apiRequest(`/reviews/${id}`, {
-                useCache: true,
-                cacheKey: `review_${id}`
-            }),
+            list: (limit = 20, offset = 0) => apiRequest(`/reviews?limit=${limit}&offset=${offset}`),
+            byRating: (rating, limit = 20, offset = 0) => apiRequest(`/reviews/rating/${rating}?limit=${limit}&offset=${offset}`),
+            get: (id) => apiRequest(`/reviews/${id}`),
             create: (payload) => apiRequest('/reviews', {
                 method: 'POST',
-                body: payload,
-                useCache: false
+                body: payload
             }),
             update: (id, patch) => apiRequest(`/reviews/${id}`, {
                 method: 'PATCH',
-                body: patch,
-                useCache: false
+                body: patch
             }),
             remove: (id) => apiRequest(`/reviews/${id}`, {
-                method: 'DELETE',
-                useCache: false
+                method: 'DELETE'
             }),
-            refresh: () => {
-                Cache.invalidate('reviews');
-                return Api.reviews.list();
-            }
+            refresh: () => Api.reviews.list()
         },
 
         auth: {
             login: (email, password) => apiRequest('/auth/login', {
                 method: 'POST',
-                body: { email, password },
-                useCache: false
+                body: { email, password }
             }),
             register: (email, password) => apiRequest('/auth/register', {
                 method: 'POST',
-                body: { email, password },
-                useCache: false
+                body: { email, password }
             }),
             logout: () => apiRequest('/auth/logout', {
-                method: 'POST',
-                useCache: false
+                method: 'POST'
             }),
             refresh: () => apiRequest('/auth/refresh', {
-                method: 'POST',
-                useCache: false
+                method: 'POST'
             }),
         },
     };
@@ -2230,7 +2123,7 @@
 
 
         const adsRail = document.getElementById('adsRail');
-        async function loadAds(forceRefresh = false) {
+        async function loadAds() {
             if (!adsRail) return;
             try {
                 const data = await Api.advertisements.list(12, 0);
@@ -2242,7 +2135,7 @@
         loadAds();
 
         const materialsGrid = document.getElementById('materialsGrid');
-        async function loadMaterials(forceRefresh = false) {
+        async function loadMaterials() {
             if (!materialsGrid) return;
             try {
                 const data = await Api.materials.list(20, 0);
@@ -2254,7 +2147,7 @@
         loadMaterials();
 
         const vacanciesGrid = document.getElementById('vacanciesGrid');
-        async function loadVacancies(forceRefresh = false) {
+        async function loadVacancies() {
             if (!vacanciesGrid) return;
             try {
                 const data = await Api.vacancies.list(20, 0);
@@ -2266,7 +2159,7 @@
         loadVacancies();
 
         const reviewsList = document.getElementById('reviewsList');
-        async function loadReviews(forceRefresh = false) {
+        async function loadReviews() {
             if (!reviewsList) return;
             try {
                 const data = await Api.reviews.list(10, 0);
@@ -2317,7 +2210,6 @@
                     if (ratingPick) {
                         ratingPick.querySelectorAll('button').forEach((b) => b.classList.remove('is-active'));
                     }
-                    Cache.invalidate('reviews');
                     loadReviews();
                 } catch (err) {
                     reviewMsg.textContent = err.message || 'Не удалось отправить отзыв. Попробуйте позже.';
@@ -2343,7 +2235,6 @@
             yearSpan.textContent = new Date().getFullYear();
         }
 
-        window.Cache = Cache;
         window.Api = Api;
 
         window.refreshAll = async function() {
@@ -2374,26 +2265,8 @@
             }
         };
 
-        window.clearCache = function() {
-            Cache.clear();
-            location.reload();
-        };
-
-        window.showCache = function() {
-            const keys = Cache.keys();
-            if (!keys.length) {
-                console.log('Кеш пуст');
-                return;
-            }
-            console.log('Содержимое кеша:');
-            keys.forEach(key => {
-                const data = Cache.get(key);
-                console.log(`  ${key}:`, data);
-            });
-        };
-
-
     })();
 </script>
+
 </body>
 </html>
