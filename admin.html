@@ -1176,7 +1176,7 @@
 
 <script>
 
-    const API_BASE = window.__API_BASE__ || 'https://tir-komi.onrender.com/api/v1';
+    const API_BASE = window.__API_BASE__ || 'https://tir-komi.relaxdev.ru/api/v1';
 
     async function apiRequest(path, { method = 'GET', body, headers, ...rest } = {}) {
         const res = await fetch(API_BASE + path, {
