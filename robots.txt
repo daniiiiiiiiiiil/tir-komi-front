@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://tir-komi-site.vercel.app/sitemap.xml
+Sitemap: https://tir-komi.vercel.app/sitemap.xml
