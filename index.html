@@ -1414,7 +1414,7 @@
 
         <section class="hero" id="hero">
             <div class="hero-bg" id="heroBg">
-                <img src="" alt="Обучение на охранника в Сыктывкаре" id="heroImg">
+                <img src="/assets/mainPage.jpg" alt="Обучение на охранника в Сыктывкаре" id="heroImg">
             </div>
 
             <div class="hero-hud">
@@ -1548,7 +1548,14 @@
                     <div class="reveal">
                         <div class="map-wrap">
                             <span class="map-tag">КАРЛА МАРКСА, 228/3</span>
-                            <iframe src="https://yandex.com/map-widget/v1/?ll=50.822636%2C61.659996&z=17" width="100%" height="450" frameborder="0" loading="lazy" title="Карта — Институт международных связей и делового сотрудничества, Сыктывкар"></iframe>
+                            <iframe
+                                    src="https://yandex.com/map-widget/v1/?text=%D0%A1%D1%8B%D0%BA%D1%82%D1%8B%D0%B2%D0%BA%D0%B0%D1%80%2C%20%D0%9A%D0%B0%D1%80%D0%BB%D0%B0%20%D0%9C%D0%B0%D1%80%D0%BA%D1%81%D0%B0%20228%D0%90&z=17"
+                                    width="100%"
+                                    height="450"
+                                    frameborder="0"
+                                    loading="lazy"
+                                    title="Институт международных связей и делового сотрудничества, Карла Маркса 228А">
+                            </iframe>
                         </div>
                     </div>
                 </div>
@@ -2126,7 +2133,7 @@
       </div>
       <div class="doc-meta">
         ${formatDate(m.create_at)}<br>
-        ${m.id ? `<a href="/api/v1/materials/${m.id}/pdf" class="btn--line" target="_blank" rel="noopener">Скачать</a>` : '—'}
+        ${m.id ? `<a href="${API_BASE}/materials/${m.id}/pdf" class="btn--line" target="_blank" rel="noopener">Скачать</a>` : '—'}
       </div>
     </div>`).join('');
             staggerChildren(materialsGrid);
