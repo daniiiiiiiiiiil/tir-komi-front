@@ -1688,6 +1688,7 @@
             logout: () => apiRequest('/auth/logout', { method: 'POST' }),
             refresh: () => apiRequest('/auth/refresh', { method: 'POST' }),
         },
+
         media: {
             list: (type, limit = 100, offset = 0) => apiRequest(`/media?${type ? `type=${type}&` : ''}limit=${limit}&offset=${offset}`),
             get: (id) => apiRequest(`/media/${id}`),
@@ -1695,9 +1696,15 @@
             update: (id, formData) => apiRequestForm(`/media/${id}`, { method: 'PATCH', formData }),
             remove: (id) => apiRequest(`/media/${id}`, { method: 'DELETE' }),
         },
-        pages: {
-            get: (pageType) => apiRequest(`/information-pages/${pageType}`),
-            update: (pageType, payload) => apiRequest(`/information-pages/${pageType}`, { method: 'PATCH', body: payload }),
+
+        // ===== POSTS API (для страниц) =====
+        posts: {
+            list: (limit = 20, offset = 0) => apiRequest(`/posts?limit=${limit}&offset=${offset}`),
+            get: (id) => apiRequest(`/posts/${id}`),
+            create: (payload) => apiRequest('/posts', { method: 'POST', body: payload }),
+            update: (id, patch) => apiRequest(`/posts/${id}`, { method: 'PATCH', body: patch }),
+            remove: (id) => apiRequest(`/posts/${id}`, { method: 'DELETE' }),
+            getByType: (type) => apiRequest(`/posts?type=${type}`),
         },
     };
 
@@ -2272,8 +2279,25 @@
         }
     })();
 
-    // ===== УПРАВЛЕНИЕ СТРАНИЦАМИ =====
-    const PAGE_TYPES = {
+    // ===== УПРАВЛЕНИЕ СТРАНИЦАМИ (через POSTS) =====
+
+    // Маппинг страниц на типы постов (из domain.go)
+    const PAGE_TYPE_MAP = {
+        'main': 'information',
+        'structure': 'structures_and_bodies',
+        'docs': 'document',
+        'education': 'education',
+        'standards': 'educational_standards',
+        'staff': 'management',
+        'facilities': 'materials',
+        'scholarships': 'scholarships',
+        'paid-services': 'paid_services',
+        'finance': 'financial_and_economic',
+        'accessible': 'accessible_environment',
+        'international': 'international_cooperation'
+    };
+
+    const PAGE_TITLES = {
         'main': 'Основные сведения',
         'structure': 'Структура и органы управления',
         'docs': 'Документы',
@@ -2288,29 +2312,45 @@
         'international': 'Международное сотрудничество'
     };
 
-    let currentPageType = 'main';
+    let currentPageKey = 'main';
     let currentBlocks = [];
+    let currentPostId = null;
     let editingBlockIndex = -1;
 
-    // API для страниц
-    Api.pages = {
-        get: (pageType) => apiRequest(`/information-pages/${pageType}`),
-        update: (pageType, payload) => apiRequest(`/information-pages/${pageType}`, { method: 'PATCH', body: payload }),
-    };
-
-    // Загрузка страницы
-    async function loadPage(pageType) {
+    // Загрузка страницы по типу
+    async function loadPage(pageKey) {
         const body = document.getElementById('blocksBody');
         body.innerHTML = '<tr class="empty-row"><td colspan="5">Загрузка...</td></tr>';
 
+        const postType = PAGE_TYPE_MAP[pageKey];
+        if (!postType) {
+            body.innerHTML = `<tr class="empty-row"><td colspan="5">Неизвестный тип страницы</td></tr>`;
+            return;
+        }
+
         try {
-            const data = await withAuth(() => Api.pages.get(pageType));
-            currentBlocks = (data && data.structured) || [];
+            const data = await withAuth(() => Api.posts.getByType(postType));
+            const items = data.items || data || [];
+            const post = items.length > 0 ? items[0] : null;
+
+            if (post) {
+                currentPostId = post.id;
+                try {
+                    currentBlocks = post.description ? JSON.parse(post.description) : [];
+                } catch {
+                    currentBlocks = [];
+                }
+            } else {
+                currentPostId = null;
+                currentBlocks = [];
+            }
+
             renderBlocks();
             document.getElementById('pageSaveMsg').className = 'form-msg';
         } catch (err) {
             body.innerHTML = `<tr class="empty-row"><td colspan="5">Ошибка: ${escapeHtml(err.message)}</td></tr>`;
             currentBlocks = [];
+            currentPostId = null;
         }
     }
 
@@ -2363,7 +2403,6 @@
         `;
         }).join('');
 
-        // Drag & drop
         setupDragDrop();
     }
 
@@ -2450,7 +2489,6 @@
             currentBlocks.push(block);
         }
 
-        // Очистка формы
         document.getElementById('blockLabel').value = '';
         document.getElementById('blockValue').value = '';
         document.getElementById('blockExtra').value = '';
@@ -2499,7 +2537,7 @@
         }
     });
 
-    // Показ типа блока → показываем поле Extra если нужно
+    // Показ поля Extra
     document.getElementById('blockType').addEventListener('change', function() {
         const typesWithExtra = ['file_link', 'external_link', 'image', 'image_grid', 'list'];
         const extraRow = document.getElementById('blockExtraRow');
@@ -2524,10 +2562,30 @@
         const msg = document.getElementById('pageSaveMsg');
         msg.className = 'form-msg';
 
+        const postType = PAGE_TYPE_MAP[currentPageKey];
+        if (!postType) {
+            msg.textContent = '❌ Неизвестный тип страницы';
+            msg.className = 'form-msg is-visible is-error';
+            return;
+        }
+
         try {
-            await withAuth(() => Api.pages.update(currentPageType, {
-                structured: currentBlocks
-            }));
+            const descriptionJson = JSON.stringify(currentBlocks);
+
+            if (currentPostId) {
+                await withAuth(() => Api.posts.update(currentPostId, {
+                    description: { Set: true, Value: descriptionJson }
+                }));
+            } else {
+                const newPost = await withAuth(() => Api.posts.create({
+                    title: PAGE_TITLES[currentPageKey] || currentPageKey,
+                    description: descriptionJson,
+                    type: postType,
+                    date: new Date().toISOString()
+                }));
+                currentPostId = newPost.id;
+            }
+
             msg.textContent = '✅ Страница сохранена!';
             msg.className = 'form-msg is-visible is-ok';
             setTimeout(() => { msg.className = 'form-msg'; }, 3000);
@@ -2540,7 +2598,7 @@
     // Сброс
     document.getElementById('resetPageBtn').addEventListener('click', () => {
         if (confirm('Сбросить все изменения? Несохраненные данные будут потеряны.')) {
-            loadPage(currentPageType);
+            loadPage(currentPageKey);
             document.getElementById('pageSaveMsg').className = 'form-msg';
             showBlockMsg('Изменения сброшены', false);
         }
@@ -2548,10 +2606,10 @@
 
     // Переключение страницы
     document.getElementById('pageSelector').addEventListener('change', function() {
-        currentPageType = this.value;
+        currentPageKey = this.value;
         editingBlockIndex = -1;
         document.getElementById('addBlockBtn').textContent = '➕ Добавить блок';
-        loadPage(currentPageType);
+        loadPage(currentPageKey);
     });
 
     // Загрузка при переключении таба

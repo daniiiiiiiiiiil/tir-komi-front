@@ -903,6 +903,23 @@
 <script>
     const API_BASE = window.__API_BASE__ || 'https://tir-komi.relaxdev.ru/api/v1';
 
+    // Маппинг типов страниц на типы постов (из domain.go)
+    const PAGE_TYPE_MAP = {
+        'main': 'information',
+        'structure': 'structures_and_bodies',
+        'docs': 'document',
+        'education': 'education',
+        'standards': 'educational_standards',
+        'staff': 'management',
+        'facilities': 'materials',
+        'scholarships': 'scholarships',
+        'paid-services': 'paid_services',
+        'finance': 'financial_and_economic',
+        'accessible': 'accessible_environment',
+        'international': 'international_cooperation'
+    };
+
+    // Обратный маппинг для отображения названий
     const PAGE_TITLES = {
         'main': 'Основные сведения',
         'structure': 'Структура и органы управления',
@@ -940,13 +957,50 @@
         return res.json();
     }
 
+    // Загрузка всех страниц через GET /posts?type={post_type}
     async function loadAllPages() {
         try {
-            const data = await apiRequest('/information-pages');
-            pagesData = {};
-            (data.items || []).forEach(p => {
-                pagesData[p.page_type] = p;
+            // Загружаем посты для каждого типа
+            const promises = PAGE_ORDER.map(async (pageKey) => {
+                const postType = PAGE_TYPE_MAP[pageKey];
+                if (!postType) return null;
+
+                try {
+                    const data = await apiRequest(`/posts?type=${postType}`);
+                    // Ожидаем, что API возвращает { items: [...] }
+                    const items = data.items || data || [];
+                    // Берем первый пост этого типа (должен быть один)
+                    const post = items.length > 0 ? items[0] : null;
+
+                    if (post) {
+                        return {
+                            pageKey: pageKey,
+                            post: post,
+                            // Парсим description как JSON с блоками
+                            blocks: post.description ? JSON.parse(post.description) : []
+                        };
+                    }
+                    return null;
+                } catch (err) {
+                    console.warn(`Не удалось загрузить страницу ${pageKey}:`, err);
+                    return null;
+                }
             });
+
+            const results = await Promise.all(promises);
+
+            pagesData = {};
+            results.forEach(result => {
+                if (result) {
+                    pagesData[result.pageKey] = {
+                        title: result.post.title || PAGE_TITLES[result.pageKey],
+                        structured: result.blocks,
+                        id: result.post.id,
+                        post: result.post
+                    };
+                }
+            });
+
             return true;
         } catch (err) {
             console.error('Ошибка загрузки страниц:', err);
@@ -995,6 +1049,16 @@
                     <img src="${imgSrc}" alt="${imgAlt}" class="inn-img" style="max-height: 1000px; width: auto;">
                 `;
 
+            case 'image_grid':
+                if (!Array.isArray(value)) return '';
+                return `
+                    <div class="facility-images">
+                        ${value.map(img => `
+                            <img src="${img.src || img}" alt="${img.alt || 'Фото'}" loading="lazy">
+                        `).join('')}
+                    </div>
+                `;
+
             case 'list':
                 if (!Array.isArray(value)) return '';
                 return `
@@ -1009,16 +1073,6 @@
                     </ul>
                 `;
 
-            case 'image_grid':
-                if (!Array.isArray(value)) return '';
-                return `
-                    <div class="facility-images">
-                        ${value.map(img => `
-                            <img src="${img.src || img}" alt="${img.alt || 'Фото'}" loading="lazy">
-                        `).join('')}
-                    </div>
-                `;
-
             case 'html':
                 return value || '';
 
@@ -1027,166 +1081,85 @@
         }
     }
 
-    function renderPage(pageType) {
-        const container = document.getElementById(`page-${pageType}`);
+    function renderPage(pageKey) {
+        const container = document.getElementById(`page-${pageKey}`);
         if (!container) return;
 
-        const page = pagesData[pageType];
-        if (!page) {
+        const page = pagesData[pageKey];
+        if (!page || !page.structured || page.structured.length === 0) {
             container.innerHTML = `
                 <div class="info-grid" style="margin-top: 40px;">
                     <div class="info-block">
                         <span class="label">Информация не загружена</span>
-                        <p class="value">Данные для этой страницы отсутствуют.</p>
+                        <p class="value">Данные для этой страницы отсутствуют. Добавьте их через панель администратора.</p>
                     </div>
                 </div>
             `;
             return;
         }
 
-        // Если есть structured данные
-        if (page.structured && Array.isArray(page.structured) && page.structured.length > 0) {
-            let html = '<div class="info-grid" style="margin-top: 40px;">';
+        let html = '<div class="info-grid" style="margin-top: 40px;">';
+        let currentBlocks = [];
 
-            // Группируем блоки по группам (каждый блок в отдельный info-block или объединяем)
-            let currentBlocks = [];
-            let inGrid = true;
-
-            page.structured.forEach((block, index) => {
-                // Если это text без label - может быть описанием для предыдущего блока
-                if (block.type === 'text' && !block.label && currentBlocks.length > 0) {
-                    // Добавляем как дополнительный контент к последнему блоку
-                    const lastBlock = currentBlocks[currentBlocks.length - 1];
-                    if (lastBlock) {
-                        lastBlock._extraText = (lastBlock._extraText || '') + renderBlock(block);
-                    }
-                    return;
+        page.structured.forEach((block) => {
+            if (block.type === 'text' && !block.label && currentBlocks.length > 0) {
+                const lastBlock = currentBlocks[currentBlocks.length - 1];
+                if (lastBlock) {
+                    lastBlock._extraText = (lastBlock._extraText || '') + renderBlock(block);
                 }
-
-                // Если это hr - разделитель внутри блока
-                if (block.type === 'hr') {
-                    if (currentBlocks.length === 0) {
-                        // Если hr в начале - просто пропускаем
-                        return;
-                    }
-                    // Добавляем hr как отдельный элемент
-                    currentBlocks.push({ _type: 'hr', _html: '<hr>' });
-                    return;
-                }
-
-                // Если это блок с label - начинаем новый info-block
-                if (block.label || block.type === 'label_value' || block.type === 'file_link' ||
-                    block.type === 'external_link' || block.type === 'image' || block.type === 'image_grid' ||
-                    block.type === 'list' || block.type === 'html') {
-
-                    // Закрываем предыдущий блок если есть
-                    if (currentBlocks.length > 0) {
-                        html += renderInfoBlock(currentBlocks);
-                        currentBlocks = [];
-                    }
-
-                    // Обрабатываем специальные типы
-                    if (block.type === 'label_value') {
-                        html += `<div class="info-block">${renderBlock(block)}</div>`;
-                        return;
-                    }
-
-                    if (block.type === 'file_link') {
-                        html += `<div class="info-block">${renderBlock(block)}</div>`;
-                        return;
-                    }
-
-                    if (block.type === 'external_link') {
-                        html += `<div class="info-block">${renderBlock(block)}</div>`;
-                        return;
-                    }
-
-                    if (block.type === 'image') {
-                        html += `<div class="info-block">${renderBlock(block)}</div>`;
-                        return;
-                    }
-
-                    if (block.type === 'image_grid') {
-                        html += `<div class="info-block">${renderBlock(block)}</div>`;
-                        return;
-                    }
-
-                    if (block.type === 'list') {
-                        html += `<div class="info-block">${renderBlock(block)}</div>`;
-                        return;
-                    }
-
-                    if (block.type === 'html') {
-                        html += `<div class="info-block">${renderBlock(block)}</div>`;
-                        return;
-                    }
-
-                    // Обычный блок с label
-                    currentBlocks.push(block);
-                } else {
-                    // Без label - добавляем в текущий блок или создаем новый
-                    currentBlocks.push(block);
-                }
-            });
-
-            // Закрываем последний блок
-            if (currentBlocks.length > 0) {
-                html += renderInfoBlock(currentBlocks);
+                return;
             }
 
-            html += '</div>';
-            container.innerHTML = html;
-            return;
+            if (block.type === 'hr') {
+                if (currentBlocks.length === 0) return;
+                currentBlocks.push({ _type: 'hr' });
+                return;
+            }
+
+            if (block.label || block.type === 'label_value' || block.type === 'file_link' ||
+                block.type === 'external_link' || block.type === 'image' || block.type === 'image_grid' ||
+                block.type === 'list' || block.type === 'html') {
+
+                if (currentBlocks.length > 0) {
+                    html += renderInfoBlock(currentBlocks);
+                    currentBlocks = [];
+                }
+
+                // Специальные типы
+                if (['label_value', 'file_link', 'external_link', 'image', 'image_grid', 'list', 'html'].includes(block.type)) {
+                    html += `<div class="info-block">${renderBlock(block)}</div>`;
+                    return;
+                }
+
+                currentBlocks.push(block);
+            } else {
+                currentBlocks.push(block);
+            }
+        });
+
+        if (currentBlocks.length > 0) {
+            html += renderInfoBlock(currentBlocks);
         }
 
-        // Если есть простой content (HTML)
-        if (page.content) {
-            container.innerHTML = `
-                <div class="info-grid" style="margin-top: 40px;">
-                    <div class="info-block">
-                        ${page.content}
-                    </div>
-                </div>
-            `;
-            return;
-        }
-
-        // Если ничего нет
-        container.innerHTML = `
-            <div class="info-grid" style="margin-top: 40px;">
-                <div class="info-block">
-                    <span class="label">Информация отсутствует</span>
-                    <p class="value">Содержимое страницы не заполнено.</p>
-                </div>
-            </div>
-        `;
+        html += '</div>';
+        container.innerHTML = html;
     }
 
     function renderInfoBlock(blocks) {
         if (!blocks || blocks.length === 0) return '';
 
-        // Проверяем, есть ли хотя бы один блок с label или специальный
-        const hasLabel = blocks.some(b => b.label || b.type === 'label_value');
-        const hasHr = blocks.some(b => b._type === 'hr');
-
-        if (hasHr && blocks.length === 1 && blocks[0]._type === 'hr') {
-            return '';
-        }
-
-        // Фильтруем hr, которые идут в начале или конце
         let filtered = blocks.filter(b => b._type !== 'hr' || (b._type === 'hr' && b !== blocks[0] && b !== blocks[blocks.length - 1]));
 
         if (filtered.length === 0) return '';
 
         let html = '<div class="info-block">';
 
-        filtered.forEach((block, index) => {
+        filtered.forEach((block) => {
             if (block._type === 'hr') {
                 html += '<hr>';
                 return;
             }
 
-            // Проверяем, есть ли _extraText
             const extraText = block._extraText || '';
 
             if (block.type === 'label_value' || block.type === 'text') {
@@ -1224,8 +1197,8 @@
         return html;
     }
 
-    function renderPageSkeleton(pageType) {
-        const container = document.getElementById(`page-${pageType}`);
+    function renderPageSkeleton(pageKey) {
+        const container = document.getElementById(`page-${pageKey}`);
         if (!container) return;
 
         container.innerHTML = `
@@ -1236,30 +1209,19 @@
                     <div class="skeleton-line"></div>
                     <div class="skeleton-line short"></div>
                 </div>
-                <div class="skeleton-block">
-                    <div class="skeleton-line short"></div>
-                    <div class="skeleton-line"></div>
-                    <div class="skeleton-line medium"></div>
-                </div>
-                <div class="skeleton-block">
-                    <div class="skeleton-line short"></div>
-                    <div class="skeleton-line"></div>
-                    <div class="skeleton-line medium"></div>
-                    <div class="skeleton-line short"></div>
-                </div>
             </div>
         `;
     }
 
     function renderAllPages() {
-        PAGE_ORDER.forEach(pageType => {
-            renderPage(pageType);
+        PAGE_ORDER.forEach(pageKey => {
+            renderPage(pageKey);
         });
     }
 
     function renderAllSkeletons() {
-        PAGE_ORDER.forEach(pageType => {
-            renderPageSkeleton(pageType);
+        PAGE_ORDER.forEach(pageKey => {
+            renderPageSkeleton(pageKey);
         });
     }
 
@@ -1268,9 +1230,9 @@
         const desktopMenu = document.getElementById('desktopMenu');
         const mobileSubmenu = document.getElementById('mobileSubmenu');
 
-        const items = PAGE_ORDER.map(pageType => `
-            <a href="#page-${pageType}" data-page="${pageType}" class="${pageType === 'main' ? 'is-current' : ''}">
-                ${PAGE_TITLES[pageType] || pageType}
+        const items = PAGE_ORDER.map(pageKey => `
+            <a href="#page-${pageKey}" data-page="${pageKey}" class="${pageKey === 'main' ? 'is-current' : ''}">
+                ${PAGE_TITLES[pageKey] || pageKey}
             </a>
         `).join('');
 
@@ -1280,30 +1242,25 @@
 
     // --- Навигация ---
     function switchPage(pageId) {
-        // Скрыть все страницы
         document.querySelectorAll('.info-page').forEach(p => {
             p.classList.remove('is-active');
         });
 
-        // Показать выбранную
         const target = document.getElementById(pageId);
         if (target) {
             target.classList.add('is-active');
         }
 
-        // Обновить заголовок
-        const pageType = pageId.replace('page-', '');
+        const pageKey = pageId.replace('page-', '');
         const titleEl = document.getElementById('pageTitle');
-        if (titleEl && PAGE_TITLES[pageType]) {
-            titleEl.textContent = PAGE_TITLES[pageType];
+        if (titleEl && PAGE_TITLES[pageKey]) {
+            titleEl.textContent = PAGE_TITLES[pageKey];
         }
 
-        // Обновить активные ссылки в меню
         document.querySelectorAll('.dropdown-content a, .mobile-submenu a').forEach(link => {
-            link.classList.toggle('is-current', link.dataset.page === pageType);
+            link.classList.toggle('is-current', link.dataset.page === pageKey);
         });
 
-        // Обновить URL hash
         if (history.pushState) {
             history.pushState(null, '', '#' + pageId);
         }
@@ -1314,15 +1271,13 @@
         renderAllSkeletons();
         renderMenus();
 
-        // Загружаем данные
         const loaded = await loadAllPages();
 
         if (loaded) {
             renderAllPages();
         } else {
-            // Если ошибка - показываем заглушки
-            PAGE_ORDER.forEach(pageType => {
-                const container = document.getElementById(`page-${pageType}`);
+            PAGE_ORDER.forEach(pageKey => {
+                const container = document.getElementById(`page-${pageKey}`);
                 if (container) {
                     container.innerHTML = `
                         <div class="info-grid" style="margin-top: 40px;">
@@ -1336,7 +1291,6 @@
             });
         }
 
-        // Восстановление hash
         const hash = window.location.hash.replace('#', '');
         if (hash && document.getElementById(hash)) {
             switchPage(hash);
@@ -1344,7 +1298,6 @@
             switchPage('page-main');
         }
 
-        // Обработчики навигации
         document.querySelectorAll('.dropdown-content a, .mobile-submenu a').forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -1352,7 +1305,6 @@
                 if (href && href.startsWith('#')) {
                     const pageId = href.replace('#', '');
                     switchPage(pageId);
-                    // Закрыть мобильное меню
                     if (navMobile.classList.contains('is-open')) {
                         closeMenu();
                     }
@@ -1360,7 +1312,6 @@
             });
         });
 
-        // Popstate
         window.addEventListener('popstate', () => {
             const hash = window.location.hash.replace('#', '');
             if (hash && document.getElementById(hash)) {
@@ -1439,7 +1390,6 @@
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
 
-    // Запуск
     document.addEventListener('DOMContentLoaded', init);
 </script>
 
