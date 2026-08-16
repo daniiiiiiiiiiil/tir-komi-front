@@ -1774,7 +1774,7 @@
                     </div>
                 </div>
 
-                <div class="gallery-wrapper reveal" id="galleryGrid">
+                <div class="grid grid--3 reveal reveal-stagger" id="galleryGrid">
                     <div class="state-block">Загрузка галереи…</div>
                 </div>
             </div>
@@ -2303,24 +2303,64 @@
                 return;
             }
 
-            const scrollContainer = document.createElement('div');
-            scrollContainer.className = 'gallery-scroll';
-            scrollContainer.style.cssText = `
-        display: flex;
-        gap: 16px;
-        overflow-x: auto;
-        overflow-y: hidden;
-        padding: 12px 4px 20px 4px;
-        scroll-snap-type: x mandatory;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: thin;
-        scrollbar-color: var(--coral) transparent;
-    `;
+            const groups = [];
+            let currentGroup = [];
+
+            for (let i = 0; i < items.length; i++) {
+                const item = items[i];
+                if (currentGroup.length === 0) {
+                    currentGroup.push(item);
+                } else {
+                    const prevTime = new Date(currentGroup[currentGroup.length - 1].create_at).getTime();
+                    const currTime = new Date(item.create_at).getTime();
+                    if (currTime - prevTime < 5000) { // 5 секунд
+                        currentGroup.push(item);
+                    } else {
+                        groups.push([...currentGroup]);
+                        currentGroup = [item];
+                    }
+                }
+            }
+            if (currentGroup.length > 0) {
+                groups.push(currentGroup);
+            }
 
             const style = document.createElement('style');
             style.textContent = `
+        .gallery-group {
+            margin-bottom: 40px;
+        }
+        .gallery-group:last-child {
+            margin-bottom: 0;
+        }
+        .gallery-group .group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .gallery-group .group-header h3 {
+            font-size: 1.1rem;
+            color: var(--dark-blue);
+        }
+        .gallery-group .group-header .group-date {
+            font-family: var(--f-mono);
+            font-size: 0.75rem;
+            color: var(--steel-dim);
+        }
+        .gallery-scroll {
+            display: flex;
+            gap: 14px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 8px 4px 16px 4px;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: var(--coral) transparent;
+        }
         .gallery-scroll::-webkit-scrollbar {
-            height: 6px;
+            height: 5px;
         }
         .gallery-scroll::-webkit-scrollbar-track {
             background: var(--bg-0);
@@ -2332,7 +2372,7 @@
         }
         .gallery-scroll .gallery-item {
             flex: 0 0 auto;
-            width: 280px;
+            width: 260px;
             scroll-snap-align: start;
             border-radius: var(--radius);
             overflow: hidden;
@@ -2356,52 +2396,85 @@
             object-fit: cover;
         }
         .gallery-scroll .gallery-item .gallery-info {
-            padding: 12px 16px 16px;
+            padding: 10px 14px 14px;
         }
         .gallery-scroll .gallery-item .gallery-info h3 {
-            font-size: 0.9rem;
-            margin-bottom: 4px;
+            font-size: 0.85rem;
+            margin-bottom: 2px;
         }
         .gallery-scroll .gallery-item .gallery-info p {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: var(--ink-dim);
             margin: 0;
         }
         @media (max-width: 600px) {
             .gallery-scroll .gallery-item {
-                width: 220px;
+                width: 200px;
             }
         }
         @media (max-width: 400px) {
             .gallery-scroll .gallery-item {
-                width: 180px;
+                width: 160px;
             }
         }
     `;
             document.head.appendChild(style);
 
-            items.forEach((m) => {
-                const src = API_BASE + m.file_url;
-                const media = m.type === 'video'
-                    ? `<video src="${src}" controls preload="metadata" loading="lazy"></video>`
-                    : `<img src="${src}" alt="${escapeHtml(m.title || '')}" loading="lazy">`;
+            galleryGrid.innerHTML = '';
+            galleryGrid.classList.remove('grid--3');
 
-                const item = document.createElement('div');
-                item.className = 'gallery-item';
-                item.innerHTML = `
-            <div class="gallery-media">${media}</div>
-            ${m.title || m.description ? `<div class="gallery-info">
-                ${m.title ? `<h3>${escapeHtml(m.title)}</h3>` : ''}
-                ${m.description ? `<p>${escapeHtml(m.description)}</p>` : ''}
-            </div>` : ''}
+            groups.forEach((group, groupIndex) => {
+                const groupWrapper = document.createElement('div');
+                groupWrapper.className = 'gallery-group';
+
+                const firstItem = group[0];
+                const groupDate = new Date(firstItem.create_at);
+                const dateStr = groupDate.toLocaleDateString('ru-RU', {
+                    day: '2-digit',
+                    month: 'long',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                const header = document.createElement('div');
+                header.className = 'group-header';
+                header.innerHTML = `
+            <h3>📸 Группа ${groupIndex + 1} (${group.length} ${group.length === 1 ? 'файл' : group.length < 5 ? 'файла' : 'файлов'})</h3>
+            <span class="group-date">${dateStr}</span>
         `;
-                scrollContainer.appendChild(item);
+                groupWrapper.appendChild(header);
+
+                const scrollContainer = document.createElement('div');
+                scrollContainer.className = 'gallery-scroll';
+
+                group.forEach((m) => {
+                    const src = API_BASE + m.file_url;
+                    const media = m.type === 'video'
+                        ? `<video src="${src}" controls preload="metadata" loading="lazy"></video>`
+                        : `<img src="${src}" alt="${escapeHtml(m.title || '')}" loading="lazy">`;
+
+                    const item = document.createElement('div');
+                    item.className = 'gallery-item';
+                    item.innerHTML = `
+                <div class="gallery-media">${media}</div>
+                ${m.title || m.description ? `<div class="gallery-info">
+                    ${m.title ? `<h3>${escapeHtml(m.title)}</h3>` : ''}
+                    ${m.description ? `<p>${escapeHtml(m.description)}</p>` : ''}
+                </div>` : ''}
+            `;
+                    scrollContainer.appendChild(item);
+                });
+
+                groupWrapper.appendChild(scrollContainer);
+                galleryGrid.appendChild(groupWrapper);
             });
 
-            galleryGrid.innerHTML = '';
-            galleryGrid.appendChild(scrollContainer);
-
-            galleryGrid.classList.remove('grid--3');
+            galleryGrid.querySelectorAll('.gallery-group').forEach((el, i) => {
+                el.style.setProperty('--i', i);
+                el.classList.add('reveal');
+                setTimeout(() => el.classList.add('is-visible'), 100 + i * 100);
+            });
         }
 
         const galleryGrid = document.getElementById('galleryGrid');
