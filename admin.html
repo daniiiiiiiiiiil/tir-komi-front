@@ -1937,6 +1937,98 @@
             }
         });
 
+        const mediaBody = tableBody('mediaTable');
+
+        async function loadMedia() {
+            mediaBody.innerHTML = emptyRow(6, 'Загрузка…');
+            try {
+                const data = await withAuth(() => Api.media.list(null, 100, 0));
+                const items = (data && data.items) || [];
+                if (!items.length) { mediaBody.innerHTML = emptyRow(6, 'Файлов нет'); return; }
+                mediaBody.innerHTML = items.map((m) => `
+        <tr data-id="${m.id}">
+          <td>${m.id}</td>
+          <td>${m.type === 'video' ? 'Видео' : 'Фото'}</td>
+          <td class="title-cell">${escapeHtml(m.title || m.file_name)}</td>
+          <td class="desc-cell"><span>${escapeHtml(m.file_name)}</span></td>
+          <td>${formatDate(m.create_at)}</td>
+          <td>${rowActions(m.id)}</td>
+        </tr>`).join('');
+            } catch (err) {
+                mediaBody.innerHTML = emptyRow(6, 'Ошибка загрузки: ' + escapeHtml(err.message || ''));
+            }
+        }
+
+        document.getElementById('mediaCreateForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            try {
+                await withAuth(() => Api.media.create(new FormData(form)));
+                setFormMsg(form, 'Файл загружен.', false);
+                form.reset();
+                loadMedia();
+            } catch (err) {
+                setFormMsg(form, err.message || 'Не удалось загрузить файл.', true);
+            }
+        });
+
+        mediaBody.addEventListener('click', async (e) => {
+            const editBtn = e.target.closest('[data-action="edit"]');
+            const delBtn = e.target.closest('[data-action="delete"]');
+            if (!editBtn && !delBtn) return;
+
+            const row = e.target.closest('tr');
+            const id = (editBtn || delBtn).dataset.id;
+
+            if (delBtn) {
+                if (!confirm('Удалить файл #' + id + '?')) return;
+                try {
+                    await withAuth(() => Api.media.remove(id));
+                    loadMedia();
+                } catch (err) {
+                    alert(err.message || 'Не удалось удалить файл.');
+                }
+                return;
+            }
+
+            const existingEdit = row.nextElementSibling;
+            if (existingEdit && existingEdit.classList.contains('edit-row')) { existingEdit.remove(); return; }
+            document.querySelectorAll('.edit-row').forEach((n) => n.remove());
+
+            try {
+                const item = await withAuth(() => Api.media.get(id));
+                const tr = document.createElement('tr');
+                tr.className = 'edit-row';
+                tr.innerHTML = `<td colspan="${row.children.length}">
+        <form class="entity-form" data-id="${id}">
+          <div class="form-row"><label>Название</label><input type="text" name="title" value="${escapeHtml(item.title || '')}"></div>
+          <div class="form-row"><label>Описание</label><textarea name="description">${escapeHtml(item.description || '')}</textarea></div>
+          <div class="form-row"><label>Порядок сортировки</label><input type="text" name="sort_order" value="${item.sort_order}"></div>
+          <div class="form-row">
+            <label>Заменить файл (необязательно)</label>
+            <div class="file-input-wrapper"><input type="file" name="file" accept="image/*,video/*"><span class="file-label">Выберите файл</span></div>
+          </div>
+          <button type="submit" class="btn btn--sm">Сохранить</button>
+          <div class="form-msg"></div>
+        </form>
+      </td>`;
+                row.after(tr);
+                tr.querySelector('form').addEventListener('submit', async (ev) => {
+                    ev.preventDefault();
+                    const form = ev.target;
+                    try {
+                        await withAuth(() => Api.media.update(id, new FormData(form)));
+                        setFormMsg(form, 'Сохранено.', false);
+                        loadMedia();
+                    } catch (err) {
+                        setFormMsg(form, err.message || 'Не удалось сохранить изменения.', true);
+                    }
+                });
+            } catch (err) {
+                alert(err.message || 'Не удалось загрузить запись.');
+            }
+        });
+
         async function handleRowAction(e, cfg) {
             const editBtn = e.target.closest('[data-action="edit"]');
             const delBtn = e.target.closest('[data-action="delete"]');
@@ -2001,95 +2093,6 @@
             loadMedia();
         }
     })();
-
-    const mediaBody = tableBody('mediaTable');
-
-    async function loadMedia() {
-        mediaBody.innerHTML = emptyRow(6, 'Загрузка…');
-        try {
-            const data = await withAuth(() => Api.media.list(null, 100, 0));
-            const items = (data && data.items) || [];
-            if (!items.length) { mediaBody.innerHTML = emptyRow(6, 'Файлов нет'); return; }
-            mediaBody.innerHTML = items.map((m) => `
-    <tr data-id="${m.id}">
-      <td>${m.id}</td>
-      <td>${m.type === 'video' ? 'Видео' : 'Фото'}</td>
-      <td class="title-cell">${escapeHtml(m.title || m.file_name)}</td>
-      <td class="desc-cell"><span>${escapeHtml(m.file_name)}</span></td>
-      <td>${formatDate(m.create_at)}</td>
-      <td>${rowActions(m.id)}</td>
-    </tr>`).join('');
-        } catch (err) {
-            mediaBody.innerHTML = emptyRow(6, 'Ошибка загрузки: ' + escapeHtml(err.message || ''));
-        }
-    }
-
-    document.getElementById('mediaCreateForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const form = e.target;
-        try {
-            await withAuth(() => Api.media.create(new FormData(form)));
-            setFormMsg(form, 'Файл загружен.', false);
-            form.reset();
-            loadMedia();
-        } catch (err) {
-            setFormMsg(form, err.message || 'Не удалось загрузить файл.', true);
-        }
-    });
-
-    mediaBody.addEventListener('click', async (e) => {
-        const editBtn = e.target.closest('[data-action="edit"]');
-        const delBtn = e.target.closest('[data-action="delete"]');
-        if (!editBtn && !delBtn) return;
-
-        const row = e.target.closest('tr');
-        const id = (editBtn || delBtn).dataset.id;
-
-        if (delBtn) {
-            if (!confirm('Удалить файл #' + id + '?')) return;
-            try { await withAuth(() => Api.media.remove(id)); loadMedia(); }
-            catch (err) { alert(err.message || 'Не удалось удалить файл.'); }
-            return;
-        }
-
-        const existingEdit = row.nextElementSibling;
-        if (existingEdit && existingEdit.classList.contains('edit-row')) { existingEdit.remove(); return; }
-        document.querySelectorAll('.edit-row').forEach((n) => n.remove());
-
-        try {
-            const item = await withAuth(() => Api.media.get(id));
-            const tr = document.createElement('tr');
-            tr.className = 'edit-row';
-            tr.innerHTML = `<td colspan="${row.children.length}">
-      <form class="entity-form" data-id="${id}">
-        <div class="form-row"><label>Название</label><input type="text" name="title" value="${escapeHtml(item.title || '')}"></div>
-        <div class="form-row"><label>Описание</label><textarea name="description">${escapeHtml(item.description || '')}</textarea></div>
-        <div class="form-row"><label>Порядок сортировки</label><input type="text" name="sort_order" value="${item.sort_order}"></div>
-        <div class="form-row">
-          <label>Заменить файл (необязательно)</label>
-          <div class="file-input-wrapper"><input type="file" name="file" accept="image/*,video/*"><span class="file-label">Выберите файл</span></div>
-        </div>
-        <button type="submit" class="btn btn--sm">Сохранить</button>
-        <div class="form-msg"></div>
-      </form>
-    </td>`;
-            row.after(tr);
-            tr.querySelector('form').addEventListener('submit', async (ev) => {
-                ev.preventDefault();
-                const form = ev.target;
-                try {
-                    await withAuth(() => Api.media.update(id, new FormData(form)));
-                    setFormMsg(form, 'Сохранено.', false);
-                    loadMedia();
-                } catch (err) {
-                    setFormMsg(form, err.message || 'Не удалось сохранить изменения.', true);
-                }
-            });
-        } catch (err) {
-            alert(err.message || 'Не удалось загрузить запись.');
-        }
-    });
-
 </script>
 
 </body>
