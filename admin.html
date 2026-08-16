@@ -1423,7 +1423,7 @@
                     <h3>Фото и видео</h3>
                 </div>
 
-                <form class="entity-form" id="mediaCreateForm">
+                <form class="entity-form" id="mediaCreateForm" enctype="multipart/form-data" method="POST">
                     <div class="form-row">
                         <label>Тип</label>
                         <select name="type" required>
@@ -1433,9 +1433,9 @@
                     </div>
                     <div class="form-row"><label>Название</label><input type="text" name="title" maxlength="200"></div>
                     <div class="form-row"><label>Описание</label><textarea name="description" maxlength="1000"></textarea></div>
-                    <div class="form-row"><label>Порядок сортировки</label><input type="text" name="sort_order" value="0"></div>
+                    <div class="form-row"><label>Порядок сортировки</label><input type="number" name="sort_order" value="0"></div>
                     <div class="form-row">
-                        <label>Файл (фото или видео, любой формат)</label>
+                        <label>Файл (фото или видео)</label>
                         <div class="file-input-wrapper">
                             <input type="file" name="file" accept="image/*,video/*" required>
                             <span class="file-label">Выберите файл</span>
@@ -1445,7 +1445,21 @@
                     <div class="form-msg"></div>
                 </form>
 
-                <div class="table-wrap"><table class="data-table" id="mediaTable"><thead><tr><th>ID</th><th>Тип</th><th>Заголовок</th><th>Файл</th><th>Дата</th><th></th></tr></thead><tbody></tbody></table></div>
+                <div class="table-wrap">
+                    <table class="data-table" id="mediaTable">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Тип</th>
+                            <th>Заголовок</th>
+                            <th>Файл</th>
+                            <th>Дата</th>
+                            <th></th>
+                        </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
             </div>
         </section>
 
@@ -1984,6 +1998,7 @@
             loadMaterials();
             loadVacancies();
             loadReviewsAdmin();
+            loadMedia();
         }
     })();
 
