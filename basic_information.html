@@ -827,6 +827,51 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0.5; }
         }
+
+        /* Стили для футера */
+        .site-footer{
+            background: var(--bg-1);
+            border-top: 1px solid var(--line);
+            padding: 64px 0 28px;
+            margin-top: 40px;
+        }
+        .footer-top{
+            display:grid;
+            grid-template-columns:1.4fr 1fr 1fr 1fr;
+            gap:40px;
+            padding-bottom:44px;
+            border-bottom:1px solid var(--line-soft);
+        }
+        @media (max-width:900px){.footer-top{grid-template-columns:1fr 1fr;}}
+        @media (max-width:560px){.footer-top{grid-template-columns:1fr;}}
+
+        .footer-top h4{
+            font-family:var(--f-head);
+            font-size:.82rem;
+            letter-spacing:.1em;
+            text-transform:uppercase;
+            color:var(--coral);
+            margin:0 0 1em;
+        }
+        .footer-top ul{display:flex;flex-direction:column;gap:.7em;}
+        .footer-top a{color:var(--steel);font-size:.88rem;transition:color .2s;}
+        .footer-top a:hover{color:var(--dark-blue);}
+        .footer-brand p{max-width:32ch;font-size:.88rem;color:var(--ink-dim);}
+
+        .footer-bottom{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            flex-wrap:wrap;
+            gap:12px;
+            padding-top:22px;
+            font-family:var(--f-mono);
+            font-size:.72rem;
+            color:var(--steel-dim);
+            letter-spacing:.03em;
+        }
+        .footer-bottom .admin-link{color:var(--steel-dim);}
+        .footer-bottom .admin-link:hover{color:var(--coral);}
     </style>
 </head>
 <body>
@@ -900,6 +945,47 @@
     </section>
 </main>
 
+<!-- ===== ФУТЕР ===== -->
+<footer class="site-footer">
+    <div class="container">
+        <div class="footer-top">
+            <div class="footer-brand">
+                <h4>ЧУ ДПО ИМДС</h4>
+                <p>Частное учреждение дополнительного профессионального образования «Институт международных связей и делового сотрудничества»</p>
+                <p style="margin-top:12px;font-size:.78rem;color:var(--steel-dim);">© 2026 Все права защищены</p>
+            </div>
+            <div>
+                <h4>Контакты</h4>
+                <ul>
+                    <li><a href="tel:88212314060">+7 (8212) 31-40-60</a></li>
+                    <li><a href="mailto:tirkomi@yandex.ru">tirkomi@yandex.ru</a></li>
+                    <li><span style="color:var(--steel);">г. Сыктывкар, ул. Карла Маркса, д. 228/3</span></li>
+                </ul>
+            </div>
+            <div>
+                <h4>Информация</h4>
+                <ul>
+                    <li><a href="./basic_information.html">Основные сведения</a></li>
+                    <li><a href="./index.html#page-about">Об институте</a></li>
+                    <li><a href="./index.html#page-vacancies">Вакансии</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4>Документы</h4>
+                <ul>
+                    <li><a href="/assets/ustav.pdf" target="_blank">Устав</a></li>
+                    <li><a href="/assets/licenzija_2020_goda.pdf" target="_blank">Лицензия</a></li>
+                    <li><a href="/assets/prajs_2025.pdf" target="_blank">Прайс-лист</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <span>Разработано в ЧУ ДПО ИМДС</span>
+            <a href="./admin.html" class="admin-link">Панель администратора</a>
+        </div>
+    </div>
+</footer>
+
 <script>
     const API_BASE = window.__API_BASE__ || 'https://tir-komi.relaxdev.ru/api/v1';
 
@@ -960,23 +1046,19 @@
     // Загрузка всех страниц через GET /posts?type={post_type}
     async function loadAllPages() {
         try {
-            // Загружаем посты для каждого типа
             const promises = PAGE_ORDER.map(async (pageKey) => {
                 const postType = PAGE_TYPE_MAP[pageKey];
                 if (!postType) return null;
 
                 try {
                     const data = await apiRequest(`/posts?type=${postType}`);
-                    // Ожидаем, что API возвращает { items: [...] }
                     const items = data.items || data || [];
-                    // Берем первый пост этого типа (должен быть один)
                     const post = items.length > 0 ? items[0] : null;
 
                     if (post) {
                         return {
                             pageKey: pageKey,
                             post: post,
-                            // Парсим description как JSON с блоками
                             blocks: post.description ? JSON.parse(post.description) : []
                         };
                     }
@@ -1026,30 +1108,33 @@
             case 'hr':
                 return '<hr>';
 
-            case 'file_link':
+            case 'file_link': {
                 const url = value?.url || value || '';
                 const label = value?.label || block.label || 'Скачать';
                 return `
                     <p class="value" style="margin-bottom: 4px;">${block.label || ''}</p>
                     <a href="${url}" target="_blank" class="pdf-link">${label}</a>
                 `;
+            }
 
-            case 'external_link':
+            case 'external_link': {
                 const href = value?.url || value || '#';
                 const linkText = value?.text || block.label || 'Перейти';
                 return `
                     <p class="value">${block.label || ''} - <a href="${href}" target="_blank">${linkText}</a></p>
                 `;
+            }
 
-            case 'image':
+            case 'image': {
                 const imgSrc = value?.src || value || '';
                 const imgAlt = value?.alt || block.label || 'Изображение';
                 return `
                     <p class="value" style="margin-bottom: 4px;">${block.label || ''}</p>
-                    <img src="${imgSrc}" alt="${imgAlt}" class="inn-img" style="max-height: 1000px; width: auto;">
+                    <img src="${imgSrc}" alt="${imgAlt}" class="inn-img" style="max-height: 1000px; width: auto; max-width: 100%;">
                 `;
+            }
 
-            case 'image_grid':
+            case 'image_grid': {
                 if (!Array.isArray(value)) return '';
                 return `
                     <div class="facility-images">
@@ -1058,8 +1143,9 @@
                         `).join('')}
                     </div>
                 `;
+            }
 
-            case 'list':
+            case 'list': {
                 if (!Array.isArray(value)) return '';
                 return `
                     <ul class="doc-sublist" style="margin-top: 12px; list-style: none;">
@@ -1072,6 +1158,7 @@
                         `).join('')}
                     </ul>
                 `;
+            }
 
             case 'html':
                 return value || '';
@@ -1125,7 +1212,6 @@
                     currentBlocks = [];
                 }
 
-                // Специальные типы
                 if (['label_value', 'file_link', 'external_link', 'image', 'image_grid', 'list', 'html'].includes(block.type)) {
                     html += `<div class="info-block">${renderBlock(block)}</div>`;
                     return;
