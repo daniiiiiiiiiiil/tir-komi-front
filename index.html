@@ -1761,26 +1761,27 @@
                 </div>
             </div>
         </section>
-    </div>
 
-    <div class="page" id="page-gallery">
-        <section id="gallery">
-            <div class="container">
-                <div class="section-head reveal">
-                    <div>
-                        <div class="eyebrow">Галерея</div>
-                        <h2>Фото и видео</h2>
-                        <p class="lede">Снимки и ролики с занятий и мероприятий тира.</p>
+
+        <div class="page" id="page-gallery">
+            <section id="gallery">
+                <div class="container">
+                    <div class="section-head reveal">
+                        <div>
+                            <div class="eyebrow">Галерея</div>
+                            <h2>Фото и видео</h2>
+                            <p class="lede">Снимки и ролики с занятий и мероприятий тира.</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid--3 reveal reveal-stagger" id="galleryGrid">
+                        <div class="state-block">Загрузка галереи…</div>
                     </div>
                 </div>
+            </section>
+        </div>
 
-                <div class="grid grid--3 reveal reveal-stagger" id="galleryGrid">
-                    <div class="state-block">Загрузка галереи…</div>
-                </div>
-            </div>
-        </section>
     </div>
-
 
 </main>
 
@@ -2303,178 +2304,18 @@
                 return;
             }
 
-            const groups = [];
-            let currentGroup = [];
-
-            for (let i = 0; i < items.length; i++) {
-                const item = items[i];
-                if (currentGroup.length === 0) {
-                    currentGroup.push(item);
-                } else {
-                    const prevTime = new Date(currentGroup[currentGroup.length - 1].create_at).getTime();
-                    const currTime = new Date(item.create_at).getTime();
-                    if (currTime - prevTime < 5000) { // 5 секунд
-                        currentGroup.push(item);
-                    } else {
-                        groups.push([...currentGroup]);
-                        currentGroup = [item];
-                    }
-                }
-            }
-            if (currentGroup.length > 0) {
-                groups.push(currentGroup);
-            }
-
-            const style = document.createElement('style');
-            style.textContent = `
-        .gallery-group {
-            margin-bottom: 40px;
-        }
-        .gallery-group:last-child {
-            margin-bottom: 0;
-        }
-        .gallery-group .group-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-        .gallery-group .group-header h3 {
-            font-size: 1.1rem;
-            color: var(--dark-blue);
-        }
-        .gallery-group .group-header .group-date {
-            font-family: var(--f-mono);
-            font-size: 0.75rem;
-            color: var(--steel-dim);
-        }
-        .gallery-scroll {
-            display: flex;
-            gap: 14px;
-            overflow-x: auto;
-            overflow-y: hidden;
-            padding: 8px 4px 16px 4px;
-            scroll-snap-type: x mandatory;
-            -webkit-overflow-scrolling: touch;
-            scrollbar-width: thin;
-            scrollbar-color: var(--coral) transparent;
-        }
-        .gallery-scroll::-webkit-scrollbar {
-            height: 5px;
-        }
-        .gallery-scroll::-webkit-scrollbar-track {
-            background: var(--bg-0);
-            border-radius: 10px;
-        }
-        .gallery-scroll::-webkit-scrollbar-thumb {
-            background: var(--coral);
-            border-radius: 10px;
-        }
-        .gallery-scroll .gallery-item {
-            flex: 0 0 auto;
-            width: 260px;
-            scroll-snap-align: start;
-            border-radius: var(--radius);
-            overflow: hidden;
-            border: 1px solid var(--line-soft);
-            background: var(--bg-0);
-            transition: transform .3s var(--ease), box-shadow .3s var(--ease);
-        }
-        .gallery-scroll .gallery-item:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-md);
-        }
-        .gallery-scroll .gallery-item .gallery-media {
-            aspect-ratio: 4/3;
-            background: var(--bg-1);
-            overflow: hidden;
-        }
-        .gallery-scroll .gallery-item .gallery-media img,
-        .gallery-scroll .gallery-item .gallery-media video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .gallery-scroll .gallery-item .gallery-info {
-            padding: 10px 14px 14px;
-        }
-        .gallery-scroll .gallery-item .gallery-info h3 {
-            font-size: 0.85rem;
-            margin-bottom: 2px;
-        }
-        .gallery-scroll .gallery-item .gallery-info p {
-            font-size: 0.75rem;
-            color: var(--ink-dim);
-            margin: 0;
-        }
-        @media (max-width: 600px) {
-            .gallery-scroll .gallery-item {
-                width: 200px;
-            }
-        }
-        @media (max-width: 400px) {
-            .gallery-scroll .gallery-item {
-                width: 160px;
-            }
-        }
-    `;
-            document.head.appendChild(style);
-
-            galleryGrid.innerHTML = '';
-            galleryGrid.classList.remove('grid--3');
-
-            groups.forEach((group, groupIndex) => {
-                const groupWrapper = document.createElement('div');
-                groupWrapper.className = 'gallery-group';
-
-                const firstItem = group[0];
-                const groupDate = new Date(firstItem.create_at);
-                const dateStr = groupDate.toLocaleDateString('ru-RU', {
-                    day: '2-digit',
-                    month: 'long',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-
-                const header = document.createElement('div');
-                header.className = 'group-header';
-                header.innerHTML = `
-            <h3>📸 Группа ${groupIndex + 1} (${group.length} ${group.length === 1 ? 'файл' : group.length < 5 ? 'файла' : 'файлов'})</h3>
-            <span class="group-date">${dateStr}</span>
-        `;
-                groupWrapper.appendChild(header);
-
-                const scrollContainer = document.createElement('div');
-                scrollContainer.className = 'gallery-scroll';
-
-                group.forEach((m) => {
-                    const src = API_BASE + m.file_url;
-                    const media = m.type === 'video'
-                        ? `<video src="${src}" controls preload="metadata" loading="lazy"></video>`
-                        : `<img src="${src}" alt="${escapeHtml(m.title || '')}" loading="lazy">`;
-
-                    const item = document.createElement('div');
-                    item.className = 'gallery-item';
-                    item.innerHTML = `
-                <div class="gallery-media">${media}</div>
-                ${m.title || m.description ? `<div class="gallery-info">
-                    ${m.title ? `<h3>${escapeHtml(m.title)}</h3>` : ''}
-                    ${m.description ? `<p>${escapeHtml(m.description)}</p>` : ''}
-                </div>` : ''}
-            `;
-                    scrollContainer.appendChild(item);
-                });
-
-                groupWrapper.appendChild(scrollContainer);
-                galleryGrid.appendChild(groupWrapper);
-            });
-
-            galleryGrid.querySelectorAll('.gallery-group').forEach((el, i) => {
-                el.style.setProperty('--i', i);
-                el.classList.add('reveal');
-                setTimeout(() => el.classList.add('is-visible'), 100 + i * 100);
-            });
+            galleryGrid.innerHTML = items.map((m) => {
+                const src = API_BASE + m.file_url;
+                const media = m.type === 'video'
+                    ? `<video src="${src}" controls preload="metadata"></video>`
+                    : `<img src="${src}" alt="${escapeHtml(m.title || '')}" loading="lazy">`;
+                return `
+    <article class="card">
+      <div class="card-media">${media}</div>
+      ${m.title ? `<div class="card-body"><h3>${escapeHtml(m.title)}</h3>${m.description ? `<p>${escapeHtml(m.description)}</p>` : ''}</div>` : ''}
+    </article>`;
+            }).join('');
+            staggerChildren(galleryGrid);
         }
 
         const galleryGrid = document.getElementById('galleryGrid');
