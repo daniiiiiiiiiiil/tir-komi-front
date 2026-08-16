@@ -2298,6 +2298,7 @@
             if (!galleryGrid) return;
 
             const items = Array.isArray(data) ? data : (data && data.items ? data.items : []);
+
             if (!items.length) {
                 galleryGrid.innerHTML = stateBlock('Галерея пока пуста', 'Фото и видео появятся здесь позже.');
                 return;
