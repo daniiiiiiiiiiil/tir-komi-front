@@ -1431,17 +1431,17 @@
                             <option value="video">Видео</option>
                         </select>
                     </div>
-                    <div class="form-row"><label>Название</label><input type="text" name="title" maxlength="200"></div>
-                    <div class="form-row"><label>Описание</label><textarea name="description" maxlength="1000"></textarea></div>
+                    <div class="form-row"><label>Название (общее для всех)</label><input type="text" name="title" maxlength="200"></div>
+                    <div class="form-row"><label>Описание (общее для всех)</label><textarea name="description" maxlength="1000"></textarea></div>
                     <div class="form-row"><label>Порядок сортировки</label><input type="number" name="sort_order" value="0"></div>
                     <div class="form-row">
-                        <label>Файл (фото или видео)</label>
+                        <label>Файлы (можно выбрать несколько фото и/или видео)</label>
                         <div class="file-input-wrapper">
-                            <input type="file" name="file" accept="image/*,video/*" required>
-                            <span class="file-label">Выберите файл</span>
+                            <input type="file" name="files" accept="image/*,video/*" multiple required>
+                            <span class="file-label">Выберите файлы</span>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn--sm">Загрузить</button>
+                    <button type="submit" class="btn btn--sm">Загрузить все</button>
                     <div class="form-msg"></div>
                 </form>
 
@@ -1962,13 +1962,60 @@
         document.getElementById('mediaCreateForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const form = e.target;
-            try {
-                await withAuth(() => Api.media.create(new FormData(form)));
-                setFormMsg(form, 'Файл загружен.', false);
+            const msg = form.querySelector('.form-msg');
+            msg.className = 'form-msg';
+
+            const fileInput = form.querySelector('input[name="files"]');
+            const files = fileInput.files;
+
+            if (!files || files.length === 0) {
+                msg.textContent = 'Выберите хотя бы один файл.';
+                msg.classList.add('is-visible', 'is-error');
+                return;
+            }
+
+            const type = form.querySelector('select[name="type"]').value;
+            const title = form.querySelector('input[name="title"]').value || '';
+            const description = form.querySelector('textarea[name="description"]').value || '';
+            const sortOrder = parseInt(form.querySelector('input[name="sort_order"]').value) || 0;
+
+            const submitBtn = form.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Загрузка...';
+
+            let successCount = 0;
+            let errorCount = 0;
+            const totalFiles = files.length;
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const formData = new FormData();
+                formData.append('type', type);
+                formData.append('title', title || file.name);
+                formData.append('description', description);
+                formData.append('sort_order', String(sortOrder + i));
+                formData.append('file', file);
+
+                try {
+                    await withAuth(() => Api.media.create(formData));
+                    successCount++;
+                } catch (err) {
+                    errorCount++;
+                    console.error(`Ошибка загрузки ${file.name}:`, err);
+                }
+            }
+
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Загрузить все';
+
+            if (errorCount === 0) {
+                msg.textContent = `Успешно загружено ${successCount} файлов!`;
+                msg.classList.add('is-visible', 'is-ok');
                 form.reset();
                 loadMedia();
-            } catch (err) {
-                setFormMsg(form, err.message || 'Не удалось загрузить файл.', true);
+            } else {
+                msg.textContent = `Загружено ${successCount}, ошибок ${errorCount}. Проверьте консоль.`;
+                msg.classList.add('is-visible', 'is-error');
             }
         });
 
