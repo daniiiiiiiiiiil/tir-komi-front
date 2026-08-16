@@ -1774,7 +1774,7 @@
                     </div>
                 </div>
 
-                <div class="grid grid--3 reveal reveal-stagger" id="galleryGrid">
+                <div class="gallery-wrapper reveal" id="galleryGrid">
                     <div class="state-block">Загрузка галереи…</div>
                 </div>
             </div>
@@ -2303,18 +2303,105 @@
                 return;
             }
 
-            galleryGrid.innerHTML = items.map((m) => {
+            const scrollContainer = document.createElement('div');
+            scrollContainer.className = 'gallery-scroll';
+            scrollContainer.style.cssText = `
+        display: flex;
+        gap: 16px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 12px 4px 20px 4px;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        scrollbar-color: var(--coral) transparent;
+    `;
+
+            const style = document.createElement('style');
+            style.textContent = `
+        .gallery-scroll::-webkit-scrollbar {
+            height: 6px;
+        }
+        .gallery-scroll::-webkit-scrollbar-track {
+            background: var(--bg-0);
+            border-radius: 10px;
+        }
+        .gallery-scroll::-webkit-scrollbar-thumb {
+            background: var(--coral);
+            border-radius: 10px;
+        }
+        .gallery-scroll .gallery-item {
+            flex: 0 0 auto;
+            width: 280px;
+            scroll-snap-align: start;
+            border-radius: var(--radius);
+            overflow: hidden;
+            border: 1px solid var(--line-soft);
+            background: var(--bg-0);
+            transition: transform .3s var(--ease), box-shadow .3s var(--ease);
+        }
+        .gallery-scroll .gallery-item:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+        .gallery-scroll .gallery-item .gallery-media {
+            aspect-ratio: 4/3;
+            background: var(--bg-1);
+            overflow: hidden;
+        }
+        .gallery-scroll .gallery-item .gallery-media img,
+        .gallery-scroll .gallery-item .gallery-media video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .gallery-scroll .gallery-item .gallery-info {
+            padding: 12px 16px 16px;
+        }
+        .gallery-scroll .gallery-item .gallery-info h3 {
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+        }
+        .gallery-scroll .gallery-item .gallery-info p {
+            font-size: 0.8rem;
+            color: var(--ink-dim);
+            margin: 0;
+        }
+        @media (max-width: 600px) {
+            .gallery-scroll .gallery-item {
+                width: 220px;
+            }
+        }
+        @media (max-width: 400px) {
+            .gallery-scroll .gallery-item {
+                width: 180px;
+            }
+        }
+    `;
+            document.head.appendChild(style);
+
+            items.forEach((m) => {
                 const src = API_BASE + m.file_url;
                 const media = m.type === 'video'
-                    ? `<video src="${src}" controls preload="metadata"></video>`
+                    ? `<video src="${src}" controls preload="metadata" loading="lazy"></video>`
                     : `<img src="${src}" alt="${escapeHtml(m.title || '')}" loading="lazy">`;
-                return `
-    <article class="card">
-      <div class="card-media">${media}</div>
-      ${m.title ? `<div class="card-body"><h3>${escapeHtml(m.title)}</h3>${m.description ? `<p>${escapeHtml(m.description)}</p>` : ''}</div>` : ''}
-    </article>`;
-            }).join('');
-            staggerChildren(galleryGrid);
+
+                const item = document.createElement('div');
+                item.className = 'gallery-item';
+                item.innerHTML = `
+            <div class="gallery-media">${media}</div>
+            ${m.title || m.description ? `<div class="gallery-info">
+                ${m.title ? `<h3>${escapeHtml(m.title)}</h3>` : ''}
+                ${m.description ? `<p>${escapeHtml(m.description)}</p>` : ''}
+            </div>` : ''}
+        `;
+                scrollContainer.appendChild(item);
+            });
+
+            galleryGrid.innerHTML = '';
+            galleryGrid.appendChild(scrollContainer);
+
+            galleryGrid.classList.remove('grid--3');
         }
 
         const galleryGrid = document.getElementById('galleryGrid');
