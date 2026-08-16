@@ -1282,6 +1282,47 @@
     }
 </style>
 
+<style>
+    /* Стили для редактора страниц */
+    #blocksBody .block-row td {
+        vertical-align: middle;
+    }
+    #blocksBody .block-row .block-handle {
+        cursor: grab;
+        color: var(--steel-dim);
+        user-select: none;
+    }
+    #blocksBody .block-row .block-handle:active {
+        cursor: grabbing;
+    }
+    #blocksBody .block-row.dragging {
+        opacity: 0.5;
+    }
+    #blocksBody .block-row.drag-over td {
+        border-top: 2px solid var(--brass);
+    }
+    .block-preview {
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: .85rem;
+        color: var(--ink-dim);
+    }
+    .block-preview .label-tag {
+        display: inline-block;
+        background: rgba(244,124,104,.15);
+        color: var(--coral);
+        padding: 0 8px;
+        border-radius: 3px;
+        font-size: .7rem;
+        font-family: var(--f-mono);
+    }
+    .block-preview .value-preview {
+        color: var(--steel);
+    }
+</style>
+
 <body class="admin-body">
 
 
@@ -1340,6 +1381,7 @@
                 <button class="tab" data-tab="vacancies">Вакантные места</button>
                 <button class="tab" data-tab="reviews">Отзывы</button>
                 <button class="tab" data-tab="media">Галерея</button>
+                <button class="tab" data-tab="pages">Страницы</button>
             </div>
 
             <div class="tab-panel is-active" data-panel="ads">
@@ -1461,7 +1503,92 @@
                     </table>
                 </div>
             </div>
+
+
+            <!-- ====== СТРАНИЦЫ ====== -->
+            <div class="tab-panel" data-panel="pages">
+                <div class="panel-toolbar">
+                    <h3>Управление страницами</h3>
+                    <span class="mono-tag">основные сведения</span>
+                </div>
+
+                <!-- Выбор страницы -->
+                <div class="form-row" style="margin-bottom:20px;">
+                    <label>Выберите страницу для редактирования</label>
+                    <select id="pageSelector" style="width:100%;max-width:400px;background:var(--bg-0);border:1px solid var(--line);color:var(--ink);padding:.85em 1em;font-family:var(--f-body);font-size:.94rem;border-radius:6px;">
+                        <option value="main">Основные сведения</option>
+                        <option value="structure">Структура и органы управления</option>
+                        <option value="docs">Документы</option>
+                        <option value="education">Образование</option>
+                        <option value="standards">Образовательные стандарты</option>
+                        <option value="staff">Руководство. Педагогический состав</option>
+                        <option value="facilities">Материально-техническое обеспечение</option>
+                        <option value="scholarships">Стипендии и иные виды материальной поддержки</option>
+                        <option value="paid-services">Платные образовательные услуги</option>
+                        <option value="finance">Финансово-хозяйственная деятельность</option>
+                        <option value="accessible">Доступная среда</option>
+                        <option value="international">Международное сотрудничество</option>
+                    </select>
+                </div>
+
+                <!-- Редактор блоков -->
+                <div id="pageEditor">
+                    <div class="entity-form" id="blockForm" style="grid-template-columns:1fr 1fr auto;gap:12px;">
+                        <div class="form-row" style="grid-column:span 1;">
+                            <label>Тип блока</label>
+                            <select name="blockType" id="blockType">
+                                <option value="label_value">Метка + значение</option>
+                                <option value="text">Текст</option>
+                                <option value="hr">Разделитель</option>
+                                <option value="file_link">Ссылка на файл</option>
+                                <option value="external_link">Внешняя ссылка</option>
+                                <option value="image">Изображение</option>
+                                <option value="image_grid">Сетка изображений</option>
+                                <option value="list">Список</option>
+                                <option value="html">HTML код</option>
+                            </select>
+                        </div>
+                        <div class="form-row" style="grid-column:span 1;">
+                            <label>Метка (заголовок)</label>
+                            <input type="text" id="blockLabel" placeholder="Например: Полное наименование">
+                        </div>
+                        <div class="form-row" style="grid-column:span 1;">
+                            <label>Значение</label>
+                            <input type="text" id="blockValue" placeholder="Значение блока">
+                        </div>
+                        <div class="form-row" style="grid-column:1/-1;display:none;" id="blockExtraRow">
+                            <label>Дополнительные данные (JSON)</label>
+                            <textarea id="blockExtra" rows="3" placeholder='{"url": "/assets/file.pdf", "label": "Скачать"}'></textarea>
+                        </div>
+                        <button type="button" class="btn btn--sm" id="addBlockBtn" style="grid-column:1/-1;justify-self:start;">➕ Добавить блок</button>
+                        <div class="form-msg" id="blockMsg"></div>
+                    </div>
+
+                    <!-- Список блоков -->
+                    <div class="table-wrap" style="margin-top:16px;">
+                        <table class="data-table" id="blocksTable">
+                            <thead>
+                            <tr>
+                                <th style="width:30px;">#</th>
+                                <th>Тип</th>
+                                <th>Метка</th>
+                                <th>Значение</th>
+                                <th style="width:120px;"></th>
+                            </tr>
+                            </thead>
+                            <tbody id="blocksBody"></tbody>
+                        </table>
+                    </div>
+
+                    <div style="display:flex;gap:12px;margin-top:20px;">
+                        <button class="btn" id="savePageBtn">💾 Сохранить страницу</button>
+                        <button class="btn btn--ghost" id="resetPageBtn">↺ Сбросить изменения</button>
+                    </div>
+                    <div class="form-msg" id="pageSaveMsg"></div>
+                </div>
+            </div>
         </section>
+
 
     </div>
 </main>
@@ -1567,6 +1694,10 @@
             create: (formData) => apiRequestForm('/media', { method: 'POST', formData }),
             update: (id, formData) => apiRequestForm(`/media/${id}`, { method: 'PATCH', formData }),
             remove: (id) => apiRequest(`/media/${id}`, { method: 'DELETE' }),
+        },
+        pages: {
+            get: (pageType) => apiRequest(`/information-pages/${pageType}`),
+            update: (pageType, payload) => apiRequest(`/information-pages/${pageType}`, { method: 'PATCH', body: payload }),
         },
     };
 
@@ -2140,6 +2271,307 @@
             loadMedia();
         }
     })();
+
+    // ===== УПРАВЛЕНИЕ СТРАНИЦАМИ =====
+    const PAGE_TYPES = {
+        'main': 'Основные сведения',
+        'structure': 'Структура и органы управления',
+        'docs': 'Документы',
+        'education': 'Образование',
+        'standards': 'Образовательные стандарты',
+        'staff': 'Руководство. Педагогический состав',
+        'facilities': 'Материально-техническое обеспечение',
+        'scholarships': 'Стипендии и иные виды материальной поддержки',
+        'paid-services': 'Платные образовательные услуги',
+        'finance': 'Финансово-хозяйственная деятельность',
+        'accessible': 'Доступная среда',
+        'international': 'Международное сотрудничество'
+    };
+
+    let currentPageType = 'main';
+    let currentBlocks = [];
+    let editingBlockIndex = -1;
+
+    // API для страниц
+    Api.pages = {
+        get: (pageType) => apiRequest(`/information-pages/${pageType}`),
+        update: (pageType, payload) => apiRequest(`/information-pages/${pageType}`, { method: 'PATCH', body: payload }),
+    };
+
+    // Загрузка страницы
+    async function loadPage(pageType) {
+        const body = document.getElementById('blocksBody');
+        body.innerHTML = '<tr class="empty-row"><td colspan="5">Загрузка...</td></tr>';
+
+        try {
+            const data = await withAuth(() => Api.pages.get(pageType));
+            currentBlocks = (data && data.structured) || [];
+            renderBlocks();
+            document.getElementById('pageSaveMsg').className = 'form-msg';
+        } catch (err) {
+            body.innerHTML = `<tr class="empty-row"><td colspan="5">Ошибка: ${escapeHtml(err.message)}</td></tr>`;
+            currentBlocks = [];
+        }
+    }
+
+    // Рендер блоков
+    function renderBlocks() {
+        const body = document.getElementById('blocksBody');
+        if (!currentBlocks.length) {
+            body.innerHTML = '<tr class="empty-row"><td colspan="5">Нет блоков. Добавьте первый!</td></tr>';
+            return;
+        }
+
+        body.innerHTML = currentBlocks.map((block, index) => {
+            const typeLabels = {
+                'label_value': '📋 Метка+значение',
+                'text': '📝 Текст',
+                'hr': '➖ Разделитель',
+                'file_link': '📎 Ссылка на файл',
+                'external_link': '🔗 Внешняя ссылка',
+                'image': '🖼️ Изображение',
+                'image_grid': '🖼️ Сетка изображений',
+                'list': '📋 Список',
+                'html': '💻 HTML'
+            };
+            const typeLabel = typeLabels[block.type] || block.type;
+
+            let preview = '';
+            if (block.label) preview += `<span class="label-tag">${escapeHtml(block.label)}</span> `;
+            if (block.value) {
+                const val = typeof block.value === 'object' ? JSON.stringify(block.value).slice(0, 50) : String(block.value).slice(0, 50);
+                preview += `<span class="value-preview">${escapeHtml(val)}</span>`;
+            }
+
+            return `
+            <tr class="block-row" data-index="${index}">
+                <td><span class="block-handle">⠿</span></td>
+                <td><span style="font-size:.75rem;font-family:var(--f-mono);color:var(--steel-dim);">${typeLabel}</span></td>
+                <td>${escapeHtml(block.label || '—')}</td>
+                <td><div class="block-preview">${preview || '—'}</div></td>
+                <td>
+                    <div class="row-actions">
+                        <button type="button" class="icon-btn" data-action="edit-block" data-index="${index}" title="Редактировать">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+                        </button>
+                        <button type="button" class="icon-btn danger" data-action="remove-block" data-index="${index}" title="Удалить">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+        }).join('');
+
+        // Drag & drop
+        setupDragDrop();
+    }
+
+    // Drag & Drop
+    function setupDragDrop() {
+        const rows = document.querySelectorAll('#blocksBody .block-row');
+        let dragIndex = null;
+
+        rows.forEach(row => {
+            row.draggable = true;
+
+            row.addEventListener('dragstart', (e) => {
+                dragIndex = parseInt(row.dataset.index);
+                row.classList.add('dragging');
+                e.dataTransfer.effectAllowed = 'move';
+            });
+
+            row.addEventListener('dragend', () => {
+                row.classList.remove('dragging');
+                document.querySelectorAll('#blocksBody .block-row').forEach(r => r.classList.remove('drag-over'));
+            });
+
+            row.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                const targetIndex = parseInt(row.dataset.index);
+                if (dragIndex !== null && dragIndex !== targetIndex) {
+                    document.querySelectorAll('#blocksBody .block-row').forEach(r => r.classList.remove('drag-over'));
+                    row.classList.add('drag-over');
+                }
+            });
+
+            row.addEventListener('dragleave', () => {
+                row.classList.remove('drag-over');
+            });
+
+            row.addEventListener('drop', (e) => {
+                e.preventDefault();
+                row.classList.remove('drag-over');
+                const targetIndex = parseInt(row.dataset.index);
+                if (dragIndex !== null && dragIndex !== targetIndex) {
+                    const [moved] = currentBlocks.splice(dragIndex, 1);
+                    currentBlocks.splice(targetIndex, 0, moved);
+                    renderBlocks();
+                }
+                dragIndex = null;
+            });
+        });
+    }
+
+    // Добавление блока
+    document.getElementById('addBlockBtn').addEventListener('click', () => {
+        const type = document.getElementById('blockType').value;
+        const label = document.getElementById('blockLabel').value.trim();
+        const valueInput = document.getElementById('blockValue').value.trim();
+        const extraInput = document.getElementById('blockExtra').value.trim();
+
+        let value = valueInput;
+        if (type === 'image_grid' || type === 'list') {
+            try {
+                value = JSON.parse(valueInput || '[]');
+            } catch {
+                value = valueInput ? [valueInput] : [];
+            }
+        } else if (type === 'file_link' || type === 'external_link' || type === 'image') {
+            if (extraInput) {
+                try {
+                    value = JSON.parse(extraInput);
+                } catch {
+                    value = { url: valueInput, label: label };
+                }
+            } else if (valueInput) {
+                value = { url: valueInput, label: label };
+            }
+        }
+
+        const block = { type, label, value };
+
+        if (editingBlockIndex >= 0) {
+            currentBlocks[editingBlockIndex] = block;
+            editingBlockIndex = -1;
+            document.getElementById('addBlockBtn').textContent = '➕ Добавить блок';
+        } else {
+            currentBlocks.push(block);
+        }
+
+        // Очистка формы
+        document.getElementById('blockLabel').value = '';
+        document.getElementById('blockValue').value = '';
+        document.getElementById('blockExtra').value = '';
+        document.getElementById('blockExtraRow').style.display = 'none';
+
+        renderBlocks();
+        showBlockMsg('Блок сохранен', false);
+    });
+
+    // Обработчики для блоков
+    document.getElementById('blocksBody').addEventListener('click', (e) => {
+        const editBtn = e.target.closest('[data-action="edit-block"]');
+        const delBtn = e.target.closest('[data-action="remove-block"]');
+
+        if (delBtn) {
+            const index = parseInt(delBtn.dataset.index);
+            if (confirm('Удалить блок?')) {
+                currentBlocks.splice(index, 1);
+                renderBlocks();
+                showBlockMsg('Блок удален', false);
+            }
+            return;
+        }
+
+        if (editBtn) {
+            const index = parseInt(editBtn.dataset.index);
+            const block = currentBlocks[index];
+            if (!block) return;
+
+            document.getElementById('blockType').value = block.type;
+            document.getElementById('blockLabel').value = block.label || '';
+
+            if (typeof block.value === 'object') {
+                document.getElementById('blockValue').value = '';
+                document.getElementById('blockExtra').value = JSON.stringify(block.value, null, 2);
+                document.getElementById('blockExtraRow').style.display = 'block';
+            } else {
+                document.getElementById('blockValue').value = block.value || '';
+                document.getElementById('blockExtra').value = '';
+                document.getElementById('blockExtraRow').style.display = 'none';
+            }
+
+            editingBlockIndex = index;
+            document.getElementById('addBlockBtn').textContent = '✏️ Обновить блок';
+            document.getElementById('blockLabel').focus();
+        }
+    });
+
+    // Показ типа блока → показываем поле Extra если нужно
+    document.getElementById('blockType').addEventListener('change', function() {
+        const typesWithExtra = ['file_link', 'external_link', 'image', 'image_grid', 'list'];
+        const extraRow = document.getElementById('blockExtraRow');
+        extraRow.style.display = typesWithExtra.includes(this.value) ? 'block' : 'none';
+
+        if (this.value === 'hr') {
+            document.getElementById('blockLabel').value = '';
+            document.getElementById('blockValue').value = '';
+        }
+    });
+
+    // Сообщения
+    function showBlockMsg(text, isError) {
+        const msg = document.getElementById('blockMsg');
+        msg.textContent = text;
+        msg.className = 'form-msg is-visible ' + (isError ? 'is-error' : 'is-ok');
+        setTimeout(() => { msg.className = 'form-msg'; }, 3000);
+    }
+
+    // Сохранение страницы
+    document.getElementById('savePageBtn').addEventListener('click', async () => {
+        const msg = document.getElementById('pageSaveMsg');
+        msg.className = 'form-msg';
+
+        try {
+            await withAuth(() => Api.pages.update(currentPageType, {
+                structured: currentBlocks
+            }));
+            msg.textContent = '✅ Страница сохранена!';
+            msg.className = 'form-msg is-visible is-ok';
+            setTimeout(() => { msg.className = 'form-msg'; }, 3000);
+        } catch (err) {
+            msg.textContent = '❌ Ошибка: ' + err.message;
+            msg.className = 'form-msg is-visible is-error';
+        }
+    });
+
+    // Сброс
+    document.getElementById('resetPageBtn').addEventListener('click', () => {
+        if (confirm('Сбросить все изменения? Несохраненные данные будут потеряны.')) {
+            loadPage(currentPageType);
+            document.getElementById('pageSaveMsg').className = 'form-msg';
+            showBlockMsg('Изменения сброшены', false);
+        }
+    });
+
+    // Переключение страницы
+    document.getElementById('pageSelector').addEventListener('change', function() {
+        currentPageType = this.value;
+        editingBlockIndex = -1;
+        document.getElementById('addBlockBtn').textContent = '➕ Добавить блок';
+        loadPage(currentPageType);
+    });
+
+    // Загрузка при переключении таба
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            if (tab.dataset.tab === 'pages') {
+                loadPage(document.getElementById('pageSelector').value);
+            }
+        });
+    });
+
+    // Инициализация при первом открытии
+    let pagesLoaded = false;
+    document.querySelector('[data-tab="pages"]').addEventListener('click', function() {
+        if (!pagesLoaded) {
+            pagesLoaded = true;
+            loadPage('main');
+        }
+    });
+
 </script>
 
 </body>

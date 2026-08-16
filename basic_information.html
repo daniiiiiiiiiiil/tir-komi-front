@@ -799,6 +799,34 @@
         }
 
         ::selection{background:var(--coral);color:#fff;}
+
+        /* Скелетон загрузки */
+        .skeleton-block {
+            background: var(--bg-1);
+            border-radius: var(--radius);
+            padding: 20px 24px;
+            min-height: 80px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        .skeleton-block .skeleton-line {
+            height: 12px;
+            background: var(--bg-2);
+            border-radius: 4px;
+            margin-bottom: 8px;
+        }
+        .skeleton-block .skeleton-line:last-child {
+            margin-bottom: 0;
+        }
+        .skeleton-block .skeleton-line.short {
+            width: 40%;
+        }
+        .skeleton-block .skeleton-line.medium {
+            width: 70%;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
     </style>
 </head>
 <body>
@@ -814,19 +842,8 @@
 
         <div class="dropdown">
             <span class="is-current">Основные сведения</span>
-            <div class="dropdown-content">
-                <a href="#page-main" data-page="page-main">Основные сведения</a>
-                <a href="#page-structure" data-page="page-structure">Структура и органы управления</a>
-                <a href="#page-docs" data-page="page-docs">Документы</a>
-                <a href="#page-education" data-page="page-education">Образование</a>
-                <a href="#page-standards" data-page="page-standards">Образовательные стандарты</a>
-                <a href="#page-staff" data-page="page-staff">Руководство. Педагогический состав</a>
-                <a href="#page-facilities" data-page="page-facilities">Материально-техническое обеспечение</a>
-                <a href="#page-scholarships" data-page="page-scholarships">Стипендии и иные виды материальной поддержки</a>
-                <a href="#page-paid-services" data-page="page-paid-services">Платные образовательные услуги</a>
-                <a href="#page-finance" data-page="page-finance">Финансово-хозяйственная деятельность</a>
-                <a href="#page-accessible" data-page="page-accessible">Доступная среда</a>
-                <a href="#page-international" data-page="page-international">Международное сотрудничество</a>
+            <div class="dropdown-content" id="desktopMenu">
+                <!-- Загружается динамически -->
             </div>
         </div>
 
@@ -850,18 +867,7 @@
         <span class="toggle-icon">▾</span>
     </div>
     <div class="mobile-submenu" id="mobileSubmenu">
-        <a href="#page-main" data-page="page-main">Основные сведения</a>
-        <a href="#page-structure" data-page="page-structure">Структура и органы управления</a>
-        <a href="#page-docs" data-page="page-docs">Документы</a>
-        <a href="#page-education" data-page="page-education">Образование</a>
-        <a href="#page-standards" data-page="page-standards">Образовательные стандарты</a>
-        <a href="#page-staff" data-page="page-staff">Руководство. Педагогический состав</a>
-        <a href="#page-facilities" data-page="page-facilities">Материально-техническое обеспечение</a>
-        <a href="#page-scholarships" data-page="page-scholarships">Стипендии и иные виды материальной поддержки</a>
-        <a href="#page-paid-services" data-page="page-paid-services">Платные образовательные услуги</a>
-        <a href="#page-finance" data-page="page-finance">Финансово-хозяйственная деятельность</a>
-        <a href="#page-accessible" data-page="page-accessible">Доступная среда</a>
-        <a href="#page-international" data-page="page-international">Международное сотрудничество</a>
+        <!-- Загружается динамически -->
     </div>
 
     <a href="./index.html">Объявления</a>
@@ -877,693 +883,476 @@
             <div class="eyebrow">Сведения об организации</div>
             <h1 id="pageTitle">Основные сведения</h1>
 
-            <!-- ================= СТРАНИЦА 1: ОСНОВНЫЕ СВЕДЕНИЯ ================= -->
-            <div id="page-main" class="info-page is-active">
-                <div class="info-grid" style="margin-top: 40px;">
-                    <div class="info-block">
-                        <span class="label">Полное наименование</span>
-                        <p class="value">Частное учреждение дополнительного профессионального образования "Институт международных связей и делового сотрудничества"</p>
-                    </div>
-                    <div class="info-block">
-                        <span class="label">Сокращенное наименование</span>
-                        <p class="value">ЧУ ДПО ИМДС</p>
-                    </div>
-                    <div class="info-block">
-                        <span class="label">Дата создания</span>
-                        <p class="value">Частное учреждение дополнительного профессионального образования «Институт международных связей и делового сотрудничества» создано в 10.01.2008г.</p>
-                    </div>
-                    <div class="info-block">
-                        <span class="label">Учредители</span>
-                        <p class="value">Учреждение создано:  Обществом с ограниченной ответственностью «Институт международных связей и делового сотрудничества».</p>
-                        <hr>
-                        <span class="label">Собственник учреждения</span>
-                        <p class="value">Теплова Тамара Александровна</p>
-                    </div>
-                    <div class="info-block">
-                        <span class="label">Представительства и филиалы</span>
-                        <p class="value">Учреждение не имеет представительств и филиалов</p>
-                    </div>
-                    <div class="info-block">
-                        <span class="label">Место нахождения, контакты</span>
-                        <p class="value">Юридический адрес: 167004, Республика Коми, г. Сыктывкар, ул.Карла Маркса д. 228\3</p>
-                        <hr>
-                        <p class="value">Адрес места нахождения: г. Сыктывкар, ул. Карла Маркса, д 228\3</p>
-                        <hr>
-                        <p class="value">Телефон: 8-8212-314060</p>
-                        <hr>
-                        <p class="value">Адрес электронной почты: tirkomi@yandex.ru</p>
-                        <hr>
-                        <p class="value">Адрес официального сайта: <a href="https://tir-komi.vercel.app/" target="_blank">http:\\tirkomi.ucoz.org</a></p>
-                    </div>
-                    <div class="info-block">
-                        <span class="label">График работы</span>
-                        <p class="value">Понедельник - пятница с 9 час. 00 мин до 17 час. 00 мин</p>
-                    </div>
-                    <div class="info-block">
-                        <span class="label">Места осуществления образовательной деятельности</span>
-                        <p class="value">Образовательная деятельность по основным программам профессионального обучения, а также по дополнительным образовательным программам осуществляется по адресу: Республика Коми, г. Сыктывкар, ул. Карла Маркса, д. 228\3</p>
-                        <hr>
-                        <p class="value">Практические занятия проводятся по месту осуществления образовательной деятельности. Практическая подготовка проходит на базе учреждения.</p>
-                        <hr>
-                        <p class="value">Сетевая форма реализации образовательных программ не используется. Учреждение осуществляет образовательный процесс самостоятельно.</p>
-                        <hr>
-                        <p class="value">Государственная итоговая аттестация реализуемых учреждением программ не предусмотрена.</p>
-                    </div>
-                    <div class="info-block">
-                        <span class="label">О лицензии на образовательную деятельность</span>
-                        <p class="value">Образовательная деятельность осуществляется на основании Лицензии</p>
-                        <hr>
-                        <p class="value">Выдана: Министерство образования, науки и молодежной политики Республики Коми № 1838-П от 17 февраля 2020 г.</p>
-                        <hr>
-                        <p class="value">Серия 11 Л 01 № 0002183 Срок действия: бессрочно</p>
-                    </div>
-                    <div class="info-block">
-                        <span class="label">Режим учебных занятий</span>
-                        <p class="value">Занятия проводятся в группах по расписанию каждой группы (устанавливается отдельно) в режиме работы учреждения. Академический час учебных занятий – 45 мин.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ================= СТРАНИЦА 2: СТРУКТУРА И ОРГАНЫ УПРАВЛЕНИЯ ================= -->
-            <div id="page-structure" class="info-page">
-                <div class="info-grid" style="margin-top: 40px;">
-                    <div class="info-block">
-                        <span class="label">Руководство</span>
-                        <p class="value">Руководство Учреждением осуществляет Собственник.</p>
-                        <hr>
-                        <p class="value">Исполнительным органом Учреждения является Директор. Директор действует от имени Учреждения без доверенности, осуществляет текущее руководство деятельностью Учреждения и подотчётен Собственнику.</p>
-                    </div>
-                    <div class="info-block">
-                        <span class="label">Коллегиальные органы управления</span>
-                        <p class="value">В Учреждении формируются коллегиальные органы управления: педагогический совет из штатных педагогических работников и общее собрание работников образовательной организации, имеющие статус совещательных органов.</p>
-                        <hr>
-                        <p class="value" style="margin-bottom: 4px;">Положение о педагогическом совете</p>
-                        <a href="/assets/polozhenie_o_pedagogicheskom_sovete.pdf" target="_blank" class="pdf-link">Скачать PDF</a>
-                        <hr>
-                        <p class="value" style="margin-bottom: 4px;">Положение об Общем собрании</p>
-                        <a href="/assets/polozh_obshhee_sobr.pdf" target="_blank" class="pdf-link">Скачать PDF</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ================= СТРАНИЦА 3: ДОКУМЕНТЫ ================= -->
-            <div id="page-docs" class="info-page">
-                <div class="info-grid" style="margin-top: 40px;">
-
-                    <div class="info-block">
-                        <span class="label">Документы</span>
-                        <p class="value">Федеральный закон "Об образовании в Российской Федерации" - <a href="https://www.consultant.ru/document/cons_doc_LAW_140174/" target="_blank">перейти на страницу</a></p>
-                        <hr>
-                        <p class="value">Федеральный закон "О некоммерческих организациях" - <a href="https://www.consultant.ru/document/cons_doc_LAW_8824/" target="_blank">перейти на страницу</a></p>
-                        <hr>
-                        <p class="value">Федеральный закон "Об оружии" - <a href="https://www.consultant.ru/document/Cons_doc_LAW_12679/" target="_blank">перейти на страницу</a></p>
-                    </div>
-
-                    <div class="info-block">
-                        <span class="label">Устав</span>
-                        <p class="value">Устав образовательной организации</p>
-                        <a href="/assets/podpisannyj_ustav_chu_dpo_imds.pdf" target="_blank" class="pdf-link">Скачать Устав</a>
-                    </div>
-
-                    <div class="info-block">
-                        <span class="label">Лицензия</span>
-                        <p class="value">Лицензия на осуществление образовательной деятельности (с приложениями)</p>
-                        <a href="/assets/licenzija_2020_goda.pdf" target="_blank" class="pdf-link">Скачать Лицензию</a>
-                    </div>
-
-                    <div class="info-block">
-                        <span class="label">Выписка ЕГРЮЛ</span>
-                        <p class="value">Выписка из Единого государственного реестра юридических лиц</p>
-                        <a href="/assets/egrjul_mart_2024.pdf" target="_blank" class="pdf-link">Скачать ЕГРЮЛ</a>
-                    </div>
-
-                    <div class="info-block">
-                        <span class="label">ИНН Учредителя</span>
-                        <p class="value">ИНН Учредителя</p>
-                        <img src="/assets/98723580.jpg" alt="ИНН Учредителя" class="inn-img" style="max-height: 1000px; width: auto;">
-                    </div>
-
-                    <div class="info-block">
-                        <span class="label">Свидетельства об аккредитации</span>
-                        <p class="value">Свидетельства об аккредитации нет, т.к. данный вид деятельности не аккредитуется (учреждение не выдаёт документы государственного образца).</p>
-                    </div>
-
-                    <div class="info-block">
-                        <span class="label">Локальные нормативные акты</span>
-
-                        <p class="value" style="margin-bottom: 4px;">Приказ об экзаменационной комиссии 2023</p>
-                        <a href="/assets/izmenenie_v_ehkz_komis_nojabr_2023.pdf" target="_blank" class="pdf-link">Скачать</a>
-                        <hr>
-
-                        <p class="value" style="margin-bottom: 4px;">Правила внутреннего распорядка</p>
-                        <a href="/assets/pravila_vnutr_raspor_obuchajushhikhsja.pdf" target="_blank" class="pdf-link">Скачать</a>
-                        <hr>
-
-                        <p class="value" style="margin-bottom: 4px;">Положение о профессиональном и дополнительном профессиональном образовании</p>
-                        <a href="/assets/polozhenie_o_po_i_dpo_2023.pdf" target="_blank" class="pdf-link">Скачать</a>
-                        <hr>
-
-                        <p class="value" style="margin-bottom: 4px;">Положение о режиме занятий</p>
-                        <a href="/assets/polozhenie_o_rezhime_zanjatij.pdf" target="_blank" class="pdf-link">Скачать</a>
-                        <hr>
-
-                        <p class="value" style="margin-bottom: 4px;">Положение о режиме обучения</p>
-                        <a href="/assets/polozhenie_o_rezhime_obuchenija.pdf" target="_blank" class="pdf-link">Скачать</a>
-                        <hr>
-
-                        <p class="value" style="margin-bottom: 4px;">Правила внутреннего трудового распорядка</p>
-                        <a href="/assets/pravila_vnutrennego_trudovogo_rasporjadka.pdf" target="_blank" class="pdf-link">Скачать</a>
-                        <hr>
-
-                        <p class="value" style="margin-bottom: 4px;">Правила приёма на обучение</p>
-                        <a href="/assets/podpis_pravila_priema_2023.pdf" target="_blank" class="pdf-link">Скачать</a>
-                        <hr>
-
-                        <p class="value" style="margin-bottom: 4px;">Формы, периодичность и порядок текущего контроля успеваемости, промежуточной аттестации, итоговой аттестации обучающихся</p>
-                        <a href="/assets/polozh_o_formakh_tekushh_kontr_attestacii.pdf" target="_blank" class="pdf-link">Скачать</a>
-                        <hr>
-
-                        <p class="value" style="margin-bottom: 4px;">Порядок и основания возникновения образовательных отношений, отчисления, восстановления</p>
-                        <a href="/assets/polozh_o_voznikn_i_prekrashh_obrazovat_otnosh.pdf" target="_blank" class="pdf-link">Скачать</a>
-                        <hr>
-
-                        <p class="value" style="margin-bottom: 4px;">Положение о доступе к информационным сетям и др</p>
-                        <a href="/assets/polozh_o_dostupe_k_inf-setjam_mat_tekh_sredstvam.pdf" target="_blank" class="pdf-link">Скачать</a>
-                        <hr>
-
-                        <p class="value" style="margin-bottom: 4px;">Положение о комиссии по урегулированию споров между участниками образовательных отношений</p>
-                        <a href="/assets/polozhenie_o_komissii.pdf" target="_blank" class="pdf-link">Скачать</a>
-                        <hr>
-
-                        <p class="value" style="margin-bottom: 4px;">Положение об охране труда</p>
-                        <a href="/assets/polozhenie_ob_okhrane_truda.pdf" target="_blank" class="pdf-link">Скачать</a>
-                        <hr>
-
-                        <p class="value" style="margin-bottom: 4px;">Инструкция по охране труда при проведении соревнований</p>
-                        <a href="/assets/okhr_tr_pri_sorevnovanijakh.pdf" target="_blank" class="pdf-link">Скачать</a>
-                    </div>
-
-                    <div class="info-block">
-                        <span class="label">Отчёт о результатах самообследования</span>
-                        <p class="value" style="margin-bottom: 4px;">Отчёт о результатах самообследования за 2024 г</p>
-                        <a href="/assets/akt_samoobsl_2024.pdf" target="_blank" class="pdf-link">Скачать</a>
-                        <hr>
-                        <p class="value" style="margin-bottom: 4px;">Отчёт о результатах самообследования за 2025 г</p>
-                        <a href="/assets/akt_samoobsledovanija_za_2025_god_podpisan.pdf" target="_blank" class="pdf-link">Скачать</a>
-                    </div>
-
-                    <div class="info-block">
-                        <span class="label">Документы о порядке оказания платных образовательных услуг</span>
-                        <p class="value">Документы о порядке оказания платных образовательных услуг, в том числе: образец договора об оказании платных образовательных услуг, приказ об утверждении стоимости обучения по каждой образовательной программе</p>
-
-                        <ul class="doc-sublist" style="margin-top: 12px; list-style: none;">
-                            <li>
-                                <div class="label">Платные образовательные услуги</div>
-                                <div class="value">Платные образовательные услуги</div>
-                            </li>
-                            <li>
-                                <div class="label">Постановление Правительства РФ</div>
-                                <div class="value">Постановление Правительства Российской Федерации от 15 августа 2013 г. №706 "Об утверждении Правил оказания платных образовательных услуг" - <a href="https://www.rg.ru/printable/2013/08/23/uslugi-dok.html" target="_blank">перейти по ссылке</a></div>
-                            </li>
-                            <li>
-                                <div class="label">Образец договора об оказании платных образовательных услуг</div>
-                                <div class="value"><a href="/assets/tipovoj.pdf" target="_blank" class="pdf-link">Скачать</a></div>
-                            </li>
-                            <li>
-                                <div class="label">Положение об оказании платных образовательных услуг</div>
-                                <div class="value"><a href="/assets/polozhenie_o_platnykh_obrazovatelnykh_uslugakh.pdf" target="_blank" class="pdf-link">Скачать</a></div>
-                            </li>
-                            <li>
-                                <div class="label">Прайс лист на 2024 год</div>
-                                <div class="value"><a href="/assets/prajs_2024.pdf" target="_blank" class="pdf-link">Скачать</a></div>
-                            </li>
-                            <li>
-                                <div class="label">Прайс лист на образовательные услуги в 2025 году</div>
-                                <div class="value"><a href="/assets/prajs_2025.pdf" target="_blank" class="pdf-link">Скачать</a></div>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div class="info-block">
-                        <span class="label">Предписания органов, осуществляющих государственный контроль (надзор) в сфере образования </span>
-                        <p class="value">Предписаний органов, осуществляющих государственный контроль (надзор) в сфере образования на дату 01.11.2023г. нет</p>
-                    </div>
-
-                </div>
-            </div>
-
-            <!-- ================= СТРАНИЦА 4: ОБРАЗОВАНИЕ ================= -->
-            <div id="page-education" class="info-page">
-                <div class="info-grid" style="margin-top: 40px;">
-
-                    <div class="info-block">
-                        <span class="label">Образование</span>
-                        <p class="value">Уровни образования</p>
-                        <hr>
-                        <p class="value">В учреждении создаются условия для реализации конституционного права граждан на профессиональное образование. Подвид – дополнительное профессиональное образование.</p>
-                        <hr>
-                        <p class="value">В учреждении созданы условия для дополнительного образования.</p>
-                    </div>
-
-                    <div class="info-block">
-                        <span class="label">Формы обучения</span>
-                        <p class="value">Обучение осуществляется в очной форме.</p>
-                    </div>
-
-                    <div class="info-block">
-                        <span class="label">Нормативный срок освоения</span>
-                        <p class="value">По программе профессиональной подготовки:</p>
-                        <p class="value">охранников 6 разряда - 80 часов;</p>
-                        <p class="value">охранников 5 разряда - 60 часа;</p>
-                        <p class="value">охранников 4 разряда - 40 часов;</p>
-                        <hr>
-                        <p class="value">По программе повышения квалификации:</p>
-                        <p class="value">охранников 6 разряда - 20 часов;</p>
-                        <p class="value">охранников 5 разряда - 16 часов;</p>
-                        <p class="value">охранников 4 разряда - 8 часов;</p>
-                        <hr>
-                        <p class="value">По программе дополнительного образования</p>
-                        <p class="value">Обучение, проверка знаний правил безопасного обращения с оружием - 6 часов</p>
-                    </div>
-
-                    <div class="info-block">
-                        <span class="label">Срок действия государственной аккредитации</span>
-                        <p class="value">Свидетельства об аккредитации нет, т.к. данный вид деятельности не аккредитуется (учреждение не выдаёт документы государственного образца).</p>
-                    </div>
-
-                    <div class="info-block">
-                        <span class="label">Об языках, на которых осуществляется обучение</span>
-                        <p class="value">Обучение осуществляется на русском языке</p>
-                        <hr>
-                        <p class="value" style="margin-bottom: 4px;">Положение о языке обучения</p>
-                        <a href="/assets/polozhenie_o_jazykakh_obuchenija.pdf" target="_blank" class="pdf-link">Скачать</a>
-                    </div>
-
-                    <div class="info-block">
-                        <span class="label">О направлениях и результатах научно-исследовательской деятельности</span>
-                        <p class="value">Сотрудники учреждения научно-исследовательскую деятельность не осуществляют.</p>
-                    </div>
-
-                    <div class="info-block">
-                        <span class="label">Описание образовательной программы</span>
-                        <p class="value">Учреждение реализует программы дополнительного образования, программы повышения квалификации, программы профессиональной подготовки.</p>
-                        <hr>
-                        <p class="value">Повышение квалификации:</p>
-                        <p class="value">приобретение профессиональных навыков, самостоятельное обучение по индивидуальным программам, дистанционное обучение, обучение с помощью новейших достижений науки и техники, в том числе в области информационных технологий;повышение квалификации может осуществляться как тематическое обучение, тематические и проблемные семинары, длительное обучение для углубленного изучения актуальных проблем или</p>
-                        <p class="value">повышение квалификации заканчивается сдачей соответствующего экзамена, защитой реферата или итоговой работы;</p>
-                        <p class="value">после окончания повышения квалификации выдается удостоверение о краткосрочном повышении квалификации или свидетельство о повышении квалификации.</p>
-                        <hr>
-                        <p class="value">Профессиональная подготовка:</p>
-                        <p class="value">длительное обучение по учебным программам, необходимым специалисту для выполнения нового вида профессиональной деятельности. Форма и сроки обучения устанавливаются в соответствии с целями обучения. Уровень образования специалистов, проходящих профессиональную подготовку, переподготовку должен быть не ниже уровня образования требуемого для нового вида профессиональной деятельности;</p>
-                        <p class="value">профессиональная подготовка, переподготовка завершается итоговой аттестацией и выдачей документа о присвоении квалификации.</p>
-                        <hr>
-                        <p class="value">Дополнительное образование:</p>
-                        <p class="value">удовлетворение образовательных потребностей граждан для расширения умений и навыков для личных потребностей</p>
-                        <hr>
-                        <p class="value">Учебные предметы, курсы, дисциплины: правовая подготовка, тактико-специальная подготовка, техническая подготовка, использование специальных средств, оказание первой помощи, психологическая подготовка, огневая подготовка, физическая подготовка.</p>
-                        <hr>
-                        <p class="value">Образовательными программами предусмотрены практические занятия по стрельбе, практическое применение специальных средств, отработка приемов самообороны, отработка приемов и способов ведения наблюдения, выявления действий противоправной направленности, в том числе террористических угроз; освоение приемов оказания первой помощи. Виды и описание практики изложены в соответствующих разделах образовательных программ.</p>
-                        <hr>
-                        <p class="value">Учебные планы, календарные учебные графики, аннотации изложены в программах (прилагаются ниже)</p>
-                        <hr>
-                        <p class="value">В процессе обучения используется электронное обучение.</p>
-                        <hr>
-                        <p class="value">Дистанционные образовательные технологии не применяются.</p>
-                    </div>
-
-                    <div class="info-block">
-                        <span class="label">Учебный план и реализуемые образовательные программы</span>
-                        <p class="value" style="margin-bottom: 4px;">Программа "Повышение квалификации охранников" (4,5,6 разряды)</p>
-                        <a href="/assets/progr_pov_kval_okhr_2024.pdf" target="_blank" class="pdf-link">Скачать</a>
-                        <hr>
-                        <p class="value" style="margin-bottom: 4px;">Программа "Профессиональная подготовка охранников" (4,5,6 разряды)</p>
-                        <a href="/assets/progr_obuch_okhr_2024.pdf" target="_blank" class="pdf-link">Скачать</a>
-                        <hr>
-                        <p class="value" style="margin-bottom: 4px;">Дополнительная образовательная программа подготовки лиц в целях изучения правил безопасного обращения с оружием и приобретения навыков безопасного обращения с оружием</p>
-                        <a href="/assets/bezop_obrashh_s_oruzh_2023.pdf" target="_blank" class="pdf-link">Скачать</a>
-                    </div>
-
-                    <div class="info-block">
-                        <span class="label">Перечень документов</span>
-                        <p class="value" style="margin-bottom: 4px;">Перечень документов, необходимых для прохождения обучения по программе профессиональной подготовки по профессии "Охранник" (4, 5, 6 разряды) : заявление; анкета, копия паспорта; копия СНИЛС; медицинское заключение об отсутствии медицинских противопоказаний к исполнению обязанностей частного охранника формы № 002-ЧО\у; справка об отсутствии судимости</p>
-                        <a href="/assets/perechen_dokumentov.docx" target="_blank" class="pdf-link">Скачать</a>
-                        <hr>
-                        <p class="value" style="margin-bottom: 4px;">Перечень документов, необходимых для прохождения обучения по программе повышения квалификации по профессии "Охранник" (4, 5, 6 разряды) : заявление; анкета, копия паспорта ; копия СНИЛС; копия действующего удостоверения охранника, медицинское заключение об отсутствии медицинских противопоказаний к исполнению обязанностей частного охранника формы № 002-ЧО\у; медицинское заключение об отсутствии противопоказаний для работы с оружием; справка об отсутствии судимости.</p>
-                        <a href="/assets/perechen_dokumentov.docx" target="_blank" class="pdf-link">Скачать</a>
-                        <hr>
-                        <p class="value" style="margin-bottom: 4px;">Перечень документов, необходимых для прохождения обучения по программе подготовки граждан РФ в целях безопасного обращения с оружием и приобретения навыков безопасного обращения с оружием:</p>
-                        <a href="/assets/perechen_dokumentov.docx" target="_blank" class="pdf-link">Скачать</a>
-                        <hr>
-                        <p class="value">- заявление; паспорт; СНИЛС; медицинское заключение об отсутствии медицинских противопоказаний к владению оружием форма №002-О\у; справка об отсутствии судимости; две фотографии размером 3х4 см матовые</p>
-                        <hr>
-                        <p class="value" style="margin-bottom: 4px;">Перечень документов, необходимых для прохождения проверки знаний граждан РФ правил безопасного обращения с оружием (один раз в пять лет):</p>
-                        <a href="/assets/perechen_dokumentov.docx" target="_blank" class="pdf-link">Скачать</a>
-                        <hr>
-                        <p class="value">- заявление; паспорт; СНИЛС; медицинское заключение об отсутствии медицинских противопоказаний к владению оружием форма №002-О\у; разрешение (лицензия) на хранение (хранение и ношение) оружия срок действия которого продлевается; две фотографии размером 3х4 см матовые</p>
-                    </div>
-
-                    <div class="info-block">
-                        <span class="label">Календарный учебный график</span>
-                        <p class="value" style="margin-bottom: 4px;">График учебных занятий на 2026 г.</p>
-                        <a href="/assets/grafik_obuchenija_na_2026_god_podp.pdf" target="_blank" class="pdf-link">Скачать</a>
-                    </div>
-
-                    <div class="info-block">
-                        <span class="label">Численность учащихся по каждой реализуемой программе</span>
-                        <p class="value">Количество обученных за 2025 год по программам начального профессионального образования - 166 чел. Обучение осуществлялось по договорам платных образовательных услуг за счет средств учащихся.</p>
-                        <hr>
-                        <p class="value">Количество обученных за 2025 год по программам повышения квалификации рабочих и служащих - 162 чел. Обучение осуществлялось по договорам платных образовательных услуг за счет средств учащихся.</p>
-                        <hr>
-                        <p class="value">По программе дополнительного образования с учетом лиц, прошедших проверку знаний, обучено в 2025 году 76 человек. Все обучались по договорам платных образовательных услуг за счет своих средств.</p>
-                        <hr>
-                        <p class="value">Иностранные граждане в учреждении в 2025 году не обучались.</p>
-                    </div>
-
-                    <div class="info-block">
-                        <span class="label">О результатах приема</span>
-                        <p class="value">Все граждане, изъявившие желание обучаться в ЧУ ДПО ИМДС, приняты в число учащихся. Зачисление осуществляется на основании поступивших заявлений без вступительных испытаний.</p>
-                    </div>
-
-                    <div class="info-block">
-                        <span class="label">О трудоустройстве выпускников</span>
-                        <p class="value">Все выпускники трудоустроены в охранные структуры Республики Коми.</p>
-                    </div>
-
-                </div>
-            </div>
-
-            <!-- ================= СТРАНИЦА 5: ОБРАЗОВАТЕЛЬНЫЕ СТАНДАРТЫ ================= -->
-            <div id="page-standards" class="info-page">
-                <div class="info-grid" style="margin-top: 40px;">
-                    <div class="info-block">
-                        <span class="label">Образовательные стандарты</span>
-                        <p class="value">Профессиональный стандарт – это характеристика квалификации, необходимой работнику для осуществления определенного вида профессиональной деятельности (ст. 195.1 Трудового кодекса Российской Федерации). Профессиональные стандарты должны применяться образовательными организациями профессионального образования при разработке профессиональных образовательных программ.</p>
-                        <hr>
-                        <p class="value">Профессиональный стандарт Работник по обеспечению охраны образовательных организаций</p>
-                        <p class="value">(утв. приказом Министерства труда и социальной защиты РФ от 11 декабря 2015 г. N 1010н)</p>
-                        <a href="/assets/ob_utverzhdenii_professionalnogo_standarta.pdf" target="_blank" class="pdf-link">Скачать</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ================= СТРАНИЦА 6: РУКОВОДСТВО. ПЕДАГОГИЧЕСКИЙ СОСТАВ ================= -->
-            <div id="page-staff" class="info-page">
-                <div class="info-grid" style="margin-top: 40px;">
-                    <div class="info-block">
-                        <span class="label">Руководство. Педагогический состав</span>
-                        <p class="value">Директор ЧУ ДПО ИМДС - Теплова Тамара Александровна (образование высшее педагогическое, высшее юридическое).</p>
-                        <hr>
-                        <p class="value">Телефон: 8(922)2724450</p>
-                        <hr>
-                        <p class="value">Адрес электронной почты: tomateplowa@yandex.ru</p>
-                        <hr>
-                        <p class="value">График работы:</p>
-                        <p class="value">Понедельник - пятница с 9 час. 00 мин до 17 час. 00 мин</p>
-                        <hr>
-                        <p class="value">Адрес электронной почты: tirkomi@yandex.ru</p>
-                        <hr>
-                        <p class="value" style="margin-bottom: 4px;">Преподаватели ЧУ ДПО ИМДС</p>
-                        <a href="/assets/kadry_na_nojabr_2023.pdf" target="_blank" class="pdf-link">Скачать</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ================= СТРАНИЦА 7: МАТЕРИАЛЬНО-ТЕХНИЧЕСКОЕ ОБЕСПЕЧЕНИЕ ================= -->
-            <div id="page-facilities" class="info-page">
-                <div class="info-grid" style="margin-top: 40px;">
-                    <div class="info-block">
-                        <span class="label">Материально-техническое обеспечение образовательной деятельности</span>
-                        <p class="value">Информация о наличии оборудованных учебных кабинетов, объектов для проведения практических занятий, средств обучения и воспитания</p>
-                        <hr>
-                        <p class="value">Для успешной реализации программ повышения квалификации и профессиональной подготовки имеются аудитории более чем на 60 учебных мест, 5 компьютеризированных мест для обучения с использованием электронных программ, сдачи экзаменов и зачетов; стенды с образцами приборов охранно-пожарной сигнализации, средств пожаротушения, палки резиновые, изделия БР, бронежилеты, шлемы защитные, манекены человека в полный рост, модели пистолетов для учебных упражнений кобуры, плакаты по огневой подготовке (ПМ, АКС-74У, видам боеприпасов и мерам безопасности при стрельбах), плакаты и образцы средств доврачебной помощи (шины, жгуты, бинты, тампоны, средства обработки ран, и т.п.), пистолеты служебные огнестрельные, пневматические и травматического действия, ружья служебные, комплекты снаряжения для рукопашного боя (накладки на руки и голени, шлемы, перчатки), макеты ножей и пистолетов. Две галереи стрелкового тира на 8 направлений стрельбы с мишенными установками, наушниками, столиками для заряжения-разряжения, две оружейные комнаты, постоянно пополняемый запас боеприпасов. Офисные помещения оборудованы компьютерами, сканерами, принтерами.</p>
-                        <hr>
-                        <p class="value">Информация об условиях охраны здоровья</p>
-                        <p class="value">Обеспечены условия противопожарной и антитеррористической защиты.</p>
-                        <hr>
-                        <p class="value">Информация о доступе к информационным системам и информационно-телекоммуникационным сетям</p>
-                        <p class="value">Обеспечен доступ к сети Интернет (скорость 2,5 Мбит/сек).</p>
-                        <hr>
-                        <p class="value">Информация об учебно-методическом обеспечении, электронных образовательных ресурсах</p>
-                        <p class="value">Учебно-методическое и учебно-информационное обеспечение учреждения соответствует требованиям современных образовательных программ дополнительного профессионального образования.</p>
-
-                        <div class="facility-images">
-                            <img src="/assets/82521243.jpg" alt="Фото 1">
-                            <img src="/assets/44605353.jpg" alt="Фото 2">
-                            <img src="/assets/45646296.jpg" alt="Фото 3">
-                            <img src="/assets/00974069.jpg" alt="Фото 4">
-                            <img src="/assets/56025204.jpg" alt="Фото 5">
-                            <img src="/assets/62107098.jpg" alt="Фото 6">
-                            <img src="/assets/84287994.jpg" alt="Фото 7">
-                            <img src="/assets/78665224.jpg" alt="Фото 8">
-                            <img src="/assets/64042338.jpg" alt="Фото 9">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ================= СТРАНИЦА 8: СТИПЕНДИИ ================= -->
-            <div id="page-scholarships" class="info-page">
-                <div class="info-grid" style="margin-top: 40px;">
-                    <div class="info-block">
-                        <span class="label">Стипендии и иные виды материальной поддержки</span>
-                        <p class="value">Стипендиальные выплаты и иные виды материальной поддержки учреждение не предоставляет.</p>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- ================= СТРАНИЦА 9: ПЛАТНЫЕ ОБРАЗОВАТЕЛЬНЫЕ УСЛУГИ ================= -->
-        <div id="page-paid-services" class="info-page">
-            <div class="container-limited" style="margin-top: 40px; max-width: 1000px; margin-left: 365px; margin-right: auto;">
-                <div class="info-grid" style="margin-top: 0;">
-                    <div class="info-block">
-                        <span class="label">Платные образовательные услуги</span>
-                        <p class="value">Постановление Правительства Российской Федерации от 15 августа 2013 г. №706 "Об утверждении Правил оказания платных образовательных услуг" - <a href="http://www.rg.ru/printable/2013/08/23/uslugi-dok.html" target="_blank">перейти на сайт</a></p>
-
-                        <div style="border-top: 1px solid var(--line-soft); margin: 16px 0;"></div>
-
-                        <p class="value" style="margin-bottom: 4px;">Образец договора об оказании платных образовательных услуг</p>
-                        <a href="/assets/tipovoj.pdf" target="_blank" class="pdf-link">Скачать</a>
-
-                        <div style="border-top: 1px solid var(--line-soft); margin: 16px 0;"></div>
-
-                        <p class="value" style="margin-bottom: 4px;">Положение об оказании платных образовательных услуг</p>
-                        <a href="/assets/polozhenie_o_platnykh_obrazovatelnykh_uslugakh.pdf" target="_blank" class="pdf-link">Скачать</a>
-
-                        <div style="border-top: 1px solid var(--line-soft); margin: 16px 0;"></div>
-
-                        <p class="value" style="margin-bottom: 4px;">Прайс лист на 2024 год</p>
-                        <a href="/assets/prajs_2024.pdf" target="_blank" class="pdf-link">Скачать</a>
-
-                        <div style="border-top: 1px solid var(--line-soft); margin: 16px 0;"></div>
-
-                        <p class="value" style="margin-bottom: 4px;">Прайс лист на образовательные услуги в 2025 году</p>
-                        <a href="/assets/prajs_2025.pdf" target="_blank" class="pdf-link">Скачать</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ================= СТРАНИЦА 10: ФИНАНСОВО-ХОЗЯЙСТВЕННАЯ ДЕЯТЕЛЬНОСТЬ ================= -->
-        <div id="page-finance" class="info-page">
-            <div class="container-limited" style="margin-top: 40px; max-width: 1000px; margin-left: 365px; margin-right: auto;">
-                <div class="info-grid" style="margin-top: 0;">
-                    <div class="info-block">
-                        <span class="label">Финансово-хозяйственная деятельность</span>
-                        <p class="value">Частное учреждение дополнительного профессионального образования «Институт международных связей и делового сотрудничества» оказывает платные образовательные услуги. Средства, получаемые за счет этой деятельности, являются базой для формирования финансовых и материальных ресурсов.</p>
-                        <hr>
-                        <p class="value">В соответствии с действующим Уставом организация осуществляет хозяйственную деятельность самостоятельно. Имеющиеся доходы и финансовые средства распределяются согласно решениям учредителя в соответствии с уставными целями.</p>
-                        <hr>
-                        <p class="value">Обновление и усовершенствование материальной и технической базы осуществляются в пределах имеющихся в распоряжении организации средств с учетом официальной сметы, которая утверждается директором.</p>
-                        <hr>
-                        <p class="value" style="margin-bottom: 4px;">Акт самообследования</p>
-                        <a href="/assets/akt_samoobsl_2023.pdf" target="_blank" class="pdf-link">Скачать</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ================= СТРАНИЦА 11: ДОСТУПНАЯ СРЕДА ================= -->
-        <div id="page-accessible" class="info-page">
-            <div class="container-limited" style="margin-top: 40px; max-width: 1000px; margin-left: 370px; margin-right: auto;">
-                <div class="info-grid" style="margin-top: 0;">
-                    <div class="info-block">
-                        <span class="label">Доступная среда</span>
-                        <p class="value">Учебный центр расположен в отдельно стоящем 2-х этажном здании. В шаговой доступности остановки городского транспорта, магазины, аптека.</p>
-                        <hr>
-                        <p class="value">На первом этаже есть все необходимое для обучения: класс, раздевалка, туалеты.</p>
-                        <hr>
-                        <p class="value">Помещения оснащены видеокамерами. Уголок потребителя расположен в месте, удобном для просмотра.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ================= СТРАНИЦА 12: МЕЖДУНАРОДНОЕ СОТРУДНИЧЕСТВО ================= -->
-        <div id="page-international" class="info-page">
-            <div class="container-limited" style="margin-top: 40px; max-width: 1000px; margin-left: 370px; margin-right: auto;">
-                <div class="info-grid" style="margin-top: 0;">
-                    <div class="info-block">
-                        <span class="label">Международное сотрудничество</span>
-                        <p class="value">Международное сотрудничество не осуществляется.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+            <!-- Контейнеры для страниц -->
+            <div id="page-main" class="info-page is-active" data-page="main"></div>
+            <div id="page-structure" class="info-page" data-page="structure"></div>
+            <div id="page-docs" class="info-page" data-page="docs"></div>
+            <div id="page-education" class="info-page" data-page="education"></div>
+            <div id="page-standards" class="info-page" data-page="standards"></div>
+            <div id="page-staff" class="info-page" data-page="staff"></div>
+            <div id="page-facilities" class="info-page" data-page="facilities"></div>
+            <div id="page-scholarships" class="info-page" data-page="scholarships"></div>
+            <div id="page-paid-services" class="info-page" data-page="paid-services"></div>
+            <div id="page-finance" class="info-page" data-page="finance"></div>
+            <div id="page-accessible" class="info-page" data-page="accessible"></div>
+            <div id="page-international" class="info-page" data-page="international"></div>
         </div>
     </section>
 </main>
 
 <script>
-    (() => {
-        'use strict';
+    const API_BASE = window.__API_BASE__ || 'https://tir-komi.relaxdev.ru/api/v1';
 
-        const burger = document.getElementById('burger');
-        const navMobile = document.getElementById('navMobile');
-        const submenu = document.getElementById('mobileSubmenu');
-        const menuTitle = document.getElementById('mobileMainLink');
-        const toggleIcon = menuTitle ? menuTitle.querySelector('.toggle-icon') : null;
+    const PAGE_TITLES = {
+        'main': 'Основные сведения',
+        'structure': 'Структура и органы управления',
+        'docs': 'Документы',
+        'education': 'Образование',
+        'standards': 'Образовательные стандарты',
+        'staff': 'Руководство. Педагогический состав',
+        'facilities': 'Материально-техническое обеспечение',
+        'scholarships': 'Стипендии и иные виды материальной поддержки',
+        'paid-services': 'Платные образовательные услуги',
+        'finance': 'Финансово-хозяйственная деятельность',
+        'accessible': 'Доступная среда',
+        'international': 'Международное сотрудничество'
+    };
 
-        function closeMenu() {
-            burger.classList.remove('is-open');
-            navMobile.classList.remove('is-open');
-            document.body.style.overflow = '';
-            if (submenu) submenu.classList.remove('is-open');
-            if (menuTitle) menuTitle.classList.remove('is-open');
-            if (toggleIcon) toggleIcon.textContent = '▾';
+    const PAGE_ORDER = [
+        'main', 'structure', 'docs', 'education', 'standards',
+        'staff', 'facilities', 'scholarships', 'paid-services',
+        'finance', 'accessible', 'international'
+    ];
+
+    let pagesData = {};
+
+    // --- API ---
+    async function apiRequest(path, options = {}) {
+        const res = await fetch(API_BASE + path, {
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            ...options,
+        });
+        if (!res.ok) {
+            const text = await res.text();
+            throw new Error(text || `Ошибка ${res.status}`);
         }
+        return res.json();
+    }
 
-        burger.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const open = burger.classList.toggle('is-open');
-            navMobile.classList.toggle('is-open', open);
-            document.body.style.overflow = open ? 'hidden' : '';
-            if (!open) {
-                if (submenu) submenu.classList.remove('is-open');
-                if (menuTitle) menuTitle.classList.remove('is-open');
-                if (toggleIcon) toggleIcon.textContent = '▾';
-            }
-        });
-
-        navMobile.addEventListener('click', (e) => {
-            if (e.target === navMobile) {
-                closeMenu();
-            }
-        });
-
-        if (menuTitle) {
-            menuTitle.addEventListener('click', (e) => {
-                const target = e.target.closest('.has-children') || e.target;
-                if (e.target.classList.contains('toggle-icon')) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const isOpen = submenu.classList.toggle('is-open');
-                    menuTitle.classList.toggle('is-open', isOpen);
-                    toggleIcon.textContent = isOpen ? '▴' : '▾';
-                    return;
-                }
-                window.location.href = '/basic_information';
+    async function loadAllPages() {
+        try {
+            const data = await apiRequest('/information-pages');
+            pagesData = {};
+            (data.items || []).forEach(p => {
+                pagesData[p.page_type] = p;
             });
+            return true;
+        } catch (err) {
+            console.error('Ошибка загрузки страниц:', err);
+            return false;
+        }
+    }
+
+    // --- Рендеринг ---
+    function renderBlock(block) {
+        const type = block.type;
+        const value = block.value;
+
+        switch (type) {
+            case 'text':
+                return `<p class="value">${value || ''}</p>`;
+
+            case 'label_value':
+                return `
+                    <span class="label">${block.label || ''}</span>
+                    <p class="value">${value || ''}</p>
+                `;
+
+            case 'hr':
+                return '<hr>';
+
+            case 'file_link':
+                const url = value?.url || value || '';
+                const label = value?.label || block.label || 'Скачать';
+                return `
+                    <p class="value" style="margin-bottom: 4px;">${block.label || ''}</p>
+                    <a href="${url}" target="_blank" class="pdf-link">${label}</a>
+                `;
+
+            case 'external_link':
+                const href = value?.url || value || '#';
+                const linkText = value?.text || block.label || 'Перейти';
+                return `
+                    <p class="value">${block.label || ''} - <a href="${href}" target="_blank">${linkText}</a></p>
+                `;
+
+            case 'image':
+                const imgSrc = value?.src || value || '';
+                const imgAlt = value?.alt || block.label || 'Изображение';
+                return `
+                    <p class="value" style="margin-bottom: 4px;">${block.label || ''}</p>
+                    <img src="${imgSrc}" alt="${imgAlt}" class="inn-img" style="max-height: 1000px; width: auto;">
+                `;
+
+            case 'list':
+                if (!Array.isArray(value)) return '';
+                return `
+                    <ul class="doc-sublist" style="margin-top: 12px; list-style: none;">
+                        ${value.map(item => `
+                            <li>
+                                <div class="label">${item.label || ''}</div>
+                                <div class="value">${item.value || ''}</div>
+                                ${item.file_url ? `<div class="value"><a href="${item.file_url}" target="_blank" class="pdf-link">${item.file_label || 'Скачать'}</a></div>` : ''}
+                            </li>
+                        `).join('')}
+                    </ul>
+                `;
+
+            case 'image_grid':
+                if (!Array.isArray(value)) return '';
+                return `
+                    <div class="facility-images">
+                        ${value.map(img => `
+                            <img src="${img.src || img}" alt="${img.alt || 'Фото'}" loading="lazy">
+                        `).join('')}
+                    </div>
+                `;
+
+            case 'html':
+                return value || '';
+
+            default:
+                return `<p class="value">${value || ''}</p>`;
+        }
+    }
+
+    function renderPage(pageType) {
+        const container = document.getElementById(`page-${pageType}`);
+        if (!container) return;
+
+        const page = pagesData[pageType];
+        if (!page) {
+            container.innerHTML = `
+                <div class="info-grid" style="margin-top: 40px;">
+                    <div class="info-block">
+                        <span class="label">Информация не загружена</span>
+                        <p class="value">Данные для этой страницы отсутствуют.</p>
+                    </div>
+                </div>
+            `;
+            return;
         }
 
-        navMobile.querySelectorAll('a').forEach((a) => {
-            a.addEventListener('click', (e) => {
-                const href = a.getAttribute('href');
+        // Если есть structured данные
+        if (page.structured && Array.isArray(page.structured) && page.structured.length > 0) {
+            let html = '<div class="info-grid" style="margin-top: 40px;">';
 
-                if (href && href.startsWith('/basic_information')) {
-                    closeMenu();
-                    if (href.includes('#') && window.location.pathname === '/basic_information') {
-                        e.preventDefault();
-                        const targetId = href.split('#')[1];
-                        const target = document.getElementById(targetId);
-                        if (target) {
-                            target.scrollIntoView({ behavior: 'smooth' });
-                        }
+            // Группируем блоки по группам (каждый блок в отдельный info-block или объединяем)
+            let currentBlocks = [];
+            let inGrid = true;
+
+            page.structured.forEach((block, index) => {
+                // Если это text без label - может быть описанием для предыдущего блока
+                if (block.type === 'text' && !block.label && currentBlocks.length > 0) {
+                    // Добавляем как дополнительный контент к последнему блоку
+                    const lastBlock = currentBlocks[currentBlocks.length - 1];
+                    if (lastBlock) {
+                        lastBlock._extraText = (lastBlock._extraText || '') + renderBlock(block);
                     }
                     return;
                 }
 
-                if (href && href.startsWith('#')) {
-                    e.preventDefault();
-                    closeMenu();
-                    const targetId = href.replace('#', '');
-                    const target = document.getElementById(targetId);
-                    if (target) {
-                        target.scrollIntoView({ behavior: 'smooth' });
-                        const pageId = a.dataset.page;
-                        if (pageId) switchPage(pageId);
+                // Если это hr - разделитель внутри блока
+                if (block.type === 'hr') {
+                    if (currentBlocks.length === 0) {
+                        // Если hr в начале - просто пропускаем
+                        return;
                     }
+                    // Добавляем hr как отдельный элемент
+                    currentBlocks.push({ _type: 'hr', _html: '<hr>' });
                     return;
                 }
 
-                closeMenu();
-            });
-        });
+                // Если это блок с label - начинаем новый info-block
+                if (block.label || block.type === 'label_value' || block.type === 'file_link' ||
+                    block.type === 'external_link' || block.type === 'image' || block.type === 'image_grid' ||
+                    block.type === 'list' || block.type === 'html') {
 
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && navMobile.classList.contains('is-open')) {
-                closeMenu();
+                    // Закрываем предыдущий блок если есть
+                    if (currentBlocks.length > 0) {
+                        html += renderInfoBlock(currentBlocks);
+                        currentBlocks = [];
+                    }
+
+                    // Обрабатываем специальные типы
+                    if (block.type === 'label_value') {
+                        html += `<div class="info-block">${renderBlock(block)}</div>`;
+                        return;
+                    }
+
+                    if (block.type === 'file_link') {
+                        html += `<div class="info-block">${renderBlock(block)}</div>`;
+                        return;
+                    }
+
+                    if (block.type === 'external_link') {
+                        html += `<div class="info-block">${renderBlock(block)}</div>`;
+                        return;
+                    }
+
+                    if (block.type === 'image') {
+                        html += `<div class="info-block">${renderBlock(block)}</div>`;
+                        return;
+                    }
+
+                    if (block.type === 'image_grid') {
+                        html += `<div class="info-block">${renderBlock(block)}</div>`;
+                        return;
+                    }
+
+                    if (block.type === 'list') {
+                        html += `<div class="info-block">${renderBlock(block)}</div>`;
+                        return;
+                    }
+
+                    if (block.type === 'html') {
+                        html += `<div class="info-block">${renderBlock(block)}</div>`;
+                        return;
+                    }
+
+                    // Обычный блок с label
+                    currentBlocks.push(block);
+                } else {
+                    // Без label - добавляем в текущий блок или создаем новый
+                    currentBlocks.push(block);
+                }
+            });
+
+            // Закрываем последний блок
+            if (currentBlocks.length > 0) {
+                html += renderInfoBlock(currentBlocks);
             }
-        });
 
-        const menuLinks = document.querySelectorAll('.dropdown-content a[data-page], .mobile-submenu a[data-page]');
-        const pages = {
-            'page-main': document.getElementById('page-main'),
-            'page-structure': document.getElementById('page-structure'),
-            'page-docs': document.getElementById('page-docs'),
-            'page-education': document.getElementById('page-education'),
-            'page-standards': document.getElementById('page-standards'),
-            'page-staff': document.getElementById('page-staff'),
-            'page-facilities': document.getElementById('page-facilities'),
-            'page-scholarships': document.getElementById('page-scholarships'),
-            'page-paid-services': document.getElementById('page-paid-services'),
-            'page-finance': document.getElementById('page-finance'),
-            'page-accessible': document.getElementById('page-accessible'),
-            'page-international': document.getElementById('page-international')
-        };
-        const pageTitle = document.getElementById('pageTitle');
-
-        const titles = {
-            'page-main': 'Основные сведения',
-            'page-structure': 'Структура и органы управления',
-            'page-docs': 'Документы',
-            'page-education': 'Образование',
-            'page-standards': 'Образовательные стандарты',
-            'page-staff': 'Руководство. Педагогический состав',
-            'page-facilities': 'Материально-техническое обеспечение',
-            'page-scholarships': 'Стипендии и иные виды материальной поддержки',
-            'page-paid-services': 'Платные образовательные услуги',
-            'page-finance': 'Финансово-хозяйственная деятельность',
-            'page-accessible': 'Доступная среда',
-            'page-international': 'Международное сотрудничество'
-        };
-
-        function switchPage(pageId) {
-            if (!pageId || !pages[pageId]) return;
-
-            Object.values(pages).forEach(p => {
-                if (p) p.classList.remove('is-active');
-            });
-            if (pages[pageId]) pages[pageId].classList.add('is-active');
-
-            if (titles[pageId]) pageTitle.textContent = titles[pageId];
-
-            document.querySelectorAll('.dropdown-content a, .mobile-submenu a').forEach(l => {
-                l.classList.toggle('is-current', l.dataset.page === pageId);
-            });
-
-            if (history.pushState) {
-                history.pushState(null, '', '#' + pageId);
-            }
+            html += '</div>';
+            container.innerHTML = html;
+            return;
         }
 
-        menuLinks.forEach(link => {
+        // Если есть простой content (HTML)
+        if (page.content) {
+            container.innerHTML = `
+                <div class="info-grid" style="margin-top: 40px;">
+                    <div class="info-block">
+                        ${page.content}
+                    </div>
+                </div>
+            `;
+            return;
+        }
+
+        // Если ничего нет
+        container.innerHTML = `
+            <div class="info-grid" style="margin-top: 40px;">
+                <div class="info-block">
+                    <span class="label">Информация отсутствует</span>
+                    <p class="value">Содержимое страницы не заполнено.</p>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderInfoBlock(blocks) {
+        if (!blocks || blocks.length === 0) return '';
+
+        // Проверяем, есть ли хотя бы один блок с label или специальный
+        const hasLabel = blocks.some(b => b.label || b.type === 'label_value');
+        const hasHr = blocks.some(b => b._type === 'hr');
+
+        if (hasHr && blocks.length === 1 && blocks[0]._type === 'hr') {
+            return '';
+        }
+
+        // Фильтруем hr, которые идут в начале или конце
+        let filtered = blocks.filter(b => b._type !== 'hr' || (b._type === 'hr' && b !== blocks[0] && b !== blocks[blocks.length - 1]));
+
+        if (filtered.length === 0) return '';
+
+        let html = '<div class="info-block">';
+
+        filtered.forEach((block, index) => {
+            if (block._type === 'hr') {
+                html += '<hr>';
+                return;
+            }
+
+            // Проверяем, есть ли _extraText
+            const extraText = block._extraText || '';
+
+            if (block.type === 'label_value' || block.type === 'text') {
+                html += renderBlock(block);
+                if (extraText) html += extraText;
+                return;
+            }
+
+            if (block.label) {
+                html += `<span class="label">${block.label}</span>`;
+            }
+
+            if (block.type === 'file_link') {
+                html += renderBlock(block);
+            } else if (block.type === 'external_link') {
+                html += renderBlock(block);
+            } else if (block.type === 'image') {
+                html += renderBlock(block);
+            } else if (block.type === 'image_grid') {
+                html += renderBlock(block);
+            } else if (block.type === 'list') {
+                html += renderBlock(block);
+            } else if (block.type === 'html') {
+                html += renderBlock(block);
+            } else if (block.type === 'text') {
+                html += renderBlock(block);
+            } else {
+                html += `<p class="value">${block.value || ''}</p>`;
+            }
+
+            if (extraText) html += extraText;
+        });
+
+        html += '</div>';
+        return html;
+    }
+
+    function renderPageSkeleton(pageType) {
+        const container = document.getElementById(`page-${pageType}`);
+        if (!container) return;
+
+        container.innerHTML = `
+            <div class="info-grid" style="margin-top: 40px;">
+                <div class="skeleton-block">
+                    <div class="skeleton-line short"></div>
+                    <div class="skeleton-line medium"></div>
+                    <div class="skeleton-line"></div>
+                    <div class="skeleton-line short"></div>
+                </div>
+                <div class="skeleton-block">
+                    <div class="skeleton-line short"></div>
+                    <div class="skeleton-line"></div>
+                    <div class="skeleton-line medium"></div>
+                </div>
+                <div class="skeleton-block">
+                    <div class="skeleton-line short"></div>
+                    <div class="skeleton-line"></div>
+                    <div class="skeleton-line medium"></div>
+                    <div class="skeleton-line short"></div>
+                </div>
+            </div>
+        `;
+    }
+
+    function renderAllPages() {
+        PAGE_ORDER.forEach(pageType => {
+            renderPage(pageType);
+        });
+    }
+
+    function renderAllSkeletons() {
+        PAGE_ORDER.forEach(pageType => {
+            renderPageSkeleton(pageType);
+        });
+    }
+
+    // --- Меню ---
+    function renderMenus() {
+        const desktopMenu = document.getElementById('desktopMenu');
+        const mobileSubmenu = document.getElementById('mobileSubmenu');
+
+        const items = PAGE_ORDER.map(pageType => `
+            <a href="#page-${pageType}" data-page="${pageType}" class="${pageType === 'main' ? 'is-current' : ''}">
+                ${PAGE_TITLES[pageType] || pageType}
+            </a>
+        `).join('');
+
+        desktopMenu.innerHTML = items;
+        mobileSubmenu.innerHTML = items;
+    }
+
+    // --- Навигация ---
+    function switchPage(pageId) {
+        // Скрыть все страницы
+        document.querySelectorAll('.info-page').forEach(p => {
+            p.classList.remove('is-active');
+        });
+
+        // Показать выбранную
+        const target = document.getElementById(pageId);
+        if (target) {
+            target.classList.add('is-active');
+        }
+
+        // Обновить заголовок
+        const pageType = pageId.replace('page-', '');
+        const titleEl = document.getElementById('pageTitle');
+        if (titleEl && PAGE_TITLES[pageType]) {
+            titleEl.textContent = PAGE_TITLES[pageType];
+        }
+
+        // Обновить активные ссылки в меню
+        document.querySelectorAll('.dropdown-content a, .mobile-submenu a').forEach(link => {
+            link.classList.toggle('is-current', link.dataset.page === pageType);
+        });
+
+        // Обновить URL hash
+        if (history.pushState) {
+            history.pushState(null, '', '#' + pageId);
+        }
+    }
+
+    // --- Инициализация ---
+    async function init() {
+        renderAllSkeletons();
+        renderMenus();
+
+        // Загружаем данные
+        const loaded = await loadAllPages();
+
+        if (loaded) {
+            renderAllPages();
+        } else {
+            // Если ошибка - показываем заглушки
+            PAGE_ORDER.forEach(pageType => {
+                const container = document.getElementById(`page-${pageType}`);
+                if (container) {
+                    container.innerHTML = `
+                        <div class="info-grid" style="margin-top: 40px;">
+                            <div class="info-block">
+                                <span class="label">Ошибка загрузки</span>
+                                <p class="value">Не удалось загрузить данные. Попробуйте обновить страницу.</p>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        // Восстановление hash
+        const hash = window.location.hash.replace('#', '');
+        if (hash && document.getElementById(hash)) {
+            switchPage(hash);
+        } else {
+            switchPage('page-main');
+        }
+
+        // Обработчики навигации
+        document.querySelectorAll('.dropdown-content a, .mobile-submenu a').forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
-                const pageId = link.dataset.page;
-                if (pageId) {
+                const href = link.getAttribute('href');
+                if (href && href.startsWith('#')) {
+                    const pageId = href.replace('#', '');
                     switchPage(pageId);
+                    // Закрыть мобильное меню
                     if (navMobile.classList.contains('is-open')) {
                         closeMenu();
                     }
@@ -1571,24 +1360,87 @@
             });
         });
 
-        function restoreFromHash() {
+        // Popstate
+        window.addEventListener('popstate', () => {
             const hash = window.location.hash.replace('#', '');
-            if (hash && pages[hash]) {
+            if (hash && document.getElementById(hash)) {
                 switchPage(hash);
-            } else {
-                switchPage('page-main');
             }
+        });
+    }
+
+    // --- Мобильное меню ---
+    const burger = document.getElementById('burger');
+    const navMobile = document.getElementById('navMobile');
+    const menuTitle = document.getElementById('mobileMainLink');
+    const submenu = document.getElementById('mobileSubmenu');
+    const toggleIcon = menuTitle ? menuTitle.querySelector('.toggle-icon') : null;
+
+    function closeMenu() {
+        burger.classList.remove('is-open');
+        navMobile.classList.remove('is-open');
+        document.body.style.overflow = '';
+        if (submenu) submenu.classList.remove('is-open');
+        if (menuTitle) menuTitle.classList.remove('is-open');
+        if (toggleIcon) toggleIcon.textContent = '▾';
+    }
+
+    burger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const open = burger.classList.toggle('is-open');
+        navMobile.classList.toggle('is-open', open);
+        document.body.style.overflow = open ? 'hidden' : '';
+        if (!open) {
+            if (submenu) submenu.classList.remove('is-open');
+            if (menuTitle) menuTitle.classList.remove('is-open');
+            if (toggleIcon) toggleIcon.textContent = '▾';
         }
+    });
 
-        window.addEventListener('popstate', restoreFromHash);
-        restoreFromHash();
+    navMobile.addEventListener('click', (e) => {
+        if (e.target === navMobile) {
+            closeMenu();
+        }
+    });
 
-        const header = document.getElementById('siteHeader');
-        const onScroll = () => header.classList.toggle('is-scrolled', window.scrollY > 40);
-        onScroll();
-        window.addEventListener('scroll', onScroll, { passive: true });
+    if (menuTitle) {
+        menuTitle.addEventListener('click', (e) => {
+            if (e.target.classList.contains('toggle-icon')) {
+                e.preventDefault();
+                e.stopPropagation();
+                const isOpen = submenu.classList.toggle('is-open');
+                menuTitle.classList.toggle('is-open', isOpen);
+                toggleIcon.textContent = isOpen ? '▴' : '▾';
+                return;
+            }
+            const mainPage = document.getElementById('page-main');
+            if (mainPage) {
+                switchPage('page-main');
+                closeMenu();
+            }
+        });
+    }
 
-    })();
+    navMobile.querySelectorAll('a:not(.mobile-submenu a)').forEach((a) => {
+        a.addEventListener('click', () => {
+            closeMenu();
+        });
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && navMobile.classList.contains('is-open')) {
+            closeMenu();
+        }
+    });
+
+    // --- Scroll header ---
+    const header = document.getElementById('siteHeader');
+    const onScroll = () => header.classList.toggle('is-scrolled', window.scrollY > 40);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+
+    // Запуск
+    document.addEventListener('DOMContentLoaded', init);
 </script>
 
 </body>
