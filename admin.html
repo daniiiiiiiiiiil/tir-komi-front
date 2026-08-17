@@ -2402,7 +2402,8 @@
         async function uploadFile(file, onProgress) {
             const formData = new FormData();
             formData.append('file', file);
-            formData.append('type', 'document');
+            // Пробуем разные варианты полей
+            // formData.append('type', 'document'); // может не работать
 
             const xhr = new XMLHttpRequest();
             const uploadPromise = new Promise((resolve, reject) => {
@@ -2416,6 +2417,9 @@
                 };
 
                 xhr.onload = () => {
+                    console.log('Response status:', xhr.status);
+                    console.log('Response text:', xhr.responseText);
+
                     if (xhr.status >= 200 && xhr.status < 300) {
                         try {
                             const data = JSON.parse(xhr.responseText);
@@ -2424,7 +2428,14 @@
                             reject(new Error('Неверный ответ сервера'));
                         }
                     } else {
-                        reject(new Error(`Ошибка загрузки: ${xhr.status}`));
+                        // Пробуем парсить ошибку
+                        let errorMsg = `Ошибка загрузки: ${xhr.status}`;
+                        try {
+                            const errData = JSON.parse(xhr.responseText);
+                            if (errData.message) errorMsg = errData.message;
+                            if (errData.error) errorMsg = errData.error;
+                        } catch {}
+                        reject(new Error(errorMsg));
                     }
                 };
                 xhr.onerror = () => reject(new Error('Ошибка сети'));
@@ -2501,43 +2512,53 @@
                 return;
             }
 
-            // Показываем имя файла
+            // Проверяем размер файла (макс 10MB для PDF)
+            if (file.size > 10 * 1024 * 1024) {
+                display.textContent = '❌ Файл слишком большой (макс 10MB)';
+                display.style.color = '#e74c3c';
+                display.style.display = 'block';
+                this.value = '';
+                return;
+            }
+
             display.textContent = '📎 ' + file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
             display.style.display = 'block';
+            display.style.color = 'var(--steel-dim)';
 
-            // Показываем прогресс
             progress.style.display = 'block';
             progressBar.style.width = '0%';
 
             try {
-                // Загружаем файл на сервер
+                // 1. Сначала загружаем через media
                 const response = await uploadFile(file, (percent) => {
                     progressBar.style.width = (percent * 100) + '%';
                 });
 
-                // Сохраняем URL из ответа
+                console.log('Ответ сервера:', response);
+
+                // 2. Получаем URL из ответа
+                let fileUrl = null;
                 if (response && response.url) {
-                    uploadedFileUrl = response.url;
-                    uploadedFileData = {
-                        url: response.url,
-                        label: file.name,
-                        id: response.id
-                    };
-                    display.textContent = '✅ ' + file.name + ' (загружено)';
-                    display.style.color = '#2ecc71';
+                    fileUrl = response.url;
                 } else if (response && response.id) {
-                    // Если вернулся только id, формируем URL
-                    uploadedFileUrl = `/api/v1/media/${response.id}/file`;
-                    uploadedFileData = {
-                        url: uploadedFileUrl,
-                        label: file.name,
-                        id: response.id
-                    };
-                    display.textContent = '✅ ' + file.name + ' (загружено)';
-                    display.style.color = '#2ecc71';
-                } else {
+                    fileUrl = `/api/v1/media/${response.id}/file`;
+                } else if (response && response.file_url) {
+                    fileUrl = response.file_url;
+                }
+
+                if (!fileUrl) {
                     throw new Error('Не удалось получить URL загруженного файла');
                 }
+
+                uploadedFileUrl = fileUrl;
+                uploadedFileData = {
+                    url: fileUrl,
+                    label: file.name,
+                    id: response.id
+                };
+
+                display.textContent = '✅ ' + file.name + ' (загружено)';
+                display.style.color = '#2ecc71';
 
                 setTimeout(() => {
                     progress.style.display = 'none';
@@ -2550,6 +2571,7 @@
                 progress.style.display = 'none';
                 uploadedFileUrl = null;
                 uploadedFileData = null;
+                this.value = '';
             }
         });
 
