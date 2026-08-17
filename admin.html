@@ -2113,119 +2113,6 @@
             },
         }));
 
-        let listItems = [];
-
-        function renderListItems() {
-            const container = document.getElementById('listItemsContainer');
-            if (!container) return;
-
-            if (!listItems.length) {
-                container.innerHTML = '<div style="padding:12px;color:var(--steel-dim);font-family:var(--f-mono);font-size:.78rem;text-align:center;border:1px dashed var(--line);border-radius:6px;">Нет элементов. Добавьте первый!</div>';
-                return;
-            }
-
-            container.innerHTML = listItems.map((item, index) => `
-        <div class="list-item" data-index="${index}">
-            <span class="item-handle">⠿</span>
-            <span class="item-label">${escapeHtml(item.label || '')}</span>
-            <span class="item-value">${escapeHtml(item.value || '')}</span>
-            <button type="button" class="item-remove" data-index="${index}" title="Удалить">✕</button>
-        </div>
-    `).join('');
-
-            const items = container.querySelectorAll('.list-item');
-            let dragIndex = null;
-
-            items.forEach(el => {
-                el.draggable = true;
-
-                el.addEventListener('dragstart', (e) => {
-                    dragIndex = parseInt(el.dataset.index);
-                    el.classList.add('dragging');
-                    e.dataTransfer.effectAllowed = 'move';
-                });
-
-                el.addEventListener('dragend', () => {
-                    el.classList.remove('dragging');
-                    document.querySelectorAll('.list-item').forEach(i => i.classList.remove('drag-over'));
-                });
-
-                el.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    e.dataTransfer.dropEffect = 'move';
-                    const targetIndex = parseInt(el.dataset.index);
-                    if (dragIndex !== null && dragIndex !== targetIndex) {
-                        document.querySelectorAll('.list-item').forEach(i => i.classList.remove('drag-over'));
-                        el.classList.add('drag-over');
-                    }
-                });
-
-                el.addEventListener('dragleave', () => {
-                    el.classList.remove('drag-over');
-                });
-
-                el.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    el.classList.remove('drag-over');
-                    const targetIndex = parseInt(el.dataset.index);
-                    if (dragIndex !== null && dragIndex !== targetIndex) {
-                        const [moved] = listItems.splice(dragIndex, 1);
-                        listItems.splice(targetIndex, 0, moved);
-                        renderListItems();
-                    }
-                    dragIndex = null;
-                });
-            });
-
-            container.querySelectorAll('.item-remove').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const index = parseInt(btn.dataset.index);
-                    listItems.splice(index, 1);
-                    renderListItems();
-                    updateListValue();
-                });
-            });
-        }
-
-        function updateListValue() {
-            const valueField = document.getElementById('blockValue');
-            if (valueField) {
-                valueField.value = JSON.stringify(listItems);
-            }
-        }
-
-        document.getElementById('addListItemBtn')?.addEventListener('click', () => {
-            const labelInput = document.getElementById('newListItemLabel');
-            const valueInput = document.getElementById('newListItemValue');
-            const label = labelInput.value.trim();
-            const value = valueInput.value.trim();
-
-            if (!value) {
-                showBlockMsg('Введите значение', true);
-                return;
-            }
-
-            listItems.push({ label, value });
-            labelInput.value = '';
-            valueInput.value = '';
-            renderListItems();
-            updateListValue();
-            showBlockMsg('Элемент добавлен', false);
-        });
-
-        document.getElementById('newListItemValue')?.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                document.getElementById('addListItemBtn')?.click();
-            }
-        });
-        document.getElementById('newListItemLabel')?.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                document.getElementById('newListItemValue')?.focus();
-            }
-        });
-
         const vacanciesBody = tableBody('vacanciesTable');
 
         async function loadVacancies() {
@@ -2632,39 +2519,61 @@
             const urlRow = document.getElementById('urlRow');
             const fileUploadRow = document.getElementById('fileUploadRow');
             const imageGridRow = document.getElementById('imageGridRow');
+            const listEditorRow = document.getElementById('listEditorRow');
 
-            valueRow.style.display = 'none';
-            urlRow.style.display = 'none';
-            fileUploadRow.style.display = 'none';
-            imageGridRow.style.display = 'none';
+            // Скрываем все
+            if (valueRow) valueRow.style.display = 'none';
+            if (urlRow) urlRow.style.display = 'none';
+            if (fileUploadRow) fileUploadRow.style.display = 'none';
+            if (imageGridRow) imageGridRow.style.display = 'none';
+            if (listEditorRow) listEditorRow.style.display = 'none';
 
             switch (type) {
                 case 'text':
                 case 'label_value':
-                    valueRow.style.display = 'block';
-                    document.getElementById('blockValue').placeholder = 'Введите текст...';
+                    if (valueRow) {
+                        valueRow.style.display = 'block';
+                        document.getElementById('blockValue').placeholder = 'Введите текст...';
+                    }
                     break;
                 case 'list':
-                    valueRow.style.display = 'block';
-                    document.getElementById('blockValue').placeholder = 'JSON массив: [{"label":"Название","value":"Значение"}]';
+                    if (listEditorRow) {
+                        listEditorRow.style.display = 'block';
+                        // Загружаем данные из textarea в редактор
+                        const val = document.getElementById('blockValue').value.trim();
+                        if (val) {
+                            try {
+                                const parsed = JSON.parse(val);
+                                if (Array.isArray(parsed)) {
+                                    listItems = parsed;
+                                    renderListItems();
+                                }
+                            } catch {}
+                        } else {
+                            listItems = [];
+                            renderListItems();
+                        }
+                    }
                     break;
                 case 'html':
-                    valueRow.style.display = 'block';
-                    document.getElementById('blockValue').placeholder = 'Введите HTML код...';
+                    if (valueRow) {
+                        valueRow.style.display = 'block';
+                        document.getElementById('blockValue').placeholder = 'Введите HTML код...';
+                    }
                     break;
                 case 'file_link':
-                    fileUploadRow.style.display = 'block';
+                    if (fileUploadRow) fileUploadRow.style.display = 'block';
                     document.getElementById('fileLabel').textContent = '📁 Выберите PDF файл';
                     break;
                 case 'external_link':
-                    urlRow.style.display = 'block';
+                    if (urlRow) urlRow.style.display = 'block';
                     break;
                 case 'image':
-                    fileUploadRow.style.display = 'block';
+                    if (fileUploadRow) fileUploadRow.style.display = 'block';
                     document.getElementById('fileLabel').textContent = '🖼️ Выберите изображение';
                     break;
                 case 'image_grid':
-                    imageGridRow.style.display = 'block';
+                    if (imageGridRow) imageGridRow.style.display = 'block';
                     break;
                 case 'hr':
                     break;
@@ -3230,6 +3139,139 @@
 
         // Инициализируем поля при загрузке
         updateBlockFormFields();
+
+        // ===== РЕДАКТОР СПИСКА =====
+        let listItems = [];
+
+        function renderListItems() {
+            const container = document.getElementById('listItemsContainer');
+            if (!container) return;
+
+            if (!listItems.length) {
+                container.innerHTML = '<div style="padding:12px;color:var(--steel-dim);font-family:var(--f-mono);font-size:.78rem;text-align:center;border:1px dashed var(--line);border-radius:6px;">Нет элементов. Добавьте первый!</div>';
+                return;
+            }
+
+            container.innerHTML = listItems.map((item, index) => `
+        <div class="list-item" data-index="${index}">
+            <span class="item-handle">⠿</span>
+            <span class="item-label">${escapeHtml(item.label || '')}</span>
+            <span class="item-value">${escapeHtml(item.value || '')}</span>
+            <button type="button" class="item-remove" data-index="${index}" title="Удалить">✕</button>
+        </div>
+    `).join('');
+
+            // Drag & Drop для элементов списка
+            const items = container.querySelectorAll('.list-item');
+            let dragIndex = null;
+
+            items.forEach(el => {
+                el.draggable = true;
+
+                el.addEventListener('dragstart', (e) => {
+                    dragIndex = parseInt(el.dataset.index);
+                    el.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                });
+
+                el.addEventListener('dragend', () => {
+                    el.classList.remove('dragging');
+                    document.querySelectorAll('.list-item').forEach(i => i.classList.remove('drag-over'));
+                });
+
+                el.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    const targetIndex = parseInt(el.dataset.index);
+                    if (dragIndex !== null && dragIndex !== targetIndex) {
+                        document.querySelectorAll('.list-item').forEach(i => i.classList.remove('drag-over'));
+                        el.classList.add('drag-over');
+                    }
+                });
+
+                el.addEventListener('dragleave', () => {
+                    el.classList.remove('drag-over');
+                });
+
+                el.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    el.classList.remove('drag-over');
+                    const targetIndex = parseInt(el.dataset.index);
+                    if (dragIndex !== null && dragIndex !== targetIndex) {
+                        const [moved] = listItems.splice(dragIndex, 1);
+                        listItems.splice(targetIndex, 0, moved);
+                        renderListItems();
+                        updateListValue();
+                    }
+                    dragIndex = null;
+                });
+            });
+
+            // Удаление элементов
+            container.querySelectorAll('.item-remove').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const index = parseInt(btn.dataset.index);
+                    listItems.splice(index, 1);
+                    renderListItems();
+                    updateListValue();
+                });
+            });
+        }
+
+        function updateListValue() {
+            const valueField = document.getElementById('blockValue');
+            if (valueField) {
+                valueField.value = JSON.stringify(listItems);
+            }
+        }
+
+// Добавление элемента в список (с проверкой на существование элементов)
+        const addBtn = document.getElementById('addListItemBtn');
+        if (addBtn) {
+            addBtn.addEventListener('click', () => {
+                const labelInput = document.getElementById('newListItemLabel');
+                const valueInput = document.getElementById('newListItemValue');
+                if (!labelInput || !valueInput) return;
+
+                const label = labelInput.value.trim();
+                const value = valueInput.value.trim();
+
+                if (!value) {
+                    showBlockMsg('Введите значение', true);
+                    return;
+                }
+
+                listItems.push({ label, value });
+                labelInput.value = '';
+                valueInput.value = '';
+                renderListItems();
+                updateListValue();
+                showBlockMsg('Элемент добавлен', false);
+            });
+        }
+
+// Enter для добавления
+        const valueInput = document.getElementById('newListItemValue');
+        if (valueInput) {
+            valueInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const btn = document.getElementById('addListItemBtn');
+                    if (btn) btn.click();
+                }
+            });
+        }
+
+        const labelInput = document.getElementById('newListItemLabel');
+        if (labelInput) {
+            labelInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const nextInput = document.getElementById('newListItemValue');
+                    if (nextInput) nextInput.focus();
+                }
+            });
+        }
 
     })();
 </script>
