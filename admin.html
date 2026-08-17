@@ -1646,7 +1646,6 @@
                                 <option value="hr">➖ Разделитель</option>
                                 <option value="file_link">📎 Ссылка на файл</option>
                                 <option value="external_link">🔗 Внешняя ссылка</option>
-                                <option value="image">🖼️ Изображение</option>
                                 <option value="image_grid">🖼️ Сетка изображений</option>
                                 <option value="list">📋 Список</option>
                                 <option value="html">💻 HTML код</option>
@@ -2587,14 +2586,6 @@
                 case 'external_link':
                     urlRow.style.display = 'block';
                     break;
-                case 'image':
-                    if (fileUploadRow) {
-                        fileUploadRow.style.display = 'block';
-                        const fileInput = document.getElementById('blockFile');
-                        if (fileInput) fileInput.accept = 'image/*';
-                        document.getElementById('fileLabel').textContent = '🖼️ Выберите изображение';
-                    }
-                    break;
                 case 'image_grid':
                     imageGridRow.style.display = 'block';
                     break;
@@ -2757,7 +2748,6 @@
                     'hr': '➖ Разделитель',
                     'file_link': '📎 Ссылка на файл',
                     'external_link': '🔗 Внешняя ссылка',
-                    'image': '🖼️ Изображение',
                     'image_grid': '🖼️ Сетка изображений',
                     'list': '📋 Список',
                     'html': '💻 HTML'
@@ -2866,8 +2856,6 @@
             });
         }
 
-        // --- Добавление блока ---
-        // --- Добавление блока ---
         const addBlockBtn = document.getElementById('addBlockBtn');
         if (addBlockBtn) {
             addBlockBtn.addEventListener('click', async () => {
@@ -2918,22 +2906,6 @@
                                 return;
                             }
                             value = { url: urlValue, text: label || 'Перейти' };
-                            break;
-                        }
-
-                        case 'image': {
-                            const file = fileInput.files[0];
-                            if (file) {
-                                const base64 = await fileToBase64(file);
-                                value = {
-                                    url: `data:image/png;base64,${base64}`,
-                                    alt: label || file.name,
-                                    base64: base64
-                                };
-                            } else {
-                                showBlockMsg('Выберите изображение', true);
-                                return;
-                            }
                             break;
                         }
 
