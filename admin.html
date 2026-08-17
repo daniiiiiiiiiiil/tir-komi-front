@@ -2825,22 +2825,6 @@
 
         // --- Сохранение страницы ---
         document.getElementById('savePageBtn').addEventListener('click', async () => {
-            if (!currentPostId) {
-                const fresh = await withAuth(() => Api.posts.getByType(postType));
-                const freshItems = fresh.items || fresh || [];
-                if (freshItems.length) {
-                    currentPostId = freshItems.reduce((a, b) => (b.id > a.id ? b : a)).id;
-                }
-            }
-
-            if (currentPostId) {
-                await withAuth(() => Api.posts.update(currentPostId, {
-                    description: { Set: true, Value: descriptionJson }
-                }));
-            } else {
-                const newPost = await withAuth(() => Api.posts.create({ ... }));
-                currentPostId = newPost.id;
-            }
             const msg = document.getElementById('pageSaveMsg');
             msg.className = 'form-msg';
 
@@ -2891,6 +2875,7 @@
                 msg.className = 'form-msg is-visible is-ok';
                 setTimeout(() => { msg.className = 'form-msg'; }, 3000);
             } catch (err) {
+                console.error('❌ Ошибка сохранения:', err);
                 msg.textContent = '❌ Ошибка: ' + err.message;
                 msg.className = 'form-msg is-visible is-error';
             }
