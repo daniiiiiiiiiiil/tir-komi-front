@@ -2670,35 +2670,52 @@
                 let preview = '';
                 if (block.label) preview += `<span class="label-tag">${escapeHtml(block.label)}</span> `;
 
+                // Для image — показываем миниатюру
                 if (block.type === 'image' && block.value && typeof block.value === 'object' && block.value.url) {
-                    preview = `<img src="${block.value.url}" alt="${escapeHtml(block.value.alt || '')}" onerror="this.style.display='none'"> ${escapeHtml(block.label || '')}`;
+                    const imgSrc = block.value.url;
+                    // Проверяем, что это не blob и не /api/ ссылка
+                    if (imgSrc && imgSrc.startsWith('data:image')) {
+                        preview = `<img src="${imgSrc}" style="height:30px;width:auto;border-radius:3px;vertical-align:middle;"> ${escapeHtml(block.label || '')}`;
+                    } else {
+                        preview = `🖼️ ${escapeHtml(block.label || 'Изображение')}`;
+                    }
                 } else if (block.type === 'image_grid' && Array.isArray(block.value) && block.value.length) {
-                    preview = `🖼️ ${block.value.length} изображений`;
+                    // Проверяем первую картинку
+                    const firstImg = block.value[0];
+                    if (firstImg && firstImg.src && firstImg.src.startsWith('data:image')) {
+                        preview = `<img src="${firstImg.src}" style="height:30px;width:auto;border-radius:3px;vertical-align:middle;"> +${block.value.length - 1}`;
+                    } else {
+                        preview = `🖼️ ${block.value.length} изображений`;
+                    }
                 } else if (block.type === 'file_link' && block.value && typeof block.value === 'object' && block.value.url) {
-                    preview = `📎 ${escapeHtml(block.value.label || block.label || 'Файл')}`;
+                    if (block.value.url && block.value.url.startsWith('data:application')) {
+                        preview = `📎 ${escapeHtml(block.value.label || block.label || 'Файл')}`;
+                    } else {
+                        preview = `📎 ${escapeHtml(block.value.label || block.label || 'Файл')}`;
+                    }
                 } else if (block.value) {
                     const val = typeof block.value === 'object' ? JSON.stringify(block.value).slice(0, 50) : String(block.value).slice(0, 50);
                     preview += `<span class="value-preview">${escapeHtml(val)}</span>`;
                 }
 
                 return `
-                    <tr class="block-row" data-index="${index}">
-                        <td><span class="block-handle">⠿</span></td>
-                        <td><span style="font-size:.75rem;font-family:var(--f-mono);color:var(--steel-dim);">${typeLabel}</span></td>
-                        <td>${escapeHtml(block.label || '—')}</td>
-                        <td><div class="block-preview">${preview || '—'}</div></td>
-                        <td>
-                            <div class="row-actions">
-                                <button type="button" class="icon-btn" data-action="edit-block" data-index="${index}" title="Редактировать">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
-                                </button>
-                                <button type="button" class="icon-btn danger" data-action="remove-block" data-index="${index}" title="Удалить">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
+            <tr class="block-row" data-index="${index}">
+                <td><span class="block-handle">⠿</span></td>
+                <td><span style="font-size:.75rem;font-family:var(--f-mono);color:var(--steel-dim);">${typeLabel}</span></td>
+                <td>${escapeHtml(block.label || '—')}</td>
+                <td><div class="block-preview">${preview || '—'}</div></td>
+                <td>
+                    <div class="row-actions">
+                        <button type="button" class="icon-btn" data-action="edit-block" data-index="${index}" title="Редактировать">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+                        </button>
+                        <button type="button" class="icon-btn danger" data-action="remove-block" data-index="${index}" title="Удалить">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
             }).join('');
 
             setupDragDrop();
@@ -2756,6 +2773,7 @@
             const type = document.getElementById('blockType').value;
             const label = document.getElementById('blockLabel').value.trim();
             const textValue = document.getElementById('blockValue').value.trim();
+            const urlValue = document.getElementById('blockUrl').value.trim();
             const fileInput = document.getElementById('blockFile');
             const imagesInput = document.getElementById('blockImages');
 
@@ -2779,21 +2797,11 @@
                     case 'file_link': {
                         const file = fileInput.files[0];
                         if (file) {
-                            // Используем данные из обработчика
-                            if (!uploadedFileData) {
-                                // Если файл выбран, но не загружен - загружаем сейчас
-                                const base64 = await fileToBase64(file);
-                                uploadedFileData = {
-                                    url: `data:application/${file.name.split('.').pop().toLowerCase()};base64,${base64}`,
-                                    label: file.name,
-                                    base64: base64,
-                                    name: file.name
-                                };
-                            }
+                            const base64 = await fileToBase64(file);
                             value = {
-                                url: uploadedFileData.url,
-                                label: uploadedFileData.label || label || file.name,
-                                base64: uploadedFileData.base64
+                                url: `data:application/pdf;base64,${base64}`,
+                                label: label || file.name,
+                                base64: base64
                             };
                         } else {
                             showBlockMsg('Выберите файл', true);
@@ -2816,9 +2824,8 @@
                         const file = fileInput.files[0];
                         if (file) {
                             const base64 = await fileToBase64(file);
-                            const ext = file.name.split('.').pop().toLowerCase();
                             value = {
-                                url: `data:image/${ext};base64,${base64}`,
+                                url: `data:image/png;base64,${base64}`,
                                 alt: label || file.name,
                                 base64: base64
                             };
@@ -2828,6 +2835,7 @@
                         }
                         break;
                     }
+
 
                     case 'image_grid': {
                         const files = imagesInput.files;
@@ -2839,9 +2847,8 @@
                         for (let i = 0; i < files.length; i++) {
                             const file = files[i];
                             const base64 = await fileToBase64(file);
-                            const ext = file.name.split('.').pop().toLowerCase();
                             images.push({
-                                src: `data:image/${ext};base64,${base64}`,
+                                src: `data:image/png;base64,${base64}`,
                                 alt: file.name,
                                 base64: base64
                             });
