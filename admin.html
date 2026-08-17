@@ -155,6 +155,60 @@
         }
     }
 
+    /* Стили для редактора списка */
+    #listItemsContainer .list-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        background: var(--bg-0);
+        border: 1px solid var(--line-soft);
+        border-radius: 6px;
+        transition: border-color .2s;
+    }
+    #listItemsContainer .list-item:hover {
+        border-color: var(--line);
+    }
+    #listItemsContainer .list-item .item-label {
+        font-family: var(--f-mono);
+        font-size: .72rem;
+        color: var(--steel-dim);
+        min-width: 80px;
+        max-width: 150px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    #listItemsContainer .list-item .item-value {
+        flex: 1;
+        color: var(--ink);
+        font-size: .9rem;
+    }
+    #listItemsContainer .list-item .item-remove {
+        background: none;
+        border: none;
+        color: var(--steel-dim);
+        cursor: pointer;
+        font-size: 1.1rem;
+        padding: 0 4px;
+        transition: color .2s;
+    }
+    #listItemsContainer .list-item .item-remove:hover {
+        color: var(--danger);
+    }
+    #listItemsContainer .list-item .item-handle {
+        cursor: grab;
+        color: var(--steel-dim);
+        user-select: none;
+        padding: 0 4px;
+    }
+    #listItemsContainer .list-item .item-handle:active {
+        cursor: grabbing;
+    }
+    #listItemsContainer .list-item.dragging {
+        opacity: 0.5;
+    }
+
     .data-table th{
         text-align:left;font-family:var(--f-mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;
         color:var(--steel-dim);padding:12px 16px;border-bottom:1px solid var(--line);background:var(--bg-1);
@@ -1332,59 +1386,7 @@
         background: var(--bg-1);
     }
 
-    /* Стили для редактора списка */
-    #listItemsContainer .list-item {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 12px;
-        background: var(--bg-0);
-        border: 1px solid var(--line-soft);
-        border-radius: 6px;
-        transition: border-color .2s;
-    }
-    #listItemsContainer .list-item:hover {
-        border-color: var(--line);
-    }
-    #listItemsContainer .list-item .item-label {
-        font-family: var(--f-mono);
-        font-size: .72rem;
-        color: var(--steel-dim);
-        min-width: 80px;
-        max-width: 150px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-    #listItemsContainer .list-item .item-value {
-        flex: 1;
-        color: var(--ink);
-        font-size: .9rem;
-    }
-    #listItemsContainer .list-item .item-remove {
-        background: none;
-        border: none;
-        color: var(--steel-dim);
-        cursor: pointer;
-        font-size: 1.1rem;
-        padding: 0 4px;
-        transition: color .2s;
-    }
-    #listItemsContainer .list-item .item-remove:hover {
-        color: var(--danger);
-    }
-    #listItemsContainer .list-item .item-handle {
-        cursor: grab;
-        color: var(--steel-dim);
-        user-select: none;
-        padding: 0 4px;
-    }
-    #listItemsContainer .list-item .item-handle:active {
-        cursor: grabbing;
-    }
-    #listItemsContainer .list-item.dragging {
-        opacity: 0.5;
-    }
+
 
     /* Стили для превью изображений */
     #imagesPreview img {
@@ -2521,7 +2523,6 @@
             const imageGridRow = document.getElementById('imageGridRow');
             const listEditorRow = document.getElementById('listEditorRow');
 
-            // Скрываем все
             if (valueRow) valueRow.style.display = 'none';
             if (urlRow) urlRow.style.display = 'none';
             if (fileUploadRow) fileUploadRow.style.display = 'none';
@@ -2531,15 +2532,12 @@
             switch (type) {
                 case 'text':
                 case 'label_value':
-                    if (valueRow) {
-                        valueRow.style.display = 'block';
-                        document.getElementById('blockValue').placeholder = 'Введите текст...';
-                    }
+                    valueRow.style.display = 'block';
+                    document.getElementById('blockValue').placeholder = 'Введите текст...';
                     break;
                 case 'list':
                     if (listEditorRow) {
                         listEditorRow.style.display = 'block';
-                        // Загружаем данные из textarea в редактор
                         const val = document.getElementById('blockValue').value.trim();
                         if (val) {
                             try {
@@ -2556,24 +2554,22 @@
                     }
                     break;
                 case 'html':
-                    if (valueRow) {
-                        valueRow.style.display = 'block';
-                        document.getElementById('blockValue').placeholder = 'Введите HTML код...';
-                    }
+                    valueRow.style.display = 'block';
+                    document.getElementById('blockValue').placeholder = 'Введите HTML код...';
                     break;
                 case 'file_link':
-                    if (fileUploadRow) fileUploadRow.style.display = 'block';
+                    fileUploadRow.style.display = 'block';
                     document.getElementById('fileLabel').textContent = '📁 Выберите PDF файл';
                     break;
                 case 'external_link':
-                    if (urlRow) urlRow.style.display = 'block';
+                    urlRow.style.display = 'block';
                     break;
                 case 'image':
-                    if (fileUploadRow) fileUploadRow.style.display = 'block';
+                    fileUploadRow.style.display = 'block';
                     document.getElementById('fileLabel').textContent = '🖼️ Выберите изображение';
                     break;
                 case 'image_grid':
-                    if (imageGridRow) imageGridRow.style.display = 'block';
+                    imageGridRow.style.display = 'block';
                     break;
                 case 'hr':
                     break;
@@ -3140,6 +3136,7 @@
         // Инициализируем поля при загрузке
         updateBlockFormFields();
 
+
         // ===== РЕДАКТОР СПИСКА =====
         let listItems = [];
 
@@ -3225,7 +3222,7 @@
             }
         }
 
-// Добавление элемента в список (с проверкой на существование элементов)
+// Добавление элемента в список
         const addBtn = document.getElementById('addListItemBtn');
         if (addBtn) {
             addBtn.addEventListener('click', () => {
