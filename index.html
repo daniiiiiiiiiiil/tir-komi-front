@@ -880,7 +880,6 @@
 
         .reveal{opacity:0;transform:translateY(28px);transition:opacity .8s var(--ease), transform .8s var(--ease);}
         .reveal.is-visible{opacity:1;transform:translateY(0);}
-        .reveal-stagger > *{transition-delay:calc(var(--i,0) * 70ms);}
 
         .bg-alt{background:var(--bg-1);}
         .bg-panel{background:linear-gradient(180deg, var(--bg-1), var(--bg-0));}
@@ -1947,7 +1946,6 @@
             return;
         }
 
-        // Рендерим блоки как на basic_information
         let html = '<div class="container">';
 
         // Заголовок
@@ -1956,11 +1954,12 @@
             <div>
                 <div class="eyebrow">О нас</div>
                 <h2>${escapeHtml(post.title || 'О нас')}</h2>
+                <p class="lede">${escapeHtml(post.title || '')}</p>
             </div>
         </div>
     `;
 
-        // Рендерим блоки в info-grid
+        // Рендерим блоки с правильными классами
         html += '<div class="info-grid" style="margin-top:40px;">';
 
         blocks.forEach((block) => {
@@ -1978,7 +1977,7 @@
                 </div>
             `;
             } else if (block.type === 'hr') {
-                html += `<hr>`;
+                html += `<hr style="border-color:var(--line-soft);margin:16px 0;">`;
             } else if (block.type === 'file_link') {
                 const url = block.value?.url || block.value || '';
                 const label = block.value?.label || block.label || 'Скачать';
@@ -1988,12 +1987,21 @@
                     <a href="${url}" target="_blank" class="pdf-link" download>${escapeHtml(label)}</a>
                 </div>
             `;
-            } else if (block.type === 'image') {
-                const imgSrc = block.value?.src || block.value || '';
-                const imgAlt = block.value?.alt || block.label || 'Изображение';
+            } else if (block.type === 'external_link') {
+                const url = block.value?.url || block.value || '';
+                const text = block.value?.text || block.label || 'Перейти';
                 html += `
                 <div class="info-block">
                     <p class="value" style="margin-bottom:4px;">${escapeHtml(block.label || '')}</p>
+                    <a href="${url}" target="_blank" class="pdf-link" rel="noopener">${escapeHtml(text)}</a>
+                </div>
+            `;
+            } else if (block.type === 'image') {
+                const imgSrc = block.value?.url || block.value || '';
+                const imgAlt = block.value?.alt || block.label || 'Изображение';
+                html += `
+                <div class="info-block">
+                    ${block.label ? `<p class="value" style="margin-bottom:4px;">${escapeHtml(block.label)}</p>` : ''}
                     <img src="${imgSrc}" alt="${escapeHtml(imgAlt)}" style="max-width:100%;max-height:500px;border-radius:var(--radius);border:1px solid var(--line-soft);">
                 </div>
             `;
@@ -2001,6 +2009,7 @@
                 if (Array.isArray(block.value) && block.value.length) {
                     html += `
                     <div class="info-block">
+                        ${block.label ? `<span class="label">${escapeHtml(block.label)}</span>` : ''}
                         <div class="facility-images">
                             ${block.value.map(img => `
                                 <img src="${img.src || img}" alt="${img.alt || 'Фото'}" loading="lazy">
@@ -2013,11 +2022,12 @@
                 if (Array.isArray(block.value)) {
                     html += `
                     <div class="info-block">
-                        <ul class="doc-sublist">
+                        <span class="label">${escapeHtml(block.label || '')}</span>
+                        <ul class="doc-sublist" style="margin-top:12px;list-style:none;padding:0;">
                             ${block.value.map(item => `
-                                <li>
-                                    <div class="label">${escapeHtml(item.label || '')}</div>
-                                    <div class="value">${escapeHtml(item.value || '')}</div>
+                                <li style="margin-bottom:10px;padding-left:12px;border-left:1px solid var(--brass-dim);">
+                                    ${item.label ? `<div class="label" style="color:var(--steel);font-size:.82rem;margin-bottom:2px;">${escapeHtml(item.label)}</div>` : ''}
+                                    <div class="value" style="font-size:.92rem;color:var(--paper);">${escapeHtml(item.value || '')}</div>
                                     ${item.file_url ? `<div class="value"><a href="${item.file_url}" target="_blank" class="pdf-link">${escapeHtml(item.file_label || 'Скачать')}</a></div>` : ''}
                                 </li>
                             `).join('')}
@@ -2032,6 +2042,7 @@
                 </div>
             `;
             } else {
+                // Fallback для неизвестных типов
                 html += `
                 <div class="info-block">
                     <p class="value">${escapeHtml(block.value || '')}</p>
