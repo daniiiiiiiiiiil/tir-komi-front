@@ -95,6 +95,9 @@
             margin: 0;
             padding-top: 70px;
             overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
 
             background:
                     radial-gradient(
@@ -132,6 +135,10 @@
             font-family: var(--f-body);
             font-size: 16px;
             line-height: 1.6;
+        }
+
+        main {
+            flex: 1;
         }
 
         img{max-width:100%;display:block;}
@@ -666,7 +673,10 @@
             }
         }
 
-        .info-section { padding: 120px 0 80px; }
+        .info-section {
+            padding: 120px 0 60px;
+            flex: 1;
+        }
         .info-grid { display: grid; gap: 16px; }
         .info-block {
             background: var(--bg-0);
@@ -706,7 +716,7 @@
             border-top: 1px solid var(--line-soft);
             margin: 12px 0;
         }
-        @media (max-width: 700px) { .info-section { padding: 80px 0 50px; } }
+        @media (max-width: 700px) { .info-section { padding: 80px 0 40px; } }
         .eyebrow + h2 { margin-top: -0.2em; }
 
         .info-page { display: none; }
@@ -832,14 +842,16 @@
         .site-footer{
             background: var(--bg-1);
             border-top: 1px solid var(--line);
-            padding: 64px 0 28px;
-            margin-top: 40px;
+            padding: 48px 0 20px;
+            margin-top: 0;
+            width: 100%;
+            flex-shrink: 0;
         }
         .footer-top{
             display:grid;
             grid-template-columns:1.4fr 1fr 1fr 1fr;
             gap:40px;
-            padding-bottom:44px;
+            padding-bottom:32px;
             border-bottom:1px solid var(--line-soft);
         }
         @media (max-width:900px){.footer-top{grid-template-columns:1fr 1fr;}}
@@ -851,12 +863,12 @@
             letter-spacing:.1em;
             text-transform:uppercase;
             color:var(--coral);
-            margin:0 0 1em;
+            margin:0 0 0.8em;
         }
-        .footer-top ul{display:flex;flex-direction:column;gap:.7em;}
-        .footer-top a{color:var(--steel);font-size:.88rem;transition:color .2s;}
+        .footer-top ul{display:flex;flex-direction:column;gap:.5em;}
+        .footer-top a{color:var(--steel);font-size:.85rem;transition:color .2s;}
         .footer-top a:hover{color:var(--dark-blue);}
-        .footer-brand p{max-width:32ch;font-size:.88rem;color:var(--ink-dim);}
+        .footer-brand p{max-width:32ch;font-size:.85rem;color:var(--ink-dim);}
 
         .footer-bottom{
             display:flex;
@@ -864,9 +876,9 @@
             align-items:center;
             flex-wrap:wrap;
             gap:12px;
-            padding-top:22px;
+            padding-top:16px;
             font-family:var(--f-mono);
-            font-size:.72rem;
+            font-size:.7rem;
             color:var(--steel-dim);
             letter-spacing:.03em;
         }
@@ -952,7 +964,7 @@
             <div class="footer-brand">
                 <h4>ЧУ ДПО ИМДС</h4>
                 <p>Частное учреждение дополнительного профессионального образования «Институт международных связей и делового сотрудничества»</p>
-                <p style="margin-top:12px;font-size:.78rem;color:var(--steel-dim);">© 2026 Все права защищены</p>
+                <p style="margin-top:12px;font-size:.75rem;color:var(--steel-dim);">© 2026 Все права защищены</p>
             </div>
             <div>
                 <h4>Контакты</h4>
@@ -1044,6 +1056,7 @@
     }
 
     // Загрузка всех страниц через GET /posts?type={post_type}
+    // ИСПРАВЛЕНО: берём ПОСЛЕДНЮЮ запись (с максимальным id)
     async function loadAllPages() {
         try {
             const promises = PAGE_ORDER.map(async (pageKey) => {
@@ -1053,7 +1066,12 @@
                 try {
                     const data = await apiRequest(`/posts?type=${postType}`);
                     const items = data.items || data || [];
-                    const post = items.length > 0 ? items[0] : null;
+
+                    // Берём ПОСЛЕДНЮЮ запись (с максимальным id)
+                    let post = null;
+                    if (items.length > 0) {
+                        post = items.reduce((a, b) => (a.id > b.id ? a : b));
+                    }
 
                     if (post) {
                         return {
