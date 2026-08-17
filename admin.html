@@ -1634,6 +1634,7 @@
                 </div>
 
                 <!-- Редактор блоков -->
+                <!-- Редактор блоков -->
                 <div id="pageEditor">
                     <div class="entity-form" id="blockForm" style="grid-template-columns:1fr 1fr;gap:12px;">
                         <!-- Тип блока -->
@@ -1678,13 +1679,8 @@
                                 <span class="file-label" id="fileLabel">📁 Выберите PDF файл</span>
                             </div>
                             <div id="fileNameDisplay" style="margin-top:6px;"></div>
-                            <div id="fileUploadProgress" style="margin-top:6px;display:none;">
-                                <span style="font-family:var(--f-mono);font-size:.72rem;color:var(--steel-dim);">Загрузка...</span>
-                                <div style="width:100%;height:4px;background:var(--bg-0);border-radius:2px;margin-top:4px;">
-                                    <div id="fileProgressBar" style="width:0%;height:100%;background:var(--brass);border-radius:2px;transition:width .3s;"></div>
-                                </div>
-                            </div>
                         </div>
+
                         <!-- Сетка изображений (image_grid) -->
                         <div class="form-row" id="imageGridRow" style="grid-column:1/-1;display:none;">
                             <label>Выберите несколько изображений</label>
@@ -1700,6 +1696,7 @@
                         <div class="form-msg" id="blockMsg"></div>
                     </div>
 
+                    <!-- Редактор списка -->
                     <div class="form-row" id="listEditorRow" style="grid-column:1/-1;display:none;">
                         <label>Элементы списка</label>
                         <div id="listItemsContainer" style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px;">
@@ -1712,6 +1709,27 @@
                         <div style="margin-top:6px;font-family:var(--f-mono);font-size:.7rem;color:var(--steel-dim);">
                             Для каждого элемента можно указать заголовок (необязательно) и значение.
                         </div>
+                    </div>
+
+                    <!-- Таблица с блоками -->
+                    <div class="table-wrap" style="margin-top:16px;">
+                        <table class="data-table" id="blocksTable">
+                            <thead>
+                            <tr>
+                                <th style="width:30px;">#</th>
+                                <th>Тип</th>
+                                <th>Метка</th>
+                                <th>Значение</th>
+                                <th style="width:120px;"></th>
+                            </tr>
+                            </thead>
+                            <tbody id="blocksBody"></tbody>
+                        </table>
+                    </div>
+
+                    <div style="display:flex;gap:12px;margin-top:20px;flex-wrap:wrap;">
+                        <button class="btn" id="savePageBtn">💾 Сохранить страницу</button>
+                        <button class="btn btn--ghost" id="resetPageBtn">↺ Сбросить изменения</button>
                     </div>
                     <div class="form-msg" id="pageSaveMsg"></div>
                 </div>
