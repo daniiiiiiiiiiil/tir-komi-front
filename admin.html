@@ -1934,7 +1934,10 @@
         });
 
         logoutBtn.addEventListener('click', async () => {
-            try { await Api.auth.logout(); } catch (_) { /* proceed regardless */ }
+            try {
+                await Api.auth.logout();
+            } catch (_) { /* proceed regardless */
+            }
             sessionStorage.removeItem('adminEmail');
             showLogin();
         });
@@ -1961,7 +1964,9 @@
             el.className = 'form-msg is-visible ' + (isError ? 'is-error' : 'is-ok');
         }
 
-        function tableBody(id) { return document.querySelector(`#${id} tbody`); }
+        function tableBody(id) {
+            return document.querySelector(`#${id} tbody`);
+        }
 
         function emptyRow(colspan, text) {
             return `<tr class="empty-row"><td colspan="${colspan}">${text}</td></tr>`;
@@ -1985,7 +1990,10 @@
             try {
                 const data = await withAuth(() => Api.advertisements.list(50, 0));
                 const items = (data && data.items) || [];
-                if (!items.length) { adsBody.innerHTML = emptyRow(5, 'Объявлений нет'); return; }
+                if (!items.length) {
+                    adsBody.innerHTML = emptyRow(5, 'Объявлений нет');
+                    return;
+                }
                 adsBody.innerHTML = items.map((a) => `
         <tr data-id="${a.id}">
           <td>${a.id}</td>
@@ -2036,19 +2044,19 @@
 
                 const title = fd.get('title');
                 if (title !== undefined && title !== null && title !== '') {
-                    patch.title = { Set: true, Value: title };
+                    patch.title = {Set: true, Value: title};
                 }
 
                 const description = fd.get('description');
                 if (description !== undefined && description !== null && description !== '') {
-                    patch.description = { Set: true, Value: description };
+                    patch.description = {Set: true, Value: description};
                 }
 
                 const url = fd.get('url');
                 if (url !== undefined && url !== null && url !== '') {
-                    patch.url = { Set: true, Value: url };
+                    patch.url = {Set: true, Value: url};
                 } else if (url === '') {
-                    patch.url = { Set: true, Value: null };
+                    patch.url = {Set: true, Value: null};
                 }
 
                 return patch;
@@ -2062,7 +2070,10 @@
             try {
                 const data = await withAuth(() => Api.materials.list(50, 0));
                 const items = (data && data.items) || [];
-                if (!items.length) { materialsBody.innerHTML = emptyRow(5, 'Материалов нет'); return; }
+                if (!items.length) {
+                    materialsBody.innerHTML = emptyRow(5, 'Материалов нет');
+                    return;
+                }
                 materialsBody.innerHTML = items.map((m) => `
         <tr data-id="${m.id}">
           <td>${m.id}</td>
@@ -2081,7 +2092,7 @@
             const form = e.target;
             const fd = new FormData(form);
             try {
-                const payload = { title: fd.get('title'), description: fd.get('description') || '' };
+                const payload = {title: fd.get('title'), description: fd.get('description') || ''};
                 const pdfFile = fd.get('pdf');
                 if (pdfFile && pdfFile.size) payload.pdf = await fileToBase64(pdfFile);
                 await withAuth(() => Api.materials.create(payload));
@@ -2105,11 +2116,11 @@
                 const patch = {};
                 const title = fd.get('title');
                 if (title !== undefined && title !== null && title !== '') {
-                    patch.title = { Set: true, Value: title };
+                    patch.title = {Set: true, Value: title};
                 }
                 const description = fd.get('description');
                 if (description !== undefined && description !== null && description !== '') {
-                    patch.description = { Set: true, Value: description };
+                    patch.description = {Set: true, Value: description};
                 }
                 return patch;
             },
@@ -2122,7 +2133,10 @@
             try {
                 const data = await withAuth(() => Api.vacancies.list(50, 0));
                 const items = (data && data.items) || [];
-                if (!items.length) { vacanciesBody.innerHTML = emptyRow(5, 'Вакансий нет'); return; }
+                if (!items.length) {
+                    vacanciesBody.innerHTML = emptyRow(5, 'Вакансий нет');
+                    return;
+                }
                 vacanciesBody.innerHTML = items.map((v) => `
         <tr data-id="${v.id}">
           <td>${v.id}</td>
@@ -2141,7 +2155,7 @@
             const form = e.target;
             const fd = new FormData(form);
             try {
-                const payload = { title: fd.get('title'), description: fd.get('description') || '' };
+                const payload = {title: fd.get('title'), description: fd.get('description') || ''};
                 await withAuth(() => Api.vacancies.create(payload));
                 setFormMsg(form, 'Вакансия создана.', false);
                 form.reset();
@@ -2163,11 +2177,11 @@
                 const patch = {};
                 const title = fd.get('title');
                 if (title !== undefined && title !== null && title !== '') {
-                    patch.title = { Set: true, Value: title };
+                    patch.title = {Set: true, Value: title};
                 }
                 const description = fd.get('description');
                 if (description !== undefined && description !== null && description !== '') {
-                    patch.description = { Set: true, Value: description };
+                    patch.description = {Set: true, Value: description};
                 }
                 return patch;
             },
@@ -2180,7 +2194,10 @@
             try {
                 const data = await withAuth(() => Api.reviews.list(50, 0));
                 const items = (data && data.items) || [];
-                if (!items.length) { reviewsBody.innerHTML = emptyRow(6, 'Отзывов нет'); return; }
+                if (!items.length) {
+                    reviewsBody.innerHTML = emptyRow(6, 'Отзывов нет');
+                    return;
+                }
                 reviewsBody.innerHTML = items.map((r) => `
         <tr data-id="${r.id}">
           <td>${r.id}</td>
@@ -2218,7 +2235,10 @@
             try {
                 const data = await withAuth(() => Api.media.list(null, 100, 0));
                 const items = (data && data.items) || [];
-                if (!items.length) { mediaBody.innerHTML = emptyRow(6, 'Файлов нет'); return; }
+                if (!items.length) {
+                    mediaBody.innerHTML = emptyRow(6, 'Файлов нет');
+                    return;
+                }
                 mediaBody.innerHTML = items.map((m) => `
         <tr data-id="${m.id}">
           <td>${m.id}</td>
@@ -2312,7 +2332,10 @@
             }
 
             const existingEdit = row.nextElementSibling;
-            if (existingEdit && existingEdit.classList.contains('edit-row')) { existingEdit.remove(); return; }
+            if (existingEdit && existingEdit.classList.contains('edit-row')) {
+                existingEdit.remove();
+                return;
+            }
             document.querySelectorAll('.edit-row').forEach((n) => n.remove());
 
             try {
@@ -2504,7 +2527,8 @@
                             const errData = JSON.parse(xhr.responseText);
                             if (errData.message) errorMsg = errData.message;
                             if (errData.error) errorMsg = errData.error;
-                        } catch {}
+                        } catch {
+                        }
                         reject(new Error(errorMsg));
                     }
                 };
@@ -2547,7 +2571,8 @@
                                     listItems = parsed;
                                     renderListItems();
                                 }
-                            } catch {}
+                            } catch {
+                            }
                         } else {
                             listItems = [];
                             renderListItems();
@@ -2582,7 +2607,7 @@
         let uploadedFileUrl = null;
         let uploadedFileData = null;
 
-        document.getElementById('blockFile').addEventListener('change', async function(e) {
+        document.getElementById('blockFile').addEventListener('change', async function (e) {
             const file = this.files[0];
             const display = document.getElementById('fileNameDisplay');
 
@@ -2633,7 +2658,7 @@
         });
 
         // --- Обработчик выбора нескольких изображений ---
-        document.getElementById('blockImages').addEventListener('change', function(e) {
+        document.getElementById('blockImages').addEventListener('change', function (e) {
             const files = this.files;
             const preview = document.getElementById('imagesPreview');
             preview.innerHTML = '';
@@ -2648,7 +2673,7 @@
             for (let i = 0; i < Math.min(files.length, 8); i++) {
                 const file = files[i];
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = function (e) {
                     const img = document.createElement('img');
                     img.src = e.target.result;
                     img.alt = file.name;
@@ -2660,7 +2685,7 @@
         });
 
         // --- Следим за изменением типа блока ---
-        document.getElementById('blockType').addEventListener('change', function() {
+        document.getElementById('blockType').addEventListener('change', function () {
             updateBlockFormFields();
             // Сбрасываем загруженный файл при смене типа
             uploadedFileUrl = null;
@@ -2888,7 +2913,7 @@
                                 showBlockMsg('Укажите URL ссылки', true);
                                 return;
                             }
-                            value = { url: urlValue, text: label || 'Перейти' };
+                            value = {url: urlValue, text: label || 'Перейти'};
                             break;
                         }
 
@@ -2955,7 +2980,7 @@
                             value = textValue;
                     }
 
-                    const block = { type, label, value };
+                    const block = {type, label, value};
 
                     if (editingBlockIndex >= 0) {
                         currentBlocks[editingBlockIndex] = block;
@@ -2996,163 +3021,185 @@
         }
 
         // --- Обработчики для блоков ---
-        document.getElementById('blocksBody').addEventListener('click', (e) => {
-            const editBtn = e.target.closest('[data-action="edit-block"]');
-            const delBtn = e.target.closest('[data-action="remove-block"]');
+        const blocksBody = document.getElementById('blocksBody');
+        if (blocksBody) {
+            blocksBody.addEventListener('click', (e) => {
+                const editBtn = e.target.closest('[data-action="edit-block"]');
+                const delBtn = e.target.closest('[data-action="remove-block"]');
 
-            if (delBtn) {
-                const index = parseInt(delBtn.dataset.index);
-                if (confirm('Удалить блок?')) {
-                    currentBlocks.splice(index, 1);
-                    renderBlocks();
-                    showBlockMsg('Блок удален', false);
-                }
-                return;
-            }
-
-            if (editBtn) {
-                const index = parseInt(editBtn.dataset.index);
-                const block = currentBlocks[index];
-                if (!block) return;
-
-                document.getElementById('blockType').value = block.type;
-                document.getElementById('blockLabel').value = block.label || '';
-
-                if (typeof block.value === 'object') {
-                    if (block.value.url || block.value.base64) {
-                        document.getElementById('blockUrl').value = block.value.url || '';
+                if (delBtn) {
+                    const index = parseInt(delBtn.dataset.index);
+                    if (confirm('Удалить блок?')) {
+                        currentBlocks.splice(index, 1);
+                        renderBlocks();
+                        showBlockMsg('Блок удален', false);
                     }
-                    if (Array.isArray(block.value)) {
-                        document.getElementById('blockValue').value = JSON.stringify(block.value, null, 2);
+                    return;
+                }
+
+                if (editBtn) {
+                    const index = parseInt(editBtn.dataset.index);
+                    const block = currentBlocks[index];
+                    if (!block) return;
+
+                    document.getElementById('blockType').value = block.type;
+                    document.getElementById('blockLabel').value = block.label || '';
+
+                    if (typeof block.value === 'object') {
+                        if (block.value.url || block.value.base64) {
+                            document.getElementById('blockUrl').value = block.value.url || '';
+                        }
+                        if (Array.isArray(block.value)) {
+                            document.getElementById('blockValue').value = JSON.stringify(block.value, null, 2);
+                        } else {
+                            document.getElementById('blockValue').value = '';
+                        }
                     } else {
-                        document.getElementById('blockValue').value = '';
+                        document.getElementById('blockValue').value = block.value || '';
+                        document.getElementById('blockUrl').value = '';
                     }
-                } else {
-                    document.getElementById('blockValue').value = block.value || '';
-                    document.getElementById('blockUrl').value = '';
+
+                    editingBlockIndex = index;
+                    const addBtn = document.getElementById('addBlockBtn');
+                    if (addBtn) addBtn.textContent = '✏️ Обновить блок';
+                    const labelEl = document.getElementById('blockLabel');
+                    if (labelEl) labelEl.focus();
+                    updateBlockFormFields();
                 }
-
-                editingBlockIndex = index;
-                document.getElementById('addBlockBtn').textContent = '✏️ Обновить блок';
-                document.getElementById('blockLabel').focus();
-                updateBlockFormFields();
-            }
-        });
-
-        // --- Сообщения ---
-        function showBlockMsg(text, isError) {
-            const msg = document.getElementById('blockMsg');
-            msg.textContent = text;
-            msg.className = 'form-msg is-visible ' + (isError ? 'is-error' : 'is-ok');
-            setTimeout(() => { msg.className = 'form-msg'; }, 3000);
+            });
         }
 
-        // --- Сохранение страницы ---
-        document.getElementById('savePageBtn').addEventListener('click', async () => {
-            const msg = document.getElementById('pageSaveMsg');
-            msg.className = 'form-msg';
+// --- Сообщения ---
+        function showBlockMsg(text, isError) {
+            const msg = document.getElementById('blockMsg');
+            if (!msg) return;
+            msg.textContent = text;
+            msg.className = 'form-msg is-visible ' + (isError ? 'is-error' : 'is-ok');
+            setTimeout(() => {
+                msg.className = 'form-msg';
+            }, 3000);
+        }
 
-            const postType = PAGE_TYPE_MAP[currentPageKey];
-            if (!postType) {
-                msg.textContent = '❌ Неизвестный тип страницы';
-                msg.className = 'form-msg is-visible is-error';
-                return;
-            }
+// --- Сохранение страницы ---
+        const savePageBtn = document.getElementById('savePageBtn');
+        if (savePageBtn) {
+            savePageBtn.addEventListener('click', async () => {
+                const msg = document.getElementById('pageSaveMsg');
+                if (!msg) return;
+                msg.className = 'form-msg';
 
-            try {
-                // Подготавливаем данные
-                const descriptionJson = JSON.stringify(currentBlocks);
-
-                // Если нет currentPostId - пытаемся найти
-                if (!currentPostId) {
-                    const freshData = await withAuth(() => Api.posts.getByType(postType));
-                    const freshItems = freshData.items || freshData || [];
-                    if (freshItems.length > 0) {
-                        const freshPost = freshItems.reduce((a, b) => (b.id > a.id ? b : a));
-                        currentPostId = freshPost.id;
-                    }
+                const postType = PAGE_TYPE_MAP[currentPageKey];
+                if (!postType) {
+                    msg.textContent = '❌ Неизвестный тип страницы';
+                    msg.className = 'form-msg is-visible is-error';
+                    return;
                 }
 
-                // ПРАВИЛЬНЫЙ формат для бэкенда — с Nullable обёрткой
-                const patchData = {
-                    description: {
-                        Set: true,
-                        Value: descriptionJson
+                try {
+                    const descriptionJson = JSON.stringify(currentBlocks);
+
+                    if (!currentPostId) {
+                        const freshData = await withAuth(() => Api.posts.getByType(postType));
+                        const freshItems = freshData.items || freshData || [];
+                        if (freshItems.length > 0) {
+                            const freshPost = freshItems.reduce((a, b) => (b.id > a.id ? b : a));
+                            currentPostId = freshPost.id;
+                        }
                     }
-                };
 
-                console.log('📤 Отправляем PATCH:', patchData);
-
-                if (currentPostId) {
-                    await withAuth(() => Api.posts.update(currentPostId, patchData));
-                    msg.textContent = '✅ Страница обновлена!';
-                } else {
-                    // Для создания используем обычный формат
-                    const newPostData = {
-                        title: PAGE_TITLES[currentPageKey] || currentPageKey,
-                        description: descriptionJson,
-                        type: postType,
-                        date: new Date().toISOString()
+                    const patchData = {
+                        description: {
+                            Set: true,
+                            Value: descriptionJson
+                        }
                     };
 
-                    console.log('📤 Отправляем POST:', newPostData);
+                    console.log('📤 Отправляем PATCH:', patchData);
 
-                    const newPost = await withAuth(() => Api.posts.create(newPostData));
-                    currentPostId = newPost.id;
-                    msg.textContent = '✅ Страница создана!';
+                    if (currentPostId) {
+                        await withAuth(() => Api.posts.update(currentPostId, patchData));
+                        msg.textContent = '✅ Страница обновлена!';
+                    } else {
+                        const newPostData = {
+                            title: PAGE_TITLES[currentPageKey] || currentPageKey,
+                            description: descriptionJson,
+                            type: postType,
+                            date: new Date().toISOString()
+                        };
+
+                        console.log('📤 Отправляем POST:', newPostData);
+
+                        const newPost = await withAuth(() => Api.posts.create(newPostData));
+                        currentPostId = newPost.id;
+                        msg.textContent = '✅ Страница создана!';
+                    }
+
+                    msg.className = 'form-msg is-visible is-ok';
+                    setTimeout(() => {
+                        msg.className = 'form-msg';
+                    }, 3000);
+
+                    await loadPage(currentPageKey);
+
+                } catch (err) {
+                    console.error('❌ Ошибка сохранения:', err);
+                    msg.textContent = '❌ Ошибка: ' + err.message;
+                    msg.className = 'form-msg is-visible is-error';
                 }
+            });
+        }
 
-                msg.className = 'form-msg is-visible is-ok';
-                setTimeout(() => { msg.className = 'form-msg'; }, 3000);
+// --- Сброс ---
+        const resetPageBtn = document.getElementById('resetPageBtn');
+        if (resetPageBtn) {
+            resetPageBtn.addEventListener('click', () => {
+                if (confirm('Сбросить все изменения? Несохраненные данные будут потеряны.')) {
+                    loadPage(currentPageKey);
+                    const pageSaveMsg = document.getElementById('pageSaveMsg');
+                    if (pageSaveMsg) pageSaveMsg.className = 'form-msg';
+                    showBlockMsg('Изменения сброшены', false);
+                }
+            });
+        }
 
-                await loadPage(currentPageKey);
-
-            } catch (err) {
-                console.error('❌ Ошибка сохранения:', err);
-                msg.textContent = '❌ Ошибка: ' + err.message;
-                msg.className = 'form-msg is-visible is-error';
-            }
-        });
-
-        // --- Сброс ---
-        document.getElementById('resetPageBtn').addEventListener('click', () => {
-            if (confirm('Сбросить все изменения? Несохраненные данные будут потеряны.')) {
+// --- Переключение страницы ---
+        const pageSelector = document.getElementById('pageSelector');
+        if (pageSelector) {
+            pageSelector.addEventListener('change', function () {
+                currentPageKey = this.value;
+                editingBlockIndex = -1;
+                const addBtn = document.getElementById('addBlockBtn');
+                if (addBtn) addBtn.textContent = '➕ Добавить блок';
                 loadPage(currentPageKey);
-                document.getElementById('pageSaveMsg').className = 'form-msg';
-                showBlockMsg('Изменения сброшены', false);
-            }
-        });
+            });
+        }
 
-        // --- Переключение страницы ---
-        document.getElementById('pageSelector').addEventListener('change', function() {
-            currentPageKey = this.value;
-            editingBlockIndex = -1;
-            document.getElementById('addBlockBtn').textContent = '➕ Добавить блок';
-            loadPage(currentPageKey);
-        });
-
-        // --- Загрузка при переключении таба ---
+// --- Загрузка при переключении таба ---
         document.querySelectorAll('.tab').forEach(tab => {
             tab.addEventListener('click', () => {
                 if (tab.dataset.tab === 'pages') {
-                    loadPage(document.getElementById('pageSelector').value);
+                    const selector = document.getElementById('pageSelector');
+                    if (selector) loadPage(selector.value);
                 }
             });
         });
 
-        // --- Инициализация ---
+// --- Инициализация ---
         let pagesLoaded = false;
-        document.querySelector('[data-tab="pages"]').addEventListener('click', function() {
-            if (!pagesLoaded) {
-                pagesLoaded = true;
-                loadPage('main');
-            }
-        });
+        const pagesTab = document.querySelector('[data-tab="pages"]');
+        if (pagesTab) {
+            pagesTab.addEventListener('click', function () {
+                if (!pagesLoaded) {
+                    pagesLoaded = true;
+                    loadPage('main');
+                }
+            });
+        }
 
-        // Инициализируем поля при загрузке
+// Инициализируем поля при загрузке
         updateBlockFormFields();
 
-
+// ===== РЕДАКТОР СПИСКА =====
         function renderListItems() {
             const container = document.getElementById('listItemsContainer');
             if (!container) return;
@@ -3171,7 +3218,6 @@
         </div>
     `).join('');
 
-            // Drag & Drop для элементов списка
             const items = container.querySelectorAll('.list-item');
             let dragIndex = null;
 
@@ -3217,7 +3263,6 @@
                 });
             });
 
-            // Удаление элементов
             container.querySelectorAll('.item-remove').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const index = parseInt(btn.dataset.index);
@@ -3251,7 +3296,7 @@
                     return;
                 }
 
-                listItems.push({ label, value });
+                listItems.push({label, value});
                 labelInput.value = '';
                 valueInput.value = '';
                 renderListItems();
@@ -3282,8 +3327,7 @@
                 }
             });
         }
-
-    })();
+    })
 </script>
 
 </body>
