@@ -1617,12 +1617,17 @@
                         <div class="form-row" id="fileUploadRow" style="grid-column:1/-1;display:none;">
                             <label>Загрузить файл</label>
                             <div class="file-input-wrapper">
-                                <input type="file" id="blockFile" accept="image/*,application/pdf">
-                                <span class="file-label" id="fileLabel">📁 Выберите файл</span>
+                                <input type="file" id="blockFile" accept="application/pdf">
+                                <span class="file-label" id="fileLabel">📁 Выберите PDF файл</span>
                             </div>
                             <div id="fileNameDisplay" style="margin-top:6px;"></div>
+                            <div id="fileUploadProgress" style="margin-top:6px;display:none;">
+                                <span style="font-family:var(--f-mono);font-size:.72rem;color:var(--steel-dim);">Загрузка...</span>
+                                <div style="width:100%;height:4px;background:var(--bg-0);border-radius:2px;margin-top:4px;">
+                                    <div id="fileProgressBar" style="width:0%;height:100%;background:var(--brass);border-radius:2px;transition:width .3s;"></div>
+                                </div>
+                            </div>
                         </div>
-
                         <!-- Сетка изображений (image_grid) -->
                         <div class="form-row" id="imageGridRow" style="grid-column:1/-1;display:none;">
                             <label>Выберите несколько изображений</label>
@@ -2393,6 +2398,42 @@
         let currentPostId = null;
         let editingBlockIndex = -1;
 
+        // --- Загрузка файла на сервер ---
+        async function uploadFile(file, onProgress) {
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('type', 'document');
+
+            const xhr = new XMLHttpRequest();
+            const uploadPromise = new Promise((resolve, reject) => {
+                xhr.open('POST', API_BASE + '/media', true);
+                xhr.withCredentials = true;
+
+                xhr.upload.onprogress = (e) => {
+                    if (e.lengthComputable && onProgress) {
+                        onProgress(e.loaded / e.total);
+                    }
+                };
+
+                xhr.onload = () => {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        try {
+                            const data = JSON.parse(xhr.responseText);
+                            resolve(data);
+                        } catch {
+                            reject(new Error('Неверный ответ сервера'));
+                        }
+                    } else {
+                        reject(new Error(`Ошибка загрузки: ${xhr.status}`));
+                    }
+                };
+                xhr.onerror = () => reject(new Error('Ошибка сети'));
+                xhr.send(formData);
+            });
+
+            return uploadPromise;
+        }
+
         // --- Показ/скрытие полей в зависимости от типа блока ---
         function updateBlockFormFields() {
             const type = document.getElementById('blockType').value;
@@ -2421,7 +2462,6 @@
                     document.getElementById('blockValue').placeholder = 'Введите HTML код...';
                     break;
                 case 'file_link':
-                    urlRow.style.display = 'block';
                     fileUploadRow.style.display = 'block';
                     document.getElementById('fileLabel').textContent = '📁 Выберите PDF файл';
                     break;
@@ -2443,15 +2483,73 @@
         }
 
         // --- Обработчик выбора файла ---
-        document.getElementById('blockFile').addEventListener('change', function(e) {
+        let uploadedFileUrl = null;
+        let uploadedFileData = null;
+
+        document.getElementById('blockFile').addEventListener('change', async function(e) {
             const file = this.files[0];
             const display = document.getElementById('fileNameDisplay');
-            if (file) {
-                display.textContent = '📎 ' + file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
-                display.style.display = 'block';
-            } else {
+            const progress = document.getElementById('fileUploadProgress');
+            const progressBar = document.getElementById('fileProgressBar');
+
+            if (!file) {
                 display.textContent = '';
                 display.style.display = 'none';
+                progress.style.display = 'none';
+                uploadedFileUrl = null;
+                uploadedFileData = null;
+                return;
+            }
+
+            // Показываем имя файла
+            display.textContent = '📎 ' + file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+            display.style.display = 'block';
+
+            // Показываем прогресс
+            progress.style.display = 'block';
+            progressBar.style.width = '0%';
+
+            try {
+                // Загружаем файл на сервер
+                const response = await uploadFile(file, (percent) => {
+                    progressBar.style.width = (percent * 100) + '%';
+                });
+
+                // Сохраняем URL из ответа
+                if (response && response.url) {
+                    uploadedFileUrl = response.url;
+                    uploadedFileData = {
+                        url: response.url,
+                        label: file.name,
+                        id: response.id
+                    };
+                    display.textContent = '✅ ' + file.name + ' (загружено)';
+                    display.style.color = '#2ecc71';
+                } else if (response && response.id) {
+                    // Если вернулся только id, формируем URL
+                    uploadedFileUrl = `/api/v1/media/${response.id}/file`;
+                    uploadedFileData = {
+                        url: uploadedFileUrl,
+                        label: file.name,
+                        id: response.id
+                    };
+                    display.textContent = '✅ ' + file.name + ' (загружено)';
+                    display.style.color = '#2ecc71';
+                } else {
+                    throw new Error('Не удалось получить URL загруженного файла');
+                }
+
+                setTimeout(() => {
+                    progress.style.display = 'none';
+                }, 500);
+
+            } catch (err) {
+                console.error('Ошибка загрузки файла:', err);
+                display.textContent = '❌ Ошибка: ' + err.message;
+                display.style.color = '#e74c3c';
+                progress.style.display = 'none';
+                uploadedFileUrl = null;
+                uploadedFileData = null;
             }
         });
 
@@ -2483,7 +2581,15 @@
         });
 
         // --- Следим за изменением типа блока ---
-        document.getElementById('blockType').addEventListener('change', updateBlockFormFields);
+        document.getElementById('blockType').addEventListener('change', function() {
+            updateBlockFormFields();
+            // Сбрасываем загруженный файл при смене типа
+            uploadedFileUrl = null;
+            uploadedFileData = null;
+            document.getElementById('blockFile').value = '';
+            document.getElementById('fileNameDisplay').textContent = '';
+            document.getElementById('fileNameDisplay').style.display = 'none';
+        });
 
         // --- Загрузка страницы ---
         async function loadPage(pageKey) {
@@ -2504,7 +2610,7 @@
                     : null;
 
                 if (items.length > 1) {
-                    console.warn(`Найдено ${items.length} постов типа "${postType}" — используется id=${post.id}. Стоит удалить дубликаты через API.`);
+                    console.warn(`Найдено ${items.length} постов типа "${postType}" — используется id=${post ? post.id : 'нет'}. Стоит удалить дубликаты через API.`);
                 }
 
                 if (post) {
@@ -2558,6 +2664,8 @@
                     preview = `<img src="${block.value.url}" alt="${escapeHtml(block.value.alt || '')}" onerror="this.style.display='none'"> ${escapeHtml(block.label || '')}`;
                 } else if (block.type === 'image_grid' && Array.isArray(block.value) && block.value.length) {
                     preview = `🖼️ ${block.value.length} изображений`;
+                } else if (block.type === 'file_link' && block.value && typeof block.value === 'object' && block.value.url) {
+                    preview = `📎 ${escapeHtml(block.value.label || block.label || 'Файл')}`;
                 } else if (block.value) {
                     const val = typeof block.value === 'object' ? JSON.stringify(block.value).slice(0, 50) : String(block.value).slice(0, 50);
                     preview += `<span class="value-preview">${escapeHtml(val)}</span>`;
@@ -2638,7 +2746,6 @@
             const type = document.getElementById('blockType').value;
             const label = document.getElementById('blockLabel').value.trim();
             const textValue = document.getElementById('blockValue').value.trim();
-            const urlValue = document.getElementById('blockUrl').value.trim();
             const fileInput = document.getElementById('blockFile');
             const imagesInput = document.getElementById('blockImages');
 
@@ -2662,38 +2769,53 @@
                     case 'file_link': {
                         const file = fileInput.files[0];
                         if (file) {
-                            const base64 = await fileToBase64(file);
+                            // Если файл ещё не загружен, загружаем
+                            if (!uploadedFileData) {
+                                showBlockMsg('Загрузите файл (выберите файл и дождитесь загрузки)', true);
+                                return;
+                            }
                             value = {
-                                url: `/assets/${file.name}`,
-                                label: label || file.name,
-                                base64: base64
+                                url: uploadedFileData.url,
+                                label: uploadedFileData.label || label || file.name
                             };
-                        } else if (urlValue) {
-                            value = { url: urlValue, label: label || 'Скачать' };
                         } else {
-                            showBlockMsg('Загрузите файл или укажите URL', true);
+                            showBlockMsg('Выберите файл', true);
                             return;
                         }
                         break;
                     }
 
-                    case 'external_link':
+                    case 'external_link': {
+                        const urlValue = document.getElementById('blockUrl').value.trim();
                         if (!urlValue) {
                             showBlockMsg('Укажите URL ссылки', true);
                             return;
                         }
                         value = { url: urlValue, text: label || 'Перейти' };
                         break;
+                    }
 
                     case 'image': {
                         const file = fileInput.files[0];
                         if (file) {
-                            const base64 = await fileToBase64(file);
-                            value = {
-                                url: URL.createObjectURL(file),
-                                alt: label || file.name,
-                                base64: base64
-                            };
+                            // Для изображений используем отдельную загрузку через media
+                            const formData = new FormData();
+                            formData.append('file', file);
+                            formData.append('type', 'photo');
+                            formData.append('title', label || file.name);
+
+                            try {
+                                const response = await withAuth(() => Api.media.create(formData));
+                                const url = response.url || `/api/v1/media/${response.id}/file`;
+                                value = {
+                                    url: url,
+                                    alt: label || file.name,
+                                    id: response.id
+                                };
+                            } catch (err) {
+                                showBlockMsg('Ошибка загрузки изображения: ' + err.message, true);
+                                return;
+                            }
                         } else {
                             showBlockMsg('Выберите изображение', true);
                             return;
@@ -2709,12 +2831,26 @@
                         }
                         const images = [];
                         for (let i = 0; i < files.length; i++) {
-                            const base64 = await fileToBase64(files[i]);
-                            images.push({
-                                src: URL.createObjectURL(files[i]),
-                                alt: files[i].name,
-                                base64: base64
-                            });
+                            const file = files[i];
+                            const formData = new FormData();
+                            formData.append('file', file);
+                            formData.append('type', 'photo');
+                            formData.append('title', file.name);
+
+                            try {
+                                const response = await withAuth(() => Api.media.create(formData));
+                                const url = response.url || `/api/v1/media/${response.id}/file`;
+                                images.push({
+                                    src: url,
+                                    alt: file.name
+                                });
+                            } catch (err) {
+                                console.error('Ошибка загрузки:', err);
+                            }
+                        }
+                        if (images.length === 0) {
+                            showBlockMsg('Не удалось загрузить изображения', true);
+                            return;
                         }
                         value = images;
                         break;
@@ -2758,9 +2894,12 @@
                 document.getElementById('blockFile').value = '';
                 document.getElementById('blockImages').value = '';
                 document.getElementById('fileNameDisplay').textContent = '';
+                document.getElementById('fileNameDisplay').style.display = 'none';
                 document.getElementById('imagesPreview').innerHTML = '';
                 document.getElementById('fileLabel').textContent = '📁 Выберите файл';
                 document.getElementById('imagesLabel').textContent = '🖼️ Выберите изображения';
+                uploadedFileUrl = null;
+                uploadedFileData = null;
 
                 renderBlocks();
                 showBlockMsg('Блок сохранен', false);
@@ -2836,7 +2975,7 @@
             }
 
             try {
-                // Очищаем base64 перед сохранением
+                // Очищаем лишние данные перед сохранением
                 const blocksToSave = currentBlocks.map(block => {
                     const b = { ...block };
                     if (b.value && typeof b.value === 'object') {
@@ -2857,10 +2996,20 @@
 
                 const descriptionJson = JSON.stringify(blocksToSave);
 
+                if (!currentPostId) {
+                    const freshData = await withAuth(() => Api.posts.getByType(postType));
+                    const freshItems = freshData.items || freshData || [];
+                    if (freshItems.length > 0) {
+                        const freshPost = freshItems.reduce((a, b) => (b.id > a.id ? b : a));
+                        currentPostId = freshPost.id;
+                    }
+                }
+
                 if (currentPostId) {
                     await withAuth(() => Api.posts.update(currentPostId, {
                         description: { Set: true, Value: descriptionJson }
                     }));
+                    msg.textContent = '✅ Страница обновлена!';
                 } else {
                     const newPost = await withAuth(() => Api.posts.create({
                         title: PAGE_TITLES[currentPageKey] || currentPageKey,
@@ -2869,11 +3018,14 @@
                         date: new Date().toISOString()
                     }));
                     currentPostId = newPost.id;
+                    msg.textContent = '✅ Страница создана!';
                 }
 
-                msg.textContent = '✅ Страница сохранена!';
                 msg.className = 'form-msg is-visible is-ok';
                 setTimeout(() => { msg.className = 'form-msg'; }, 3000);
+
+                await loadPage(currentPageKey);
+
             } catch (err) {
                 console.error('❌ Ошибка сохранения:', err);
                 msg.textContent = '❌ Ошибка: ' + err.message;
