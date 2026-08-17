@@ -1332,6 +1332,60 @@
         background: var(--bg-1);
     }
 
+    /* Стили для редактора списка */
+    #listItemsContainer .list-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        background: var(--bg-0);
+        border: 1px solid var(--line-soft);
+        border-radius: 6px;
+        transition: border-color .2s;
+    }
+    #listItemsContainer .list-item:hover {
+        border-color: var(--line);
+    }
+    #listItemsContainer .list-item .item-label {
+        font-family: var(--f-mono);
+        font-size: .72rem;
+        color: var(--steel-dim);
+        min-width: 80px;
+        max-width: 150px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    #listItemsContainer .list-item .item-value {
+        flex: 1;
+        color: var(--ink);
+        font-size: .9rem;
+    }
+    #listItemsContainer .list-item .item-remove {
+        background: none;
+        border: none;
+        color: var(--steel-dim);
+        cursor: pointer;
+        font-size: 1.1rem;
+        padding: 0 4px;
+        transition: color .2s;
+    }
+    #listItemsContainer .list-item .item-remove:hover {
+        color: var(--danger);
+    }
+    #listItemsContainer .list-item .item-handle {
+        cursor: grab;
+        color: var(--steel-dim);
+        user-select: none;
+        padding: 0 4px;
+    }
+    #listItemsContainer .list-item .item-handle:active {
+        cursor: grabbing;
+    }
+    #listItemsContainer .list-item.dragging {
+        opacity: 0.5;
+    }
+
     /* Стили для превью изображений */
     #imagesPreview img {
         width: 80px;
@@ -1644,25 +1698,18 @@
                         <div class="form-msg" id="blockMsg"></div>
                     </div>
 
-                    <!-- Список блоков -->
-                    <div class="table-wrap" style="margin-top:16px;">
-                        <table class="data-table" id="blocksTable">
-                            <thead>
-                            <tr>
-                                <th style="width:30px;">#</th>
-                                <th>Тип</th>
-                                <th>Метка</th>
-                                <th>Значение</th>
-                                <th style="width:120px;"></th>
-                            </tr>
-                            </thead>
-                            <tbody id="blocksBody"></tbody>
-                        </table>
-                    </div>
-
-                    <div style="display:flex;gap:12px;margin-top:20px;">
-                        <button class="btn" id="savePageBtn">💾 Сохранить страницу</button>
-                        <button class="btn btn--ghost" id="resetPageBtn">↺ Сбросить изменения</button>
+                    <div class="form-row" id="listEditorRow" style="grid-column:1/-1;display:none;">
+                        <label>Элементы списка</label>
+                        <div id="listItemsContainer" style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px;">
+                        </div>
+                        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                            <input type="text" id="newListItemLabel" placeholder="Заголовок (необязательно)" style="flex:1;min-width:120px;background:var(--bg-0);border:1px solid var(--line);color:var(--ink);padding:.6em 1em;font-family:var(--f-body);font-size:.9rem;border-radius:6px;">
+                            <input type="text" id="newListItemValue" placeholder="Значение" style="flex:2;min-width:150px;background:var(--bg-0);border:1px solid var(--line);color:var(--ink);padding:.6em 1em;font-family:var(--f-body);font-size:.9rem;border-radius:6px;">
+                            <button type="button" class="btn btn--sm" id="addListItemBtn">➕ Добавить</button>
+                        </div>
+                        <div style="margin-top:6px;font-family:var(--f-mono);font-size:.7rem;color:var(--steel-dim);">
+                            Для каждого элемента можно указать заголовок (необязательно) и значение.
+                        </div>
                     </div>
                     <div class="form-msg" id="pageSaveMsg"></div>
                 </div>
@@ -2065,6 +2112,119 @@
                 return patch;
             },
         }));
+
+        let listItems = [];
+
+        function renderListItems() {
+            const container = document.getElementById('listItemsContainer');
+            if (!container) return;
+
+            if (!listItems.length) {
+                container.innerHTML = '<div style="padding:12px;color:var(--steel-dim);font-family:var(--f-mono);font-size:.78rem;text-align:center;border:1px dashed var(--line);border-radius:6px;">Нет элементов. Добавьте первый!</div>';
+                return;
+            }
+
+            container.innerHTML = listItems.map((item, index) => `
+        <div class="list-item" data-index="${index}">
+            <span class="item-handle">⠿</span>
+            <span class="item-label">${escapeHtml(item.label || '')}</span>
+            <span class="item-value">${escapeHtml(item.value || '')}</span>
+            <button type="button" class="item-remove" data-index="${index}" title="Удалить">✕</button>
+        </div>
+    `).join('');
+
+            const items = container.querySelectorAll('.list-item');
+            let dragIndex = null;
+
+            items.forEach(el => {
+                el.draggable = true;
+
+                el.addEventListener('dragstart', (e) => {
+                    dragIndex = parseInt(el.dataset.index);
+                    el.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                });
+
+                el.addEventListener('dragend', () => {
+                    el.classList.remove('dragging');
+                    document.querySelectorAll('.list-item').forEach(i => i.classList.remove('drag-over'));
+                });
+
+                el.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'move';
+                    const targetIndex = parseInt(el.dataset.index);
+                    if (dragIndex !== null && dragIndex !== targetIndex) {
+                        document.querySelectorAll('.list-item').forEach(i => i.classList.remove('drag-over'));
+                        el.classList.add('drag-over');
+                    }
+                });
+
+                el.addEventListener('dragleave', () => {
+                    el.classList.remove('drag-over');
+                });
+
+                el.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    el.classList.remove('drag-over');
+                    const targetIndex = parseInt(el.dataset.index);
+                    if (dragIndex !== null && dragIndex !== targetIndex) {
+                        const [moved] = listItems.splice(dragIndex, 1);
+                        listItems.splice(targetIndex, 0, moved);
+                        renderListItems();
+                    }
+                    dragIndex = null;
+                });
+            });
+
+            container.querySelectorAll('.item-remove').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const index = parseInt(btn.dataset.index);
+                    listItems.splice(index, 1);
+                    renderListItems();
+                    updateListValue();
+                });
+            });
+        }
+
+        function updateListValue() {
+            const valueField = document.getElementById('blockValue');
+            if (valueField) {
+                valueField.value = JSON.stringify(listItems);
+            }
+        }
+
+        document.getElementById('addListItemBtn')?.addEventListener('click', () => {
+            const labelInput = document.getElementById('newListItemLabel');
+            const valueInput = document.getElementById('newListItemValue');
+            const label = labelInput.value.trim();
+            const value = valueInput.value.trim();
+
+            if (!value) {
+                showBlockMsg('Введите значение', true);
+                return;
+            }
+
+            listItems.push({ label, value });
+            labelInput.value = '';
+            valueInput.value = '';
+            renderListItems();
+            updateListValue();
+            showBlockMsg('Элемент добавлен', false);
+        });
+
+        document.getElementById('newListItemValue')?.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('addListItemBtn')?.click();
+            }
+        });
+        document.getElementById('newListItemLabel')?.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('newListItemValue')?.focus();
+            }
+        });
 
         const vacanciesBody = tableBody('vacanciesTable');
 
