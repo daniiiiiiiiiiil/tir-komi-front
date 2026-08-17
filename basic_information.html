@@ -1059,9 +1059,22 @@
         return res.json();
     }
 
-    // Загрузка всех страниц через GET /posts?type={post_type}
-    // ИСПРАВЛЕНО: берём ПОСЛЕДНЮЮ запись (с максимальным id)
-    async function loadAllPages() {
+    async function loadAllPages(forceRefresh = false) {
+        if (!forceRefresh) {
+            const cached = localStorage.getItem('cache_basic_pages');
+            if (cached) {
+                try {
+                    const data = JSON.parse(cached);
+                    // Проверяем, что кеш валидный
+                    if (data && data.pagesData && data.timestamp) {
+                        pagesData = data.pagesData;
+                        dataLoaded = true;
+                        return true;
+                    }
+                } catch {}
+            }
+        }
+
         try {
             const promises = PAGE_ORDER.map(async (pageKey) => {
                 const postType = PAGE_TYPE_MAP[pageKey];
@@ -1071,7 +1084,6 @@
                     const data = await apiRequest(`/posts?type=${postType}`);
                     const items = data.items || data || [];
 
-                    // Берём ПОСЛЕДНЮЮ запись (с максимальным id)
                     let post = null;
                     if (items.length > 0) {
                         post = items.reduce((a, b) => (a.id > b.id ? a : b));
@@ -1105,12 +1117,22 @@
                 }
             });
 
+            dataLoaded = true;
+
+            try {
+                localStorage.setItem('cache_basic_pages', JSON.stringify({
+                    pagesData: pagesData,
+                    timestamp: Date.now()
+                }));
+            } catch {}
+
             return true;
         } catch (err) {
             console.error('Ошибка загрузки страниц:', err);
             return false;
         }
     }
+
 
     function renderBlock(block) {
         const type = block.type;
@@ -1133,7 +1155,6 @@
                 const url = value?.url || value || '';
                 const label = value?.label || block.label || 'Скачать';
 
-                // Если это base64 data URL
                 if (url && url.startsWith('data:')) {
                     return `
                     <p class="value" style="margin-bottom: 4px;">${block.label || ''}</p>
@@ -1143,7 +1164,6 @@
                 `;
                 }
 
-                // Обычная ссылка
                 return `
                 <p class="value" style="margin-bottom: 4px;">${block.label || ''}</p>
                 <a href="${url}" target="_blank" class="pdf-link" download>${label}</a>
@@ -1201,6 +1221,7 @@
         }
     }
 
+
     function renderPage(pageKey) {
         const container = document.getElementById(`page-${pageKey}`);
         if (!container) return;
@@ -1208,13 +1229,13 @@
         const page = pagesData[pageKey];
         if (!page || !page.structured || page.structured.length === 0) {
             container.innerHTML = `
-                <div class="info-grid" style="margin-top: 40px;">
-                    <div class="info-block">
-                        <span class="label">Информация не загружена</span>
-                        <p class="value">Данные для этой страницы отсутствуют. Добавьте их через панель администратора.</p>
-                    </div>
+            <div class="info-grid" style="margin-top: 40px;">
+                <div class="info-block">
+                    <span class="label">Информация не загружена</span>
+                    <p class="value">Данные для этой страницы отсутствуют. Добавьте их через панель администратора.</p>
                 </div>
-            `;
+            </div>
+        `;
             return;
         }
 
@@ -1316,6 +1337,7 @@
         return html;
     }
 
+
     function renderPageSkeleton(pageKey) {
         const container = document.getElementById(`page-${pageKey}`);
         if (!container) return;
@@ -1350,10 +1372,10 @@
         const mobileSubmenu = document.getElementById('mobileSubmenu');
 
         const items = PAGE_ORDER.map(pageKey => `
-            <a href="#page-${pageKey}" data-page="${pageKey}" class="${pageKey === 'main' ? 'is-current' : ''}">
-                ${PAGE_TITLES[pageKey] || pageKey}
-            </a>
-        `).join('');
+        <a href="#page-${pageKey}" data-page="${pageKey}" class="${pageKey === 'main' ? 'is-current' : ''}">
+            ${PAGE_TITLES[pageKey] || pageKey}
+        </a>
+    `).join('');
 
         desktopMenu.innerHTML = items;
         mobileSubmenu.innerHTML = items;
@@ -1385,11 +1407,29 @@
         }
     }
 
+
     // --- Инициализация ---
     async function init() {
-        renderAllSkeletons();
+        // Показываем скелетоны
+        PAGE_ORDER.forEach(pageKey => {
+            const container = document.getElementById(`page-${pageKey}`);
+            if (container) {
+                container.innerHTML = `
+                <div class="info-grid" style="margin-top: 40px;">
+                    <div class="skeleton-block">
+                        <div class="skeleton-line short"></div>
+                        <div class="skeleton-line medium"></div>
+                        <div class="skeleton-line"></div>
+                        <div class="skeleton-line short"></div>
+                    </div>
+                </div>
+            `;
+            }
+        });
+
         renderMenus();
 
+        // Загружаем данные (сначала кеш, потом фоном обновляем)
         const loaded = await loadAllPages();
 
         if (loaded) {
@@ -1399,15 +1439,30 @@
                 const container = document.getElementById(`page-${pageKey}`);
                 if (container) {
                     container.innerHTML = `
-                        <div class="info-grid" style="margin-top: 40px;">
-                            <div class="info-block">
-                                <span class="label">Ошибка загрузки</span>
-                                <p class="value">Не удалось загрузить данные. Попробуйте обновить страницу.</p>
-                            </div>
+                    <div class="info-grid" style="margin-top: 40px;">
+                        <div class="info-block">
+                            <span class="label">Ошибка загрузки</span>
+                            <p class="value">Не удалось загрузить данные. Попробуйте обновить страницу.</p>
                         </div>
-                    `;
+                    </div>
+                `;
                 }
             });
+        }
+
+        // Фоновое обновление, если был кеш
+        const cached = localStorage.getItem('cache_basic_pages');
+        if (cached) {
+            try {
+                const data = JSON.parse(cached);
+                if (data && data.pagesData) {
+                    // Обновляем в фоне
+                    setTimeout(async () => {
+                        await loadAllPages(true);
+                        renderAllPages();
+                    }, 500);
+                }
+            } catch {}
         }
 
         const hash = window.location.hash.replace('#', '');
@@ -1438,6 +1493,25 @@
             }
         });
     }
+
+    window.refreshBasicPages = async function() {
+        const msg = document.createElement('div');
+        msg.style.cssText = 'position:fixed;bottom:20px;right:20px;background:var(--coral);color:#fff;padding:12px 24px;border-radius:var(--radius);z-index:9999;font-family:var(--f-body);box-shadow:var(--shadow-lg);';
+        msg.textContent = 'Обновление...';
+        document.body.appendChild(msg);
+
+        try {
+            await loadAllPages(true);
+            renderAllPages();
+            msg.textContent = 'Обновлено!';
+            msg.style.background = 'var(--mint)';
+            setTimeout(() => msg.remove(), 1500);
+        } catch (err) {
+            msg.textContent = 'Ошибка обновления';
+            msg.style.background = 'var(--danger)';
+            setTimeout(() => msg.remove(), 2000);
+        }
+    };
 
     // --- Мобильное меню ---
     const burger = document.getElementById('burger');
