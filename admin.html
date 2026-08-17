@@ -2969,11 +2969,8 @@
             }
 
             try {
-                // Подготавливаем данные для отправки
+                // Подготавливаем данные
                 const descriptionJson = JSON.stringify(currentBlocks);
-
-                // Проверяем, что отправляем
-                console.log('📤 Отправляем description:', descriptionJson);
 
                 // Если нет currentPostId - пытаемся найти
                 if (!currentPostId) {
@@ -2985,18 +2982,21 @@
                     }
                 }
 
+                // ПРАВИЛЬНЫЙ формат для бэкенда — с Nullable обёрткой
+                const patchData = {
+                    description: {
+                        Set: true,
+                        Value: descriptionJson
+                    }
+                };
+
+                console.log('📤 Отправляем PATCH:', patchData);
+
                 if (currentPostId) {
-                    // ПРОСТОЙ JSON - без Nullable обёртки
-                    const patchData = {
-                        description: descriptionJson
-                    };
-
-                    console.log('📤 PATCH /posts/' + currentPostId, patchData);
-
                     await withAuth(() => Api.posts.update(currentPostId, patchData));
                     msg.textContent = '✅ Страница обновлена!';
                 } else {
-                    // Создаём новый пост
+                    // Для создания используем обычный формат
                     const newPostData = {
                         title: PAGE_TITLES[currentPageKey] || currentPageKey,
                         description: descriptionJson,
@@ -3004,7 +3004,7 @@
                         date: new Date().toISOString()
                     };
 
-                    console.log('📤 POST /posts', newPostData);
+                    console.log('📤 Отправляем POST:', newPostData);
 
                     const newPost = await withAuth(() => Api.posts.create(newPostData));
                     currentPostId = newPost.id;
@@ -3014,7 +3014,6 @@
                 msg.className = 'form-msg is-visible is-ok';
                 setTimeout(() => { msg.className = 'form-msg'; }, 3000);
 
-                // Перезагружаем страницу
                 await loadPage(currentPageKey);
 
             } catch (err) {
