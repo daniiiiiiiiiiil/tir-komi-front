@@ -1964,6 +1964,14 @@
             list: (type, limit = 40, offset = 0) => apiRequest(`/media?${type ? `type=${type}&` : ''}limit=${limit}&offset=${offset}`),
             refresh: () => Api.media.list(),
         },
+        about: {
+            get: () => apiRequest('/posts?type=about'),
+            update: (id, payload) => apiRequest(`/posts/${id}`, {
+                method: 'PATCH',
+                body: payload
+            }),
+            refresh: () => Api.about.get()
+        },
     };
 
     function formatDate(iso) {
@@ -1979,6 +1987,174 @@
         return String(str ?? '').replace(/[&<>"']/g, (c) => ({
             '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
         }[c]));
+    }
+
+    function renderAbout(data) {
+        const aboutContainer = document.getElementById('page-about');
+        if (!aboutContainer) return;
+
+        const items = Array.isArray(data) ? data : (data && data.items ? data.items : []);
+        const post = items.length > 0 ? items[0] : null;
+
+        if (!post || !post.description) {
+            aboutContainer.innerHTML = `
+            <div class="container">
+                <div class="state-block">
+                    <strong>Информация о нас</strong>
+                    <p>Контент страницы пока не заполнен. Добавьте его через панель администратора.</p>
+                </div>
+            </div>
+        `;
+            return;
+        }
+
+        let blocks = [];
+        try {
+            blocks = JSON.parse(post.description);
+        } catch {
+            blocks = [];
+        }
+
+        if (!blocks.length) {
+            aboutContainer.innerHTML = `
+            <div class="container">
+                <div class="state-block">
+                    <strong>Информация о нас</strong>
+                    <p>Контент страницы пока не заполнен. Добавьте его через панель администратора.</p>
+                </div>
+            </div>
+        `;
+            return;
+        }
+
+        // Рендерим блоки как на basic_information
+        let html = '<div class="container">';
+
+        // Заголовок
+        html += `
+        <div class="section-head reveal">
+            <div>
+                <div class="eyebrow">О нас</div>
+                <h2>${escapeHtml(post.title || 'О нас')}</h2>
+            </div>
+        </div>
+    `;
+
+        // Рендерим блоки в info-grid
+        html += '<div class="info-grid" style="margin-top:40px;">';
+
+        blocks.forEach((block) => {
+            if (block.type === 'label_value') {
+                html += `
+                <div class="info-block">
+                    <span class="label">${escapeHtml(block.label || '')}</span>
+                    <p class="value">${escapeHtml(block.value || '')}</p>
+                </div>
+            `;
+            } else if (block.type === 'text') {
+                html += `
+                <div class="info-block">
+                    <p class="value">${escapeHtml(block.value || '')}</p>
+                </div>
+            `;
+            } else if (block.type === 'hr') {
+                html += `<hr>`;
+            } else if (block.type === 'file_link') {
+                const url = block.value?.url || block.value || '';
+                const label = block.value?.label || block.label || 'Скачать';
+                html += `
+                <div class="info-block">
+                    <p class="value" style="margin-bottom:4px;">${escapeHtml(block.label || '')}</p>
+                    <a href="${url}" target="_blank" class="pdf-link" download>${escapeHtml(label)}</a>
+                </div>
+            `;
+            } else if (block.type === 'image') {
+                const imgSrc = block.value?.src || block.value || '';
+                const imgAlt = block.value?.alt || block.label || 'Изображение';
+                html += `
+                <div class="info-block">
+                    <p class="value" style="margin-bottom:4px;">${escapeHtml(block.label || '')}</p>
+                    <img src="${imgSrc}" alt="${escapeHtml(imgAlt)}" style="max-width:100%;max-height:500px;border-radius:var(--radius);border:1px solid var(--line-soft);">
+                </div>
+            `;
+            } else if (block.type === 'image_grid') {
+                if (Array.isArray(block.value) && block.value.length) {
+                    html += `
+                    <div class="info-block">
+                        <div class="facility-images">
+                            ${block.value.map(img => `
+                                <img src="${img.src || img}" alt="${img.alt || 'Фото'}" loading="lazy">
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+                }
+            } else if (block.type === 'list') {
+                if (Array.isArray(block.value)) {
+                    html += `
+                    <div class="info-block">
+                        <ul class="doc-sublist">
+                            ${block.value.map(item => `
+                                <li>
+                                    <div class="label">${escapeHtml(item.label || '')}</div>
+                                    <div class="value">${escapeHtml(item.value || '')}</div>
+                                    ${item.file_url ? `<div class="value"><a href="${item.file_url}" target="_blank" class="pdf-link">${escapeHtml(item.file_label || 'Скачать')}</a></div>` : ''}
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                `;
+                }
+            } else if (block.type === 'html') {
+                html += `
+                <div class="info-block">
+                    ${block.value || ''}
+                </div>
+            `;
+            } else {
+                html += `
+                <div class="info-block">
+                    <p class="value">${escapeHtml(block.value || '')}</p>
+                </div>
+            `;
+            }
+        });
+
+        html += '</div></div>';
+        aboutContainer.innerHTML = html;
+    }
+
+    // Добавить функцию загрузки
+    async function loadAbout() {
+        const aboutContainer = document.getElementById('page-about');
+        if (!aboutContainer) return;
+
+        // Показываем скелетон
+        aboutContainer.innerHTML = `
+        <div class="container">
+            <div class="section-head reveal">
+                <div>
+                    <div class="eyebrow">О нас</div>
+                    <h2>Загрузка...</h2>
+                </div>
+            </div>
+            <div class="skeleton-block" style="height:200px;"></div>
+        </div>
+    `;
+
+        try {
+            const data = await Api.about.get();
+            renderAbout(data);
+        } catch (err) {
+            aboutContainer.innerHTML = `
+            <div class="container">
+                <div class="state-block">
+                    <strong>Ошибка загрузки</strong>
+                    <p>${escapeHtml(err.message || 'Попробуйте обновить страницу.')}</p>
+                </div>
+            </div>
+        `;
+        }
     }
 </script>
 
