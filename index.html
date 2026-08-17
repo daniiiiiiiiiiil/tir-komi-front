@@ -1437,6 +1437,36 @@
             color: var(--coral-bright);
             border-color: var(--coral-bright);
         }
+
+        /* Стили для состояния загрузки и пустой страницы */
+        #page-about {
+            min-height: calc(100vh - 250px);
+        }
+
+        #page-about .loading-state {
+            min-height: calc(100vh - 400px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 0;
+        }
+
+        #page-about .loading-state .skeleton-block {
+            width: 100%;
+            max-width: 600px;
+            height: 120px;
+            background: var(--bg-1);
+            border-radius: var(--radius);
+            border: 1px solid var(--line-soft);
+            animation: shimmer 1.4s infinite;
+            background: linear-gradient(100deg, var(--bg-2) 30%, var(--bg-3) 50%, var(--bg-2) 70%);
+            background-size: 200% 100%;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
     </style>
 
     <script type="application/ld+json">
@@ -1980,8 +2010,8 @@
 
         if (!post || !post.description) {
             aboutContainer.innerHTML = `
-            <div class="container">
-                <div class="state-block">
+            <div class="container" style="min-height:calc(100vh - 400px);display:flex;align-items:center;justify-content:center;padding-bottom:60px;">
+                <div class="state-block" style="max-width:600px;width:100%;">
                     <strong>Информация о нас</strong>
                     <p>Контент страницы пока не заполнен. Добавьте его через панель администратора.</p>
                 </div>
@@ -1999,8 +2029,8 @@
 
         if (!blocks.length) {
             aboutContainer.innerHTML = `
-            <div class="container">
-                <div class="state-block">
+            <div class="container" style="min-height:calc(100vh - 400px);display:flex;align-items:center;justify-content:center;padding-bottom:60px;">
+                <div class="state-block" style="max-width:600px;width:100%;">
                     <strong>Информация о нас</strong>
                     <p>Контент страницы пока не заполнен. Добавьте его через панель администратора.</p>
                 </div>
@@ -2009,8 +2039,8 @@
             return;
         }
 
-        // Начинаем строить HTML
-        let html = '<div class="container" style="padding-bottom:60px;">';
+        // Начинаем строить HTML с отступом
+        let html = '<div class="container" style="min-height:calc(100vh - 400px);padding-bottom:60px;">';
 
         // Заголовок
         html += `
@@ -2159,7 +2189,7 @@
             }
         });
 
-        html += '</div></div>';
+        html += '</div>';
         aboutContainer.innerHTML = html;
     }
 
