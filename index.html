@@ -1977,12 +1977,35 @@
             refresh: () => Api.media.list(),
         },
         about: {
-            get: () => apiRequest('/posts?type=about'),
-            update: (id, payload) => apiRequest(`/posts/${id}`, {
-                method: 'PATCH',
-                body: payload
-            }),
-            refresh: () => Api.about.get()
+            get: () => {
+                // Проверяем кеш
+                const cached = localStorage.getItem('cache_about');
+                if (cached) {
+                    try {
+                        const data = JSON.parse(cached);
+                        // Возвращаем кешированные данные
+                        return Promise.resolve(data);
+                    } catch {}
+                }
+                // Если нет кеша — запрос к серверу
+                return apiRequest('/posts?type=about').then(data => {
+                    // Сохраняем в кеш
+                    try {
+                        localStorage.setItem('cache_about', JSON.stringify(data));
+                    } catch {}
+                    return data;
+                });
+            },
+            refresh: () => {
+                // Принудительное обновление
+                localStorage.removeItem('cache_about');
+                return apiRequest('/posts?type=about').then(data => {
+                    try {
+                        localStorage.setItem('cache_about', JSON.stringify(data));
+                    } catch {}
+                    return data;
+                });
+            }
         },
     };
 
@@ -2044,14 +2067,15 @@
 
         // Заголовок
         html += `
-        <div class="section-head reveal">
-            <div>
-                <div class="eyebrow">О нас</div>
-                <h2>${escapeHtml(post.title || 'О нас')}</h2>
-                <p class="lede">${escapeHtml(post.title || '')}</p>
+            <div class="section-head reveal" style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px;">
+                <div>
+                    <div class="eyebrow">О нас</div>
+                    <h2>${escapeHtml(post.title || 'О нас')}</h2>
+                    <p class="lede">${escapeHtml(post.title || '')}</p>
+                </div>
+                <button onclick="refreshAbout()" class="btn btn--sm btn--ghost" style="flex-shrink:0;">🔄 Обновить</button>
             </div>
-        </div>
-    `;
+        `;
 
         // Институт-стрип (если есть блок с типом "institute")
         const instituteBlock = blocks.find(b => b.type === 'institute');
@@ -2198,7 +2222,7 @@
         const aboutContainer = document.getElementById('page-about');
         if (!aboutContainer) return;
 
-        // Показываем скелетон
+        // Сначала показываем скелетон
         aboutContainer.innerHTML = `
         <div class="container">
             <div class="section-head reveal">
@@ -2212,8 +2236,18 @@
     `;
 
         try {
+            // Получаем данные (с кешем)
             const data = await Api.about.get();
             renderAbout(data);
+
+            // Фоновое обновление, если кеш есть
+            const cached = localStorage.getItem('cache_about');
+            if (cached) {
+                // Если есть кеш, обновляем в фоне
+                Api.about.refresh().then(freshData => {
+                    renderAbout(freshData);
+                }).catch(() => {});
+            }
         } catch (err) {
             aboutContainer.innerHTML = `
             <div class="container">
@@ -2226,6 +2260,41 @@
         }
     }
     loadAbout();
+
+    // Принудительное обновление страницы "О нас"
+    window.refreshAbout = async function() {
+        const aboutContainer = document.getElementById('page-about');
+        if (!aboutContainer) return;
+
+        // Показываем состояние загрузки
+        aboutContainer.innerHTML = `
+        <div class="container">
+            <div class="section-head reveal">
+                <div>
+                    <div class="eyebrow">О нас</div>
+                    <h2>Обновление...</h2>
+                </div>
+            </div>
+            <div class="skeleton-block" style="height:200px;"></div>
+        </div>
+    `;
+
+        try {
+            // Принудительно обновляем кеш
+            const data = await Api.about.refresh();
+            renderAbout(data);
+        } catch (err) {
+            aboutContainer.innerHTML = `
+            <div class="container">
+                <div class="state-block">
+                    <strong>Ошибка загрузки</strong>
+                    <p>${escapeHtml(err.message || 'Попробуйте обновить страницу.')}</p>
+                    <button onclick="refreshAbout()" class="btn btn--sm" style="margin-top:12px;">🔄 Повторить</button>
+                </div>
+            </div>
+        `;
+        }
+    };
 </script>
 
 <script>
