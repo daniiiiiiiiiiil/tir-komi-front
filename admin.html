@@ -2512,93 +2512,48 @@
         document.getElementById('blockFile').addEventListener('change', async function(e) {
             const file = this.files[0];
             const display = document.getElementById('fileNameDisplay');
-            const progress = document.getElementById('fileUploadProgress');
-            const progressBar = document.getElementById('fileProgressBar');
 
-            // Сброс предыдущего состояния
             if (!file) {
                 display.textContent = '';
                 display.style.display = 'none';
-                progress.style.display = 'none';
-                uploadedFileUrl = null;
                 uploadedFileData = null;
                 return;
             }
 
-            // Проверка размера (макс 10MB)
-            if (file.size > 10 * 1024 * 1024) {
-                display.textContent = '❌ Файл слишком большой (макс 10MB)';
+            // Проверка размера (макс 5MB для base64)
+            if (file.size > 5 * 1024 * 1024) {
+                display.textContent = '❌ Файл слишком большой (макс 5MB)';
                 display.style.color = '#e74c3c';
                 display.style.display = 'block';
                 this.value = '';
+                uploadedFileData = null;
                 return;
             }
 
-            display.textContent = '⏳ Загрузка ' + file.name + '...';
+            display.textContent = '⏳ Чтение ' + file.name + '...';
             display.style.display = 'block';
             display.style.color = 'var(--steel-dim)';
 
-            progress.style.display = 'block';
-            progressBar.style.width = '0%';
-
             try {
-                const response = await uploadFile(file, (percent) => {
-                    progressBar.style.width = (percent * 100) + '%';
-                });
+                // Конвертируем в base64
+                const base64 = await fileToBase64(file);
+                const ext = file.name.split('.').pop().toLowerCase();
 
-                console.log('Ответ сервера:', response);
-
-                // Получаем URL из ответа
-                let fileUrl = null;
-                let fileId = null;
-
-                if (response) {
-                    if (response.url) {
-                        fileUrl = response.url;
-                    } else if (response.file_url) {
-                        fileUrl = response.file_url;
-                    } else if (response.id) {
-                        fileId = response.id;
-                        fileUrl = `/api/v1/media/${response.id}/file`;
-                    }
-                }
-
-                if (!fileUrl) {
-                    // Если URL нет, пробуем получить через GET запрос
-                    if (fileId) {
-                        const mediaData = await withAuth(() => Api.media.get(fileId));
-                        if (mediaData && mediaData.file_url) {
-                            fileUrl = mediaData.file_url;
-                        } else if (mediaData && mediaData.url) {
-                            fileUrl = mediaData.url;
-                        }
-                    }
-                }
-
-                if (!fileUrl) {
-                    throw new Error('Не удалось получить URL загруженного файла. Ответ: ' + JSON.stringify(response));
-                }
-
-                uploadedFileUrl = fileUrl;
                 uploadedFileData = {
-                    url: fileUrl,
+                    url: `data:application/${ext};base64,${base64}`,
                     label: file.name,
-                    id: fileId || response?.id
+                    base64: base64,
+                    name: file.name,
+                    size: file.size
                 };
 
-                display.textContent = '✅ ' + file.name + ' (загружено)';
+                display.textContent = '✅ ' + file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB, готово)';
                 display.style.color = '#2ecc71';
 
-                setTimeout(() => {
-                    progress.style.display = 'none';
-                }, 1000);
-
             } catch (err) {
-                console.error('Ошибка загрузки файла:', err);
+                console.error('Ошибка чтения файла:', err);
                 display.textContent = '❌ Ошибка: ' + err.message;
                 display.style.color = '#e74c3c';
-                progress.style.display = 'none';
-                uploadedFileUrl = null;
                 uploadedFileData = null;
                 this.value = '';
             }
@@ -2820,14 +2775,21 @@
                     case 'file_link': {
                         const file = fileInput.files[0];
                         if (file) {
-                            // Если файл ещё не загружен, загружаем
+                            // Используем данные из обработчика
                             if (!uploadedFileData) {
-                                showBlockMsg('Загрузите файл (выберите файл и дождитесь загрузки)', true);
-                                return;
+                                // Если файл выбран, но не загружен - загружаем сейчас
+                                const base64 = await fileToBase64(file);
+                                uploadedFileData = {
+                                    url: `data:application/${file.name.split('.').pop().toLowerCase()};base64,${base64}`,
+                                    label: file.name,
+                                    base64: base64,
+                                    name: file.name
+                                };
                             }
                             value = {
                                 url: uploadedFileData.url,
-                                label: uploadedFileData.label || label || file.name
+                                label: uploadedFileData.label || label || file.name,
+                                base64: uploadedFileData.base64
                             };
                         } else {
                             showBlockMsg('Выберите файл', true);
