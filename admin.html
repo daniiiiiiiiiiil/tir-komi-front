@@ -2673,6 +2673,7 @@
         // --- Загрузка страницы ---
         async function loadPage(pageKey) {
             const body = document.getElementById('blocksBody');
+            if (!body) return;
             body.innerHTML = '<tr class="empty-row"><td colspan="5">Загрузка...</td></tr>';
 
             const postType = PAGE_TYPE_MAP[pageKey];
@@ -2717,6 +2718,7 @@
         // --- Рендер блоков ---
         function renderBlocks() {
             const body = document.getElementById('blocksBody');
+            if (!body) return;
             if (!currentBlocks.length) {
                 body.innerHTML = '<tr class="empty-row"><td colspan="5">Нет блоков. Добавьте первый!</td></tr>';
                 return;
@@ -2793,6 +2795,7 @@
         // --- Drag & Drop ---
         function setupDragDrop() {
             const rows = document.querySelectorAll('#blocksBody .block-row');
+            if (!rows.length) return;
             let dragIndex = null;
 
             rows.forEach(row => {
