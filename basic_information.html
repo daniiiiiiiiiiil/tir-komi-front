@@ -318,6 +318,8 @@
             margin-top:2px;
         }
 
+
+
         .pdf-link {
             display: inline-block;
             padding: 0.4em 1.2em;
@@ -1108,7 +1110,6 @@
         }
     }
 
-    // --- Рендеринг ---
     function renderBlock(block) {
         const type = block.type;
         const value = block.value;
@@ -1119,9 +1120,9 @@
 
             case 'label_value':
                 return `
-                    <span class="label">${block.label || ''}</span>
-                    <p class="value">${value || ''}</p>
-                `;
+                <span class="label">${block.label || ''}</span>
+                <p class="value">${value || ''}</p>
+            `;
 
             case 'hr':
                 return '<hr>';
@@ -1129,53 +1130,65 @@
             case 'file_link': {
                 const url = value?.url || value || '';
                 const label = value?.label || block.label || 'Скачать';
-                return `
+
+                // Если это base64 data URL
+                if (url && url.startsWith('data:')) {
+                    return `
                     <p class="value" style="margin-bottom: 4px;">${block.label || ''}</p>
-                    <a href="${url}" target="_blank" class="pdf-link">${label}</a>
+                    <button onclick="downloadFile('${url}', '${label}')" class="pdf-link" style="background:var(--coral);color:#fff;border:none;padding:0.4em 1.2em;border-radius:var(--radius);font-family:var(--f-head);font-weight:600;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;transition:background .25s,transform .25s,box-shadow .25s;box-shadow:0 2px 8px rgba(244,124,104,.3);">
+                        📎 ${label}
+                    </button>
                 `;
+                }
+
+                // Обычная ссылка
+                return `
+                <p class="value" style="margin-bottom: 4px;">${block.label || ''}</p>
+                <a href="${url}" target="_blank" class="pdf-link" download>${label}</a>
+            `;
             }
 
             case 'external_link': {
                 const href = value?.url || value || '#';
                 const linkText = value?.text || block.label || 'Перейти';
                 return `
-                    <p class="value">${block.label || ''} - <a href="${href}" target="_blank">${linkText}</a></p>
-                `;
+                <p class="value">${block.label || ''} - <a href="${href}" target="_blank">${linkText}</a></p>
+            `;
             }
 
             case 'image': {
                 const imgSrc = value?.src || value || '';
                 const imgAlt = value?.alt || block.label || 'Изображение';
                 return `
-                    <p class="value" style="margin-bottom: 4px;">${block.label || ''}</p>
-                    <img src="${imgSrc}" alt="${imgAlt}" class="inn-img" style="max-height: 1000px; width: auto; max-width: 100%;">
-                `;
+                <p class="value" style="margin-bottom: 4px;">${block.label || ''}</p>
+                <img src="${imgSrc}" alt="${imgAlt}" class="inn-img" style="max-height: 1000px; width: auto; max-width: 100%;">
+            `;
             }
 
             case 'image_grid': {
                 if (!Array.isArray(value)) return '';
                 return `
-                    <div class="facility-images">
-                        ${value.map(img => `
-                            <img src="${img.src || img}" alt="${img.alt || 'Фото'}" loading="lazy">
-                        `).join('')}
-                    </div>
-                `;
+                <div class="facility-images">
+                    ${value.map(img => `
+                        <img src="${img.src || img}" alt="${img.alt || 'Фото'}" loading="lazy">
+                    `).join('')}
+                </div>
+            `;
             }
 
             case 'list': {
                 if (!Array.isArray(value)) return '';
                 return `
-                    <ul class="doc-sublist" style="margin-top: 12px; list-style: none;">
-                        ${value.map(item => `
-                            <li>
-                                <div class="label">${item.label || ''}</div>
-                                <div class="value">${item.value || ''}</div>
-                                ${item.file_url ? `<div class="value"><a href="${item.file_url}" target="_blank" class="pdf-link">${item.file_label || 'Скачать'}</a></div>` : ''}
-                            </li>
-                        `).join('')}
-                    </ul>
-                `;
+                <ul class="doc-sublist" style="margin-top: 12px; list-style: none;">
+                    ${value.map(item => `
+                        <li>
+                            <div class="label">${item.label || ''}</div>
+                            <div class="value">${item.value || ''}</div>
+                            ${item.file_url ? `<div class="value"><a href="${item.file_url}" target="_blank" class="pdf-link">${item.file_label || 'Скачать'}</a></div>` : ''}
+                        </li>
+                    `).join('')}
+                </ul>
+            `;
             }
 
             case 'html':
@@ -1494,6 +1507,45 @@
     window.addEventListener('scroll', onScroll, { passive: true });
 
     document.addEventListener('DOMContentLoaded', init);
+
+    // Функция скачивания файла из base64
+    function downloadFile(base64Data, filename) {
+        if (!base64Data) return;
+
+        // Извлекаем тип и данные
+        const parts = base64Data.split(';base64,');
+        if (parts.length !== 2) {
+            console.error('Неверный формат data URL');
+            return;
+        }
+
+        const mimeType = parts[0].replace('data:', '');
+        const base64 = parts[1];
+
+        // Декодируем base64 в бинарные данные
+        const byteCharacters = atob(base64);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: mimeType });
+
+        // Создаем ссылку для скачивания
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename || 'file.pdf';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // Освобождаем память
+        setTimeout(() => URL.revokeObjectURL(url), 100);
+    }
+
+    // Делаем функцию глобальной для использования в onclick
+    window.downloadFile = downloadFile;
 </script>
 
 </body>
