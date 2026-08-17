@@ -1667,47 +1667,6 @@
     </div>
 </main>
 
-<!-- ===== ФУТЕР ===== -->
-<footer class="site-footer">
-    <div class="container">
-        <div class="footer-top">
-            <div class="footer-brand">
-                <h4>ЧУ ДПО ИМДС</h4>
-                <p>Частное учреждение дополнительного профессионального образования «Институт международных связей и делового сотрудничества»</p>
-                <p style="margin-top:12px;font-size:.78rem;color:var(--steel-dim);">© 2026 Все права защищены</p>
-            </div>
-            <div>
-                <h4>Контакты</h4>
-                <ul>
-                    <li><a href="tel:88212314060">+7 (8212) 31-40-60</a></li>
-                    <li><a href="mailto:tirkomi@yandex.ru">tirkomi@yandex.ru</a></li>
-                    <li><span style="color:var(--steel);">г. Сыктывкар, ул. Карла Маркса, д. 228/3</span></li>
-                </ul>
-            </div>
-            <div>
-                <h4>Информация</h4>
-                <ul>
-                    <li><a href="./basic_information.html">Основные сведения</a></li>
-                    <li><a href="./index.html#page-about">Об институте</a></li>
-                    <li><a href="./index.html#page-vacancies">Вакансии</a></li>
-                </ul>
-            </div>
-            <div>
-                <h4>Документы</h4>
-                <ul>
-                    <li><a href="/assets/ustav.pdf" target="_blank">Устав</a></li>
-                    <li><a href="/assets/licenzija_2020_goda.pdf" target="_blank">Лицензия</a></li>
-                    <li><a href="/assets/prajs_2025.pdf" target="_blank">Прайс-лист</a></li>
-                </ul>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <span>Разработано в ЧУ ДПО ИМДС</span>
-            <a href="./admin.html" class="admin-link">Панель администратора</a>
-        </div>
-    </div>
-</footer>
-
 <script>
 
     const API_BASE = window.__API_BASE__ || 'https://tir-komi.relaxdev.ru/api/v1';
@@ -2540,7 +2499,13 @@
             try {
                 const data = await withAuth(() => Api.posts.getByType(postType));
                 const items = data.items || data || [];
-                const post = items.length > 0 ? items[0] : null;
+                const post = items.length
+                    ? items.reduce((a, b) => (b.id > a.id ? b : a))
+                    : null;
+
+                if (items.length > 1) {
+                    console.warn(`Найдено ${items.length} постов типа "${postType}" — используется id=${post.id}. Стоит удалить дубликаты через API.`);
+                }
 
                 if (post) {
                     currentPostId = post.id;
@@ -2860,6 +2825,22 @@
 
         // --- Сохранение страницы ---
         document.getElementById('savePageBtn').addEventListener('click', async () => {
+            if (!currentPostId) {
+                const fresh = await withAuth(() => Api.posts.getByType(postType));
+                const freshItems = fresh.items || fresh || [];
+                if (freshItems.length) {
+                    currentPostId = freshItems.reduce((a, b) => (b.id > a.id ? b : a)).id;
+                }
+            }
+
+            if (currentPostId) {
+                await withAuth(() => Api.posts.update(currentPostId, {
+                    description: { Set: true, Value: descriptionJson }
+                }));
+            } else {
+                const newPost = await withAuth(() => Api.posts.create({ ... }));
+                currentPostId = newPost.id;
+            }
             const msg = document.getElementById('pageSaveMsg');
             msg.className = 'form-msg';
 
