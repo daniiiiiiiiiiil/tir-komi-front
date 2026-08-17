@@ -1677,6 +1677,8 @@
     const API_BASE = window.__API_BASE__ || 'https://tir-komi.relaxdev.ru/api/v1';
 
     async function apiRequest(path, { method = 'GET', body, headers, ...rest } = {}) {
+        console.log(`📤 ${method} ${path}`, body);
+
         const res = await fetch(API_BASE + path, {
             method,
             credentials: 'include',
@@ -1693,6 +1695,8 @@
         if (text) {
             try { data = JSON.parse(text); } catch (_) { data = text; }
         }
+
+        console.log(`📥 ${method} ${path} -> ${res.status}`, data);
 
         if (!res.ok) {
             const message = (data && (data.message || data.error)) || `Ошибка запроса (${res.status})`;
@@ -2965,27 +2969,13 @@
             }
 
             try {
-                // Очищаем лишние данные перед сохранением
-                const blocksToSave = currentBlocks.map(block => {
-                    const b = { ...block };
-                    if (b.value && typeof b.value === 'object') {
-                        if (b.value.base64) {
-                            b.value = { url: b.value.url, label: b.value.label || b.label };
-                        }
-                        if (Array.isArray(b.value)) {
-                            b.value = b.value.map(item => {
-                                if (item && typeof item === 'object' && item.base64) {
-                                    return { src: item.src || '/uploads/' + item.alt, alt: item.alt };
-                                }
-                                return item;
-                            });
-                        }
-                    }
-                    return b;
-                });
+                // Подготавливаем данные для отправки
+                const descriptionJson = JSON.stringify(currentBlocks);
 
-                const descriptionJson = JSON.stringify(blocksToSave);
+                // Проверяем, что отправляем
+                console.log('📤 Отправляем description:', descriptionJson);
 
+                // Если нет currentPostId - пытаемся найти
                 if (!currentPostId) {
                     const freshData = await withAuth(() => Api.posts.getByType(postType));
                     const freshItems = freshData.items || freshData || [];
@@ -2996,17 +2986,27 @@
                 }
 
                 if (currentPostId) {
-                    await withAuth(() => Api.posts.update(currentPostId, {
-                        description: { Set: true, Value: descriptionJson }
-                    }));
+                    // ПРОСТОЙ JSON - без Nullable обёртки
+                    const patchData = {
+                        description: descriptionJson
+                    };
+
+                    console.log('📤 PATCH /posts/' + currentPostId, patchData);
+
+                    await withAuth(() => Api.posts.update(currentPostId, patchData));
                     msg.textContent = '✅ Страница обновлена!';
                 } else {
-                    const newPost = await withAuth(() => Api.posts.create({
+                    // Создаём новый пост
+                    const newPostData = {
                         title: PAGE_TITLES[currentPageKey] || currentPageKey,
                         description: descriptionJson,
                         type: postType,
                         date: new Date().toISOString()
-                    }));
+                    };
+
+                    console.log('📤 POST /posts', newPostData);
+
+                    const newPost = await withAuth(() => Api.posts.create(newPostData));
                     currentPostId = newPost.id;
                     msg.textContent = '✅ Страница создана!';
                 }
@@ -3014,6 +3014,7 @@
                 msg.className = 'form-msg is-visible is-ok';
                 setTimeout(() => { msg.className = 'form-msg'; }, 3000);
 
+                // Перезагружаем страницу
                 await loadPage(currentPageKey);
 
             } catch (err) {
