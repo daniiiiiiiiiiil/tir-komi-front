@@ -2453,6 +2453,7 @@
         let currentBlocks = [];
         let currentPostId = null;
         let editingBlockIndex = -1;
+        let listItems = [];
 
         // --- Загрузка файла на сервер ---
         async function uploadFile(file, onProgress) {
@@ -2837,147 +2838,162 @@
         }
 
         // --- Добавление блока ---
-        document.getElementById('addBlockBtn').addEventListener('click', async () => {
-            const type = document.getElementById('blockType').value;
-            const label = document.getElementById('blockLabel').value.trim();
-            const textValue = document.getElementById('blockValue').value.trim();
-            const urlValue = document.getElementById('blockUrl').value.trim();
-            const fileInput = document.getElementById('blockFile');
-            const imagesInput = document.getElementById('blockImages');
+        // --- Добавление блока ---
+        const addBlockBtn = document.getElementById('addBlockBtn');
+        if (addBlockBtn) {
+            addBlockBtn.addEventListener('click', async () => {
+                const type = document.getElementById('blockType').value;
+                const label = document.getElementById('blockLabel').value.trim();
+                const textValue = document.getElementById('blockValue').value.trim();
+                const urlValue = document.getElementById('blockUrl').value.trim();
+                const fileInput = document.getElementById('blockFile');
+                const imagesInput = document.getElementById('blockImages');
 
-            let value = null;
+                let value = null;
 
-            try {
-                switch (type) {
-                    case 'text':
-                    case 'label_value':
-                        if (!textValue) {
-                            showBlockMsg('Введите текст или значение', true);
-                            return;
-                        }
-                        value = textValue;
-                        break;
-
-                    case 'hr':
-                        value = null;
-                        break;
-
-                    case 'file_link': {
-                        const file = fileInput.files[0];
-                        if (file) {
-                            const base64 = await fileToBase64(file);
-                            value = {
-                                url: `data:application/pdf;base64,${base64}`,
-                                label: label || file.name,
-                                base64: base64
-                            };
-                        } else {
-                            showBlockMsg('Выберите файл', true);
-                            return;
-                        }
-                        break;
-                    }
-
-                    case 'external_link': {
-                        const urlValue = document.getElementById('blockUrl').value.trim();
-                        if (!urlValue) {
-                            showBlockMsg('Укажите URL ссылки', true);
-                            return;
-                        }
-                        value = { url: urlValue, text: label || 'Перейти' };
-                        break;
-                    }
-
-                    case 'image': {
-                        const file = fileInput.files[0];
-                        if (file) {
-                            const base64 = await fileToBase64(file);
-                            value = {
-                                url: `data:image/png;base64,${base64}`,
-                                alt: label || file.name,
-                                base64: base64
-                            };
-                        } else {
-                            showBlockMsg('Выберите изображение', true);
-                            return;
-                        }
-                        break;
-                    }
-
-
-                    case 'image_grid': {
-                        const files = imagesInput.files;
-                        if (files.length === 0) {
-                            showBlockMsg('Выберите хотя бы одно изображение', true);
-                            return;
-                        }
-                        const images = [];
-                        for (let i = 0; i < files.length; i++) {
-                            const file = files[i];
-                            const base64 = await fileToBase64(file);
-                            images.push({
-                                src: `data:image/png;base64,${base64}`,
-                                alt: file.name,
-                                base64: base64
-                            });
-                        }
-                        value = images;
-                        break;
-                    }
-
-                    case 'list':
-                        try {
-                            value = JSON.parse(textValue);
-                            if (!Array.isArray(value)) {
-                                showBlockMsg('Значение должно быть массивом', true);
+                try {
+                    switch (type) {
+                        case 'text':
+                        case 'label_value':
+                            if (!textValue) {
+                                showBlockMsg('Введите текст или значение', true);
                                 return;
                             }
-                        } catch {
-                            showBlockMsg('Неверный формат JSON. Ожидается массив.', true);
-                            return;
+                            value = textValue;
+                            break;
+
+                        case 'hr':
+                            value = null;
+                            break;
+
+                        case 'file_link': {
+                            const file = fileInput.files[0];
+                            if (file) {
+                                const base64 = await fileToBase64(file);
+                                value = {
+                                    url: `data:application/pdf;base64,${base64}`,
+                                    label: label || file.name,
+                                    base64: base64
+                                };
+                            } else {
+                                showBlockMsg('Выберите файл', true);
+                                return;
+                            }
+                            break;
                         }
-                        break;
 
-                    case 'html':
-                        value = textValue;
-                        break;
+                        case 'external_link': {
+                            const urlValue = document.getElementById('blockUrl').value.trim();
+                            if (!urlValue) {
+                                showBlockMsg('Укажите URL ссылки', true);
+                                return;
+                            }
+                            value = { url: urlValue, text: label || 'Перейти' };
+                            break;
+                        }
 
-                    default:
-                        value = textValue;
+                        case 'image': {
+                            const file = fileInput.files[0];
+                            if (file) {
+                                const base64 = await fileToBase64(file);
+                                value = {
+                                    url: `data:image/png;base64,${base64}`,
+                                    alt: label || file.name,
+                                    base64: base64
+                                };
+                            } else {
+                                showBlockMsg('Выберите изображение', true);
+                                return;
+                            }
+                            break;
+                        }
+
+                        case 'image_grid': {
+                            const files = imagesInput.files;
+                            if (files.length === 0) {
+                                showBlockMsg('Выберите хотя бы одно изображение', true);
+                                return;
+                            }
+                            const images = [];
+                            for (let i = 0; i < files.length; i++) {
+                                const file = files[i];
+                                const base64 = await fileToBase64(file);
+                                images.push({
+                                    src: `data:image/png;base64,${base64}`,
+                                    alt: file.name,
+                                    base64: base64
+                                });
+                            }
+                            value = images;
+                            break;
+                        }
+
+                        case 'list':
+                            // Для списка используем данные из редактора
+                            const listData = document.getElementById('blockValue').value.trim();
+                            if (listData) {
+                                try {
+                                    value = JSON.parse(listData);
+                                    if (!Array.isArray(value)) {
+                                        showBlockMsg('Значение должно быть массивом', true);
+                                        return;
+                                    }
+                                } catch {
+                                    showBlockMsg('Неверный формат JSON. Ожидается массив.', true);
+                                    return;
+                                }
+                            } else {
+                                value = [];
+                            }
+                            break;
+
+                        case 'html':
+                            value = textValue;
+                            break;
+
+                        default:
+                            value = textValue;
+                    }
+
+                    const block = { type, label, value };
+
+                    if (editingBlockIndex >= 0) {
+                        currentBlocks[editingBlockIndex] = block;
+                        editingBlockIndex = -1;
+                        document.getElementById('addBlockBtn').textContent = '➕ Добавить блок';
+                    } else {
+                        currentBlocks.push(block);
+                    }
+
+                    // Очистка формы
+                    document.getElementById('blockLabel').value = '';
+                    document.getElementById('blockValue').value = '';
+                    document.getElementById('blockUrl').value = '';
+                    document.getElementById('blockFile').value = '';
+                    document.getElementById('blockImages').value = '';
+                    const fileNameDisplay = document.getElementById('fileNameDisplay');
+                    if (fileNameDisplay) {
+                        fileNameDisplay.textContent = '';
+                        fileNameDisplay.style.display = 'none';
+                    }
+                    const imagesPreview = document.getElementById('imagesPreview');
+                    if (imagesPreview) imagesPreview.innerHTML = '';
+                    const fileLabel = document.getElementById('fileLabel');
+                    if (fileLabel) fileLabel.textContent = '📁 Выберите файл';
+                    const imagesLabel = document.getElementById('imagesLabel');
+                    if (imagesLabel) imagesLabel.textContent = '🖼️ Выберите изображения';
+                    uploadedFileUrl = null;
+                    uploadedFileData = null;
+
+                    renderBlocks();
+                    showBlockMsg('Блок сохранен', false);
+                    updateBlockFormFields();
+
+                } catch (err) {
+                    showBlockMsg('Ошибка: ' + err.message, true);
                 }
-
-                const block = { type, label, value };
-
-                if (editingBlockIndex >= 0) {
-                    currentBlocks[editingBlockIndex] = block;
-                    editingBlockIndex = -1;
-                    document.getElementById('addBlockBtn').textContent = '➕ Добавить блок';
-                } else {
-                    currentBlocks.push(block);
-                }
-
-                // Очистка формы
-                document.getElementById('blockLabel').value = '';
-                document.getElementById('blockValue').value = '';
-                document.getElementById('blockUrl').value = '';
-                document.getElementById('blockFile').value = '';
-                document.getElementById('blockImages').value = '';
-                document.getElementById('fileNameDisplay').textContent = '';
-                document.getElementById('fileNameDisplay').style.display = 'none';
-                document.getElementById('imagesPreview').innerHTML = '';
-                document.getElementById('fileLabel').textContent = '📁 Выберите файл';
-                document.getElementById('imagesLabel').textContent = '🖼️ Выберите изображения';
-                uploadedFileUrl = null;
-                uploadedFileData = null;
-
-                renderBlocks();
-                showBlockMsg('Блок сохранен', false);
-                updateBlockFormFields();
-
-            } catch (err) {
-                showBlockMsg('Ошибка: ' + err.message, true);
-            }
-        });
+            });
+        }
 
         // --- Обработчики для блоков ---
         document.getElementById('blocksBody').addEventListener('click', (e) => {
@@ -3136,9 +3152,6 @@
         // Инициализируем поля при загрузке
         updateBlockFormFields();
 
-
-        // ===== РЕДАКТОР СПИСКА =====
-        let listItems = [];
 
         function renderListItems() {
             const container = document.getElementById('listItemsContainer');
