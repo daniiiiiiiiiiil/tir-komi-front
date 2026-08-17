@@ -1641,7 +1641,7 @@
                         <div class="form-row" style="grid-column:span 1;">
                             <label>Тип блока</label>
                             <select name="blockType" id="blockType">
-                                <option value="label_value">📋 Метка + значение</option>
+                                <option value="label_value">📋 Заголовок + значение</option>
                                 <option value="text">📝 Текст</option>
                                 <option value="hr">➖ Разделитель</option>
                                 <option value="file_link">📎 Ссылка на файл</option>
@@ -1655,7 +1655,7 @@
 
                         <!-- Метка -->
                         <div class="form-row" style="grid-column:span 1;">
-                            <label>Метка (заголовок)</label>
+                            <label>Заголовок</label>
                             <input type="text" id="blockLabel" placeholder="Например: Полное наименование">
                         </div>
 
@@ -1675,8 +1675,8 @@
                         <div class="form-row" id="fileUploadRow" style="grid-column:1/-1;display:none;">
                             <label>Загрузить файл</label>
                             <div class="file-input-wrapper">
-                                <input type="file" id="blockFile" accept="application/pdf">
-                                <span class="file-label" id="fileLabel">📁 Выберите PDF файл</span>
+                                <input type="file" id="blockFile" accept="application/pdf,image/*">
+                                <span class="file-label" id="fileLabel">📁 Выберите файл (PDF или изображение)</span>
                             </div>
                             <div id="fileNameDisplay" style="margin-top:6px;"></div>
                         </div>
@@ -2577,15 +2577,23 @@
                     document.getElementById('blockValue').placeholder = 'Введите HTML код...';
                     break;
                 case 'file_link':
-                    fileUploadRow.style.display = 'block';
-                    document.getElementById('fileLabel').textContent = '📁 Выберите PDF файл';
+                    if (fileUploadRow) {
+                        fileUploadRow.style.display = 'block';
+                        const fileInput = document.getElementById('blockFile');
+                        if (fileInput) fileInput.accept = 'application/pdf';
+                        document.getElementById('fileLabel').textContent = '📁 Выберите PDF файл';
+                    }
                     break;
                 case 'external_link':
                     urlRow.style.display = 'block';
                     break;
                 case 'image':
-                    fileUploadRow.style.display = 'block';
-                    document.getElementById('fileLabel').textContent = '🖼️ Выберите изображение';
+                    if (fileUploadRow) {
+                        fileUploadRow.style.display = 'block';
+                        const fileInput = document.getElementById('blockFile');
+                        if (fileInput) fileInput.accept = 'image/*';
+                        document.getElementById('fileLabel').textContent = '🖼️ Выберите изображение';
+                    }
                     break;
                 case 'image_grid':
                     imageGridRow.style.display = 'block';
