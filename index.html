@@ -1578,94 +1578,14 @@
 
     </div>
 
-    <!-- ================= PAGE 2 — О НАС ================= -->
     <div class="page" id="page-about">
-
         <section id="institute">
             <div class="container">
-                <div class="section-head reveal">
-                    <div>
-                        <div class="eyebrow">О нас</div>
-                        <h2>Обучение на охранника в Сыктывкаре</h2>
-                        <p class="lede">Образование по профессии «охранник»: обучение охраны и обучение на оружие проводит <strong>Институт международных связей и делового сотрудничества</strong>. Практические стрелковые занятия в рамках программы проходят в тире.</p>
-                    </div>
-                </div>
-
-                <div class="institute-strip reveal">
-                    <span class="badge">ИМСДС</span>
-                    <div>
-                        <strong>Институт международных связей и делового сотрудничества (Сыктывкар)</strong>
-                        <span>Институт реализует образовательную программу по профессии «охранник»: правовая подготовка, тактика действий, курс обучения на оружие и итоговая аттестация. Документ по итогам обучения выдаёт институт.</span>
-                        <div class="institute-note">Практическая стрельба в рамках программы проходит в тире.</div>
-                    </div>
-                </div>
-
-                <div class="grid grid--3 reveal reveal-stagger" style="margin-top:32px;">
-                    <div class="dir-card frame" style="--i:0">
-                        <div class="inner">
-                            <span class="dir-index">ПРОГРАММА</span>
-                            <h3>Обучение на охранника Сыктывкар</h3>
-                            <button type="button" class="card-toggle" data-toggle>Подробнее <span class="arrow">▾</span></button>
-                            <p class="card-desc">Образование по профессии «охранник»: теория, тактика действий, правовая, физическая и огневая подготовка, подготовка к квалификационному экзамену на разряд.</p>
-                        </div>
-                    </div>
-                    <div class="dir-card frame" style="--i:1">
-                        <div class="inner">
-                            <span class="dir-index">ПРОГРАММА</span>
-                            <h3>Обучение охраны и обращению с оружием</h3>
-                            <button type="button" class="card-toggle" data-toggle>Подробнее <span class="arrow">▾</span></button>
-                            <p class="card-desc">Устройство и разборка оружия, правила хранения и переноски, безопасное обращение — курс обучения на оружие в Сыктывкаре с итоговой практической аттестацией.</p>
-                        </div>
-                    </div>
-                    <div class="dir-card frame" style="--i:2">
-                        <div class="inner">
-                            <span class="dir-index">ПРАКТИКА</span>
-                            <h3>Стрельба в тире</h3>
-                            <button type="button" class="card-toggle" data-toggle>Подробнее <span class="arrow">▾</span></button>
-                            <p class="card-desc">Практическая часть программы: постановка хвата и стойки, отработка точности на разных дистанциях под контролем инструктора.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="about-grid" style="margin-top:56px;">
-                    <div class="reveal">
-                        <h3 style="margin-bottom:1em;">Контакты и режим работы</h3>
-                        <div class="contact-board">
-                            <div class="row"><span>Телефон</span><span><a href="tel:882123140060">8-8212-314060</a></span></div>
-                            <div class="row"><span>Email</span><span><a href="mailto:tirkomi@mail.ru">tirkomi@yandex.ru</a></span></div>
-                            <div class="row"><span>Понедельник — Пятница</span><span>9:00 — 17:00</span></div>
-                        </div>
-
-                        <div class="study-mode">
-                            <strong>Режим учебных занятий</strong>
-                            <p>Занятия проводятся в группах по расписанию каждой группы (устанавливается отдельно) в режиме работы учреждения. Академический час учебных занятий — 45 минут.</p>
-                        </div>
-
-                        <div class="info-list">
-                            <div class="item">
-                                <span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 1 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></span>
-                                <div><strong>Адрес практики</strong><span>г. Сыктывкар, ул. Карла Маркса, д. 228/3 — Институт международных связей и делового сотрудничества, вход со стороны шлагбаума</span></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="reveal">
-                        <div class="map-wrap">
-                            <span class="map-tag">КАРЛА МАРКСА, 228/3</span>
-                            <iframe
-                                    src="https://yandex.com/map-widget/v1/?text=%D0%A1%D1%8B%D0%BA%D1%82%D1%8B%D0%B2%D0%BA%D0%B0%D1%80%2C%20%D0%9A%D0%B0%D1%80%D0%BB%D0%B0%20%D0%9C%D0%B0%D1%80%D0%BA%D1%81%D0%B0%20228%D0%90&z=17"
-                                    width="100%"
-                                    height="450"
-                                    frameborder="0"
-                                    loading="lazy"
-                                    title="Институт международных связей и делового сотрудничества, Карла Маркса 228А">
-                            </iframe>
-                        </div>
-                    </div>
+                <div id="aboutContent">
+                    <!-- Контент будет загружен из API -->
                 </div>
             </div>
         </section>
-
     </div>
 
     <!-- ================= PAGE 3 — МЕТОДИЧКИ ================= -->
@@ -2156,6 +2076,7 @@
         `;
         }
     }
+    loadAbout();
 </script>
 
 <script>
