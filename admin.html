@@ -2811,24 +2811,13 @@
                     case 'image': {
                         const file = fileInput.files[0];
                         if (file) {
-                            // Для изображений используем отдельную загрузку через media
-                            const formData = new FormData();
-                            formData.append('file', file);
-                            formData.append('type', 'photo');
-                            formData.append('title', label || file.name);
-
-                            try {
-                                const response = await withAuth(() => Api.media.create(formData));
-                                const url = response.url || `/api/v1/media/${response.id}/file`;
-                                value = {
-                                    url: url,
-                                    alt: label || file.name,
-                                    id: response.id
-                                };
-                            } catch (err) {
-                                showBlockMsg('Ошибка загрузки изображения: ' + err.message, true);
-                                return;
-                            }
+                            const base64 = await fileToBase64(file);
+                            const ext = file.name.split('.').pop().toLowerCase();
+                            value = {
+                                url: `data:image/${ext};base64,${base64}`,
+                                alt: label || file.name,
+                                base64: base64
+                            };
                         } else {
                             showBlockMsg('Выберите изображение', true);
                             return;
@@ -2845,25 +2834,13 @@
                         const images = [];
                         for (let i = 0; i < files.length; i++) {
                             const file = files[i];
-                            const formData = new FormData();
-                            formData.append('file', file);
-                            formData.append('type', 'photo');
-                            formData.append('title', file.name);
-
-                            try {
-                                const response = await withAuth(() => Api.media.create(formData));
-                                const url = response.url || `/api/v1/media/${response.id}/file`;
-                                images.push({
-                                    src: url,
-                                    alt: file.name
-                                });
-                            } catch (err) {
-                                console.error('Ошибка загрузки:', err);
-                            }
-                        }
-                        if (images.length === 0) {
-                            showBlockMsg('Не удалось загрузить изображения', true);
-                            return;
+                            const base64 = await fileToBase64(file);
+                            const ext = file.name.split('.').pop().toLowerCase();
+                            images.push({
+                                src: `data:image/${ext};base64,${base64}`,
+                                alt: file.name,
+                                base64: base64
+                            });
                         }
                         value = images;
                         break;
