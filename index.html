@@ -1374,6 +1374,69 @@
         @media (max-width:620px){
             .modal-window{padding:24px 20px;}
         }
+
+        /* Стили для динамической страницы "О нас" */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media (max-width: 700px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .info-block {
+            background: var(--bg-0);
+            border: 1px solid var(--line-soft);
+            padding: 20px 24px;
+            border-radius: var(--radius);
+        }
+
+        .label {
+            font-family: var(--f-mono);
+            font-size: .72rem;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: var(--coral);
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .value {
+            font-size: 1rem;
+            color: var(--dark-blue);
+            margin: 0;
+        }
+
+        .facility-images {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px;
+        }
+        .facility-images img {
+            width: 100%;
+            aspect-ratio: 4/3;
+            object-fit: cover;
+            border-radius: var(--radius);
+            border: 1px solid var(--line-soft);
+            background: var(--bg-1);
+        }
+
+        .btn--line {
+            color: var(--coral);
+            border-bottom: 2px solid var(--coral-dim);
+            padding: .3em 0;
+            text-decoration: none;
+            font-family: var(--f-body);
+            font-size: .95rem;
+            transition: color .2s, border-color .2s;
+        }
+        .btn--line:hover {
+            color: var(--coral-bright);
+            border-color: var(--coral-bright);
+        }
     </style>
 
     <script type="application/ld+json">
@@ -1946,6 +2009,7 @@
             return;
         }
 
+        // Начинаем строить HTML
         let html = '<div class="container">';
 
         // Заголовок
@@ -1959,93 +2023,137 @@
         </div>
     `;
 
-        // Рендерим блоки с правильными классами
-        html += '<div class="info-grid" style="margin-top:40px;">';
+        // Институт-стрип (если есть блок с типом "institute")
+        const instituteBlock = blocks.find(b => b.type === 'institute');
+        if (instituteBlock) {
+            html += `
+            <div class="institute-strip reveal">
+                <span class="badge">ИМСДС</span>
+                <div>
+                    <strong>${escapeHtml(instituteBlock.value?.title || 'Институт международных связей и делового сотрудничества')}</strong>
+                    <span>${escapeHtml(instituteBlock.value?.description || '')}</span>
+                    ${instituteBlock.value?.note ? `<div class="institute-note">${escapeHtml(instituteBlock.value.note)}</div>` : ''}
+                </div>
+            </div>
+        `;
+        }
+
+        // Блоки в сетке
+        html += '<div class="info-grid" style="margin-top:32px;">';
 
         blocks.forEach((block) => {
+            // Пропускаем institute, так как уже вывели
+            if (block.type === 'institute') return;
+
             if (block.type === 'label_value') {
                 html += `
-                <div class="info-block">
-                    <span class="label">${escapeHtml(block.label || '')}</span>
-                    <p class="value">${escapeHtml(block.value || '')}</p>
+                <div class="info-block" style="background:var(--bg-0);border:1px solid var(--line-soft);padding:20px 24px;border-radius:var(--radius);">
+                    <span class="label" style="font-family:var(--f-mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--coral);display:block;margin-bottom:6px;">${escapeHtml(block.label || '')}</span>
+                    <p class="value" style="font-size:1rem;color:var(--dark-blue);margin:0;">${escapeHtml(block.value || '')}</p>
                 </div>
             `;
             } else if (block.type === 'text') {
                 html += `
-                <div class="info-block">
-                    <p class="value">${escapeHtml(block.value || '')}</p>
+                <div class="info-block" style="background:var(--bg-0);border:1px solid var(--line-soft);padding:20px 24px;border-radius:var(--radius);grid-column:1/-1;">
+                    <p class="value" style="font-size:.95rem;color:var(--ink-dim);margin:0;line-height:1.8;">${escapeHtml(block.value || '')}</p>
                 </div>
             `;
             } else if (block.type === 'hr') {
-                html += `<hr style="border-color:var(--line-soft);margin:16px 0;">`;
+                html += `<hr style="border-color:var(--line-soft);margin:8px 0;grid-column:1/-1;">`;
             } else if (block.type === 'file_link') {
                 const url = block.value?.url || block.value || '';
                 const label = block.value?.label || block.label || 'Скачать';
                 html += `
-                <div class="info-block">
-                    <p class="value" style="margin-bottom:4px;">${escapeHtml(block.label || '')}</p>
-                    <a href="${url}" target="_blank" class="pdf-link" download>${escapeHtml(label)}</a>
+                <div class="info-block" style="background:var(--bg-0);border:1px solid var(--line-soft);padding:20px 24px;border-radius:var(--radius);">
+                    ${block.label ? `<span class="label" style="font-family:var(--f-mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--coral);display:block;margin-bottom:6px;">${escapeHtml(block.label)}</span>` : ''}
+                    <a href="${url}" target="_blank" class="btn--line" style="color:var(--coral);border-bottom:2px solid var(--coral-dim);padding:.3em 0;text-decoration:none;font-family:var(--f-body);font-size:.95rem;">${escapeHtml(label)}</a>
                 </div>
             `;
             } else if (block.type === 'external_link') {
                 const url = block.value?.url || block.value || '';
                 const text = block.value?.text || block.label || 'Перейти';
                 html += `
-                <div class="info-block">
-                    <p class="value" style="margin-bottom:4px;">${escapeHtml(block.label || '')}</p>
-                    <a href="${url}" target="_blank" class="pdf-link" rel="noopener">${escapeHtml(text)}</a>
+                <div class="info-block" style="background:var(--bg-0);border:1px solid var(--line-soft);padding:20px 24px;border-radius:var(--radius);">
+                    ${block.label ? `<span class="label" style="font-family:var(--f-mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--coral);display:block;margin-bottom:6px;">${escapeHtml(block.label)}</span>` : ''}
+                    <a href="${url}" target="_blank" class="btn--line" style="color:var(--electric-blue);border-bottom:2px solid var(--electric-blue);padding:.3em 0;text-decoration:none;font-family:var(--f-body);font-size:.95rem;" rel="noopener">${escapeHtml(text)}</a>
                 </div>
             `;
             } else if (block.type === 'image') {
                 const imgSrc = block.value?.url || block.value || '';
                 const imgAlt = block.value?.alt || block.label || 'Изображение';
                 html += `
-                <div class="info-block">
-                    ${block.label ? `<p class="value" style="margin-bottom:4px;">${escapeHtml(block.label)}</p>` : ''}
-                    <img src="${imgSrc}" alt="${escapeHtml(imgAlt)}" style="max-width:100%;max-height:500px;border-radius:var(--radius);border:1px solid var(--line-soft);">
+                <div class="info-block" style="background:var(--bg-0);border:1px solid var(--line-soft);padding:20px 24px;border-radius:var(--radius);grid-column:1/-1;">
+                    ${block.label ? `<span class="label" style="font-family:var(--f-mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--coral);display:block;margin-bottom:6px;">${escapeHtml(block.label)}</span>` : ''}
+                    <img src="${imgSrc}" alt="${escapeHtml(imgAlt)}" style="width:100%;max-height:500px;object-fit:contain;border-radius:var(--radius);border:1px solid var(--line-soft);background:var(--bg-1);">
                 </div>
             `;
             } else if (block.type === 'image_grid') {
                 if (Array.isArray(block.value) && block.value.length) {
                     html += `
-                    <div class="info-block">
-                        ${block.label ? `<span class="label">${escapeHtml(block.label)}</span>` : ''}
-                        <div class="facility-images">
+                    <div class="info-block" style="background:var(--bg-0);border:1px solid var(--line-soft);padding:20px 24px;border-radius:var(--radius);grid-column:1/-1;">
+                        ${block.label ? `<span class="label" style="font-family:var(--f-mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--coral);display:block;margin-bottom:12px;">${escapeHtml(block.label)}</span>` : ''}
+                        <div class="facility-images" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;">
                             ${block.value.map(img => `
-                                <img src="${img.src || img}" alt="${img.alt || 'Фото'}" loading="lazy">
+                                <img src="${img.src || img}" alt="${img.alt || 'Фото'}" loading="lazy" style="width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:var(--radius);border:1px solid var(--line-soft);background:var(--bg-1);">
                             `).join('')}
                         </div>
                     </div>
                 `;
                 }
             } else if (block.type === 'list') {
-                if (Array.isArray(block.value)) {
+                if (Array.isArray(block.value) && block.value.length) {
                     html += `
-                    <div class="info-block">
-                        <span class="label">${escapeHtml(block.label || '')}</span>
-                        <ul class="doc-sublist" style="margin-top:12px;list-style:none;padding:0;">
+                    <div class="info-block" style="background:var(--bg-0);border:1px solid var(--line-soft);padding:20px 24px;border-radius:var(--radius);grid-column:1/-1;">
+                        ${block.label ? `<span class="label" style="font-family:var(--f-mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--coral);display:block;margin-bottom:12px;">${escapeHtml(block.label)}</span>` : ''}
+                        <div style="display:grid;grid-template-columns:1fr;gap:8px;">
                             ${block.value.map(item => `
-                                <li style="margin-bottom:10px;padding-left:12px;border-left:1px solid var(--brass-dim);">
-                                    ${item.label ? `<div class="label" style="color:var(--steel);font-size:.82rem;margin-bottom:2px;">${escapeHtml(item.label)}</div>` : ''}
-                                    <div class="value" style="font-size:.92rem;color:var(--paper);">${escapeHtml(item.value || '')}</div>
-                                    ${item.file_url ? `<div class="value"><a href="${item.file_url}" target="_blank" class="pdf-link">${escapeHtml(item.file_label || 'Скачать')}</a></div>` : ''}
-                                </li>
+                                <div style="padding:8px 12px;border-left:3px solid var(--coral);background:var(--bg-1);border-radius:var(--radius);">
+                                    ${item.label ? `<div style="font-family:var(--f-mono);font-size:.72rem;color:var(--steel-dim);letter-spacing:.05em;text-transform:uppercase;">${escapeHtml(item.label)}</div>` : ''}
+                                    <div style="font-size:.92rem;color:var(--dark-blue);">${escapeHtml(item.value || '')}</div>
+                                    ${item.file_url ? `<a href="${item.file_url}" target="_blank" class="btn--line" style="color:var(--coral);border-bottom:2px solid var(--coral-dim);font-size:.78rem;padding:.2em 0;text-decoration:none;">${escapeHtml(item.file_label || 'Скачать')}</a>` : ''}
+                                </div>
                             `).join('')}
-                        </ul>
+                        </div>
                     </div>
                 `;
                 }
             } else if (block.type === 'html') {
                 html += `
-                <div class="info-block">
+                <div class="info-block" style="background:var(--bg-0);border:1px solid var(--line-soft);padding:20px 24px;border-radius:var(--radius);grid-column:1/-1;">
                     ${block.value || ''}
                 </div>
             `;
-            } else {
-                // Fallback для неизвестных типов
+            } else if (block.type === 'contact_board') {
+                // Специальный тип для контактов
+                const items = block.value || [];
                 html += `
-                <div class="info-block">
-                    <p class="value">${escapeHtml(block.value || '')}</p>
+                <div class="info-block" style="background:var(--bg-0);border:1px solid var(--line-soft);padding:20px 24px;border-radius:var(--radius);grid-column:1/-1;">
+                    ${block.label ? `<span class="label" style="font-family:var(--f-mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--coral);display:block;margin-bottom:12px;">${escapeHtml(block.label)}</span>` : ''}
+                    <div style="font-family:var(--f-mono);border:1px solid var(--line);background:var(--bg-1);border-radius:var(--radius);overflow:hidden;">
+                        ${items.map(item => `
+                            <div style="display:flex;justify-content:space-between;gap:16px;padding:14px 20px;border-bottom:1px solid var(--line-soft);font-size:.88rem;flex-wrap:wrap;">
+                                <span style="color:var(--ink-dim);letter-spacing:.05em;">${escapeHtml(item.label)}</span>
+                                ${item.value.startsWith('http') || item.value.startsWith('tel:') || item.value.startsWith('mailto:')
+                    ? `<a href="${item.value}" style="color:var(--coral);text-decoration:none;">${escapeHtml(item.value.replace(/^https?:\/\//, ''))}</a>`
+                    : `<span style="color:var(--coral);">${escapeHtml(item.value)}</span>`
+                }
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            } else if (block.type === 'study_mode') {
+                html += `
+                <div class="info-block" style="background:var(--bg-0);border:1px solid var(--line-soft);padding:20px 24px;border-radius:var(--radius);grid-column:1/-1;">
+                    <span class="label" style="font-family:var(--f-mono);font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--coral);display:block;margin-bottom:6px;">${escapeHtml(block.label || 'Режим учебных занятий')}</span>
+                    <p style="font-size:.92rem;color:var(--dark-blue);margin:0;line-height:1.8;">${escapeHtml(block.value || '')}</p>
+                </div>
+            `;
+            } else {
+                // Fallback
+                html += `
+                <div class="info-block" style="background:var(--bg-0);border:1px solid var(--line-soft);padding:20px 24px;border-radius:var(--radius);">
+                    <p class="value" style="font-size:.95rem;color:var(--ink-dim);margin:0;">${escapeHtml(block.value || '')}</p>
                 </div>
             `;
             }
