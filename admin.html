@@ -2610,8 +2610,7 @@
                 return;
             }
 
-            // Проверка размера (макс 5MB для base64)
-            if (file.size > 5 * 1024 * 1024) {
+            if (file.size > 100 * 1024 * 1024) {
                 display.textContent = '❌ Файл слишком большой (макс 5MB)';
                 display.style.color = '#e74c3c';
                 display.style.display = 'block';
