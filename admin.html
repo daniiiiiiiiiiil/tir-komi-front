@@ -1857,6 +1857,49 @@
         },
     };
 
+
+    // Функция удаления с повторными попытками
+    async function deleteMediaWithRetry(id, maxRetries = 2) {
+        let lastError = null;
+
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                console.log(`🔄 Попытка ${attempt} удаления #${id}...`);
+                await withAuth(() => Api.media.remove(id));
+                console.log(`✅ Удалено #${id}`);
+                return true;
+            } catch (err) {
+                lastError = err;
+                console.warn(`⚠️ Попытка ${attempt} не удалась:`, err.message);
+
+                // Если ошибка 404 — файл уже удалён, считаем успехом
+                if (err.status === 404) {
+                    console.log(`ℹ️ Файл #${id} уже удалён`);
+                    return true;
+                }
+
+                // Если ошибка 500 — возможно, файл удалён, но ответ с ошибкой
+                if (err.status === 500) {
+                    try {
+                        await Api.media.get(id);
+                        // Если получили ответ — файл существует, продолжаем попытки
+                    } catch (getErr) {
+                        if (getErr.status === 404) {
+                            console.log(`ℹ️ Файл #${id} не найден (удалён)`);
+                            return true;
+                        }
+                    }
+                }
+
+                if (attempt < maxRetries) {
+                    await new Promise(resolve => setTimeout(resolve, 500 * attempt));
+                }
+            }
+        }
+
+        throw lastError;
+    }
+
     function formatDate(iso) {
         if (!iso) return '—';
         try {
@@ -2319,17 +2362,43 @@
 
             if (delBtn) {
                 if (!confirm('Удалить файл #' + id + '?')) return;
+
+                const btn = delBtn;
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '⏳';
+                btn.disabled = true;
+
                 try {
-                    await withAuth(() => Api.media.remove(id));
+                    // Пробуем удалить с повторными попытками
+                    await deleteMediaWithRetry(id);
                     loadMedia();
                 } catch (err) {
-                    alert(err.message || 'Не удалось удалить файл.');
+                    console.error('❌ Ошибка удаления:', err);
+
+                    let errorMessage = err.message || 'Не удалось удалить файл.';
+
+                    if (err.status === 500) {
+                        errorMessage = '⚠️ Ошибка сервера. Возможно, файл уже удалён. Обновите страницу.';
+                    } else if (err.status === 404) {
+                        errorMessage = '⚠️ Файл не найден. Обновите страницу.';
+                    }
+
+                    alert(errorMessage);
+                    // В любом случае перезагружаем таблицу
+                    loadMedia();
+                } finally {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
                 }
                 return;
             }
 
+            // Редактирование
             const existingEdit = row.nextElementSibling;
-            if (existingEdit && existingEdit.classList.contains('edit-row')) { existingEdit.remove(); return; }
+            if (existingEdit && existingEdit.classList.contains('edit-row')) {
+                existingEdit.remove();
+                return;
+            }
             document.querySelectorAll('.edit-row').forEach((n) => n.remove());
 
             try {
@@ -2337,18 +2406,18 @@
                 const tr = document.createElement('tr');
                 tr.className = 'edit-row';
                 tr.innerHTML = `<td colspan="${row.children.length}">
-        <form class="entity-form" data-id="${id}">
-          <div class="form-row"><label>Название</label><input type="text" name="title" value="${escapeHtml(item.title || '')}"></div>
-          <div class="form-row"><label>Описание</label><textarea name="description">${escapeHtml(item.description || '')}</textarea></div>
-          <div class="form-row"><label>Порядок сортировки</label><input type="text" name="sort_order" value="${item.sort_order}"></div>
-          <div class="form-row">
-            <label>Заменить файл (необязательно)</label>
-            <div class="file-input-wrapper"><input type="file" name="file" accept="image/*,video/*"><span class="file-label">Выберите файл</span></div>
-          </div>
-          <button type="submit" class="btn btn--sm">Сохранить</button>
-          <div class="form-msg"></div>
-        </form>
-      </td>`;
+            <form class="entity-form" data-id="${id}">
+                <div class="form-row"><label>Название</label><input type="text" name="title" value="${escapeHtml(item.title || '')}"></div>
+                <div class="form-row"><label>Описание</label><textarea name="description">${escapeHtml(item.description || '')}</textarea></div>
+                <div class="form-row"><label>Порядок сортировки</label><input type="text" name="sort_order" value="${item.sort_order}"></div>
+                <div class="form-row">
+                    <label>Заменить файл (необязательно)</label>
+                    <div class="file-input-wrapper"><input type="file" name="file" accept="image/*,video/*"><span class="file-label">Выберите файл</span></div>
+                </div>
+                <button type="submit" class="btn btn--sm">Сохранить</button>
+                <div class="form-msg"></div>
+            </form>
+        </td>`;
                 row.after(tr);
                 tr.querySelector('form').addEventListener('submit', async (ev) => {
                     ev.preventDefault();
