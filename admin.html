@@ -1426,6 +1426,14 @@
 
 <body class="admin-body">
 
+<div id="loadingBar" style="position:fixed;top:0;left:0;width:100%;height:3px;background:rgba(255,255,255,0.1);z-index:9999;pointer-events:none;">
+    <div id="loadingProgress" style="width:0%;height:100%;background:linear-gradient(90deg, #F47C68, #ff957a, #F47C68);background-size:200% 100%;transition:width 0.3s ease;border-radius:0 2px 2px 0;box-shadow:0 0 20px rgba(244,124,104,0.5);"></div>
+</div>
+
+<div id="loadingCounter" style="position:fixed;top:8px;right:16px;font-family:var(--f-mono);font-size:.7rem;color:var(--steel-dim);z-index:9999;background:rgba(255,255,255,0.85);padding:2px 10px;border-radius:12px;border:1px solid var(--line);display:none;backdrop-filter:blur(4px);">
+    ⏳ <span id="loadingCount">0</span> запросов
+</div>
+
 
 <header class="site-header is-scrolled">
     <a href="./index.html" class="logo">
@@ -1743,8 +1751,79 @@
 
     const API_BASE = window.__API_BASE__ || 'https://tir-komi.relaxdev.ru/api/v1';
 
+    let activeRequests = 0;
+    let progressInterval = null;
+    let currentProgress = 0;
+
+    const loadingBar = document.getElementById('loadingProgress');
+    const loadingCounter = document.getElementById('loadingCounter');
+    const loadingCount = document.getElementById('loadingCount');
+
+    function showLoading() {
+        activeRequests++;
+        if (activeRequests === 1) {
+            // Показываем полоску
+            loadingCounter.style.display = 'block';
+            currentProgress = 0;
+            loadingBar.style.width = '5%';
+
+            // Анимируем полоску
+            if (progressInterval) clearInterval(progressInterval);
+            progressInterval = setInterval(() => {
+                if (currentProgress < 80) {
+                    currentProgress += Math.random() * 5 + 1;
+                    if (currentProgress > 80) currentProgress = 80;
+                    loadingBar.style.width = currentProgress + '%';
+                }
+            }, 300);
+        }
+        loadingCount.textContent = activeRequests;
+    }
+
+    function hideLoading() {
+        activeRequests--;
+        if (activeRequests < 0) activeRequests = 0;
+        loadingCount.textContent = activeRequests;
+
+        if (activeRequests === 0) {
+            // Завершаем загрузку
+            loadingBar.style.width = '100%';
+            if (progressInterval) {
+                clearInterval(progressInterval);
+                progressInterval = null;
+            }
+
+            // Скрываем через 300ms
+            setTimeout(() => {
+                loadingBar.style.width = '0%';
+                loadingCounter.style.display = 'none';
+            }, 300);
+        }
+    }
+
+    // Перехватываем все fetch запросы
+    const originalFetch = window.fetch;
+    window.fetch = function(...args) {
+        showLoading();
+        return originalFetch.apply(this, args)
+            .finally(() => {
+                hideLoading();
+            });
+    };
+
+    // Также перехватываем XMLHttpRequest
+    const originalXHROpen = XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = function(...args) {
+        this.addEventListener('loadstart', () => showLoading());
+        this.addEventListener('loadend', () => hideLoading());
+        this.addEventListener('error', () => hideLoading());
+        return originalXHROpen.apply(this, args);
+    };
+
     async function apiRequest(path, { method = 'GET', body, headers, ...rest } = {}) {
         console.log(`📤 ${method} ${path}`, body);
+
+        showLoading();
 
         const res = await fetch(API_BASE + path, {
             method,
