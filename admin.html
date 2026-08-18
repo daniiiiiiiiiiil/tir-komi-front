@@ -231,93 +231,6 @@
     .edit-row .entity-form{margin:0;border:none;padding:12px 0;}
 
     .empty-row td{text-align:center;padding:36px;font-family:var(--f-mono);color:var(--steel-dim);}
-
-    /* ===== УНИВЕРСАЛЬНЫЙ ПРОГРЕСС-БАР ДЛЯ ФАЙЛОВ ===== */
-    .file-upload-progress {
-        display: none;
-        margin-top: 10px;
-        padding: 12px 16px;
-        background: rgba(255,255,255,0.06);
-        border-radius: 8px;
-        border: 1px solid var(--line-soft);
-    }
-
-    .file-upload-progress .file-info {
-        display: flex;
-        justify-content: space-between;
-        font-family: var(--f-mono);
-        font-size: .7rem;
-        color: var(--steel-dim);
-        margin-bottom: 4px;
-    }
-
-    .file-upload-progress .file-name {
-        color: var(--paper);
-        font-weight: 500;
-        max-width: 60%;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-
-    .file-upload-progress .file-percent {
-        color: var(--brass-bright);
-        font-weight: 600;
-    }
-
-    .file-upload-progress .progress-track {
-        width: 100%;
-        height: 6px;
-        background: rgba(255,255,255,0.1);
-        border-radius: 4px;
-        overflow: hidden;
-    }
-
-    .file-upload-progress .progress-bar {
-        width: 0%;
-        height: 100%;
-        background: linear-gradient(90deg, #F47C68, #ff957a, #F47C68);
-        background-size: 200% 100%;
-        border-radius: 4px;
-        transition: width 0.3s ease;
-        animation: shimmer-bar 1.5s ease-in-out infinite;
-    }
-
-    @keyframes shimmer-bar {
-        0% { background-position: 200% 0; }
-        100% { background-position: -200% 0; }
-    }
-
-    .file-upload-progress .file-size-info {
-        display: flex;
-        justify-content: space-between;
-        font-family: var(--f-mono);
-        font-size: .65rem;
-        color: var(--steel-dim);
-        margin-top: 4px;
-    }
-
-    .file-upload-progress .file-status {
-        font-size: .7rem;
-        padding: 2px 10px;
-        border-radius: 12px;
-        display: inline-block;
-    }
-
-    .file-upload-progress .file-status.loading {
-        color: #ff957a;
-        background: rgba(244,124,104,0.15);
-    }
-
-    .file-upload-progress .file-status.done {
-        color: #8FD8C5;
-        background: rgba(143,216,197,0.15);
-    }
-
-    .file-upload-progress .file-status.error {
-        color: #e74c3c;
-        background: rgba(231,76,60,0.15);
-    }
 </style>
 
 <style>
@@ -1885,95 +1798,6 @@
         });
     }
 
-    // ===== УНИВЕРСАЛЬНАЯ СИСТЕМА ПРОГРЕССА ДЛЯ ФАЙЛОВ =====
-
-    // Функция конвертации файла в base64 с прогрессом
-    function fileToBase64WithProgress(file, onProgress) {
-        return new Promise((resolve, reject) => {
-            if (!file) return resolve(null);
-
-            const reader = new FileReader();
-
-            reader.onload = () => {
-                const base64 = String(reader.result).split(',')[1] || '';
-                resolve(base64);
-            };
-
-            reader.onerror = () => reject(reader.error);
-
-            reader.onprogress = (event) => {
-                if (event.lengthComputable && onProgress) {
-                    const percent = Math.round((event.loaded / event.total) * 100);
-                    onProgress(percent, event.loaded, event.total);
-                }
-            };
-
-            reader.readAsDataURL(file);
-        });
-    }
-
-    // Создание элемента прогресса для файла
-    function createFileProgress(file) {
-        const container = document.createElement('div');
-        container.className = 'file-upload-progress';
-        container.style.display = 'block';
-        container.innerHTML = `
-        <div class="file-info">
-            <span class="file-name">📄 ${file.name}</span>
-            <span class="file-percent">0%</span>
-        </div>
-        <div class="progress-track">
-            <div class="progress-bar" style="width:0%;"></div>
-        </div>
-        <div class="file-size-info">
-            <span>0 KB / ${(file.size / 1024).toFixed(1)} KB</span>
-            <span class="file-status loading">⏳ Загрузка...</span>
-        </div>
-    `;
-        return container;
-    }
-
-    // Обновление прогресса
-    function updateFileProgress(container, percent, loaded, total) {
-        const bar = container.querySelector('.progress-bar');
-        const percentLabel = container.querySelector('.file-percent');
-        const sizeInfo = container.querySelector('.file-size-info span:first-child');
-        const status = container.querySelector('.file-status');
-
-        bar.style.width = percent + '%';
-        percentLabel.textContent = percent + '%';
-
-        if (loaded !== undefined) {
-            const loadedKB = (loaded / 1024).toFixed(1);
-            const totalKB = (total / 1024).toFixed(1);
-            sizeInfo.textContent = `${loadedKB} KB / ${totalKB} KB`;
-        }
-
-        if (percent >= 100) {
-            status.className = 'file-status done';
-            status.textContent = '✅ Готово';
-        } else {
-            status.className = 'file-status loading';
-            status.textContent = '⏳ Загрузка...';
-        }
-    }
-
-    function finishFileProgress(container, success, errorMessage) {
-        const status = container.querySelector('.file-status');
-        const bar = container.querySelector('.progress-bar');
-
-        if (success) {
-            status.className = 'file-status done';
-            status.textContent = 'Загружено';
-            bar.style.width = '100%';
-            container.querySelector('.file-percent').textContent = '100%';
-        } else {
-            status.className = 'file-status error';
-            status.textContent = errorMessage || 'Ошибка';
-            bar.style.background = '#e74c3c';
-        }
-    }
-
     const Api = {
         advertisements: {
             list: (limit = 20, offset = 0) => apiRequest(`/advertisements?limit=${limit}&offset=${offset}`),
@@ -2238,92 +2062,23 @@
         document.getElementById('adCreateForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const form = e.target;
-            const msg = form.querySelector('.form-msg');
-            msg.className = 'form-msg';
-
             const fd = new FormData(form);
-            const submitBtn = form.querySelector('button[type="submit"]');
-
-            // Собираем все файлы
-            const imageFile = fd.get('image');
-            const pdfFile = fd.get('pdf');
-            const files = [];
-
-            if (imageFile && imageFile.size) {
-                files.push({ field: 'image', file: imageFile, label: 'Изображение' });
-            }
-            if (pdfFile && pdfFile.size) {
-                files.push({ field: 'pdf', file: pdfFile, label: 'PDF' });
-            }
-
-            if (files.length === 0) {
-                // Если нет файлов — отправляем без прогресса
-                try {
-                    const payload = {
-                        title: fd.get('title'),
-                        description: fd.get('description') || '',
-                        url: fd.get('url') || undefined,
-                    };
-                    await withAuth(() => Api.advertisements.create(payload));
-                    setFormMsg(form, 'Объявление создано.', false);
-                    form.reset();
-                    loadAds();
-                } catch (err) {
-                    setFormMsg(form, err.message || 'Не удалось создать объявление.', true);
-                }
-                return;
-            }
-
-            submitBtn.disabled = true;
-            submitBtn.textContent = '⏳ Загрузка...';
-
-            // Создаём прогресс для каждого файла
-            const progressContainers = [];
-            files.forEach((f, index) => {
-                const container = createFileProgress(f.file);
-                // Вставляем после инпута
-                const wrapper = f.field === 'image'
-                    ? document.getElementById('imageInput').closest('.file-input-wrapper')
-                    : document.getElementById('pdfInput').closest('.file-input-wrapper');
-                wrapper.parentNode.insertBefore(container, wrapper.nextSibling);
-                progressContainers.push({ container, ...f });
-            });
-
             try {
                 const payload = {
                     title: fd.get('title'),
                     description: fd.get('description') || '',
                     url: fd.get('url') || undefined,
                 };
-
-                // Загружаем файлы с прогрессом
-                for (const p of progressContainers) {
-                    const base64 = await fileToBase64WithProgress(p.file, (percent, loaded, total) => {
-                        updateFileProgress(p.container, percent, loaded, total);
-                    });
-                    payload[p.field] = base64;
-                    finishFileProgress(p.container, true);
-                }
-
+                const imageFile = fd.get('image');
+                const pdfFile = fd.get('pdf');
+                if (imageFile && imageFile.size) payload.image = await fileToBase64(imageFile);
+                if (pdfFile && pdfFile.size) payload.pdf = await fileToBase64(pdfFile);
                 await withAuth(() => Api.advertisements.create(payload));
                 setFormMsg(form, 'Объявление создано.', false);
                 form.reset();
                 loadAds();
-
-                // Удаляем контейнеры прогресса
-                progressContainers.forEach(p => p.container.remove());
-
             } catch (err) {
                 setFormMsg(form, err.message || 'Не удалось создать объявление.', true);
-                progressContainers.forEach(p => {
-                    finishFileProgress(p.container, false, err.message);
-                });
-                setTimeout(() => {
-                    progressContainers.forEach(p => p.container.remove());
-                }, 3000);
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Создать';
             }
         });
 
@@ -2384,53 +2139,17 @@
         document.getElementById('materialCreateForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const form = e.target;
-            const msg = form.querySelector('.form-msg');
-            msg.className = 'form-msg';
-
-            const fileInput = document.getElementById('materialPdfInput');
-            const file = fileInput.files[0];
-
-            if (!file) {
-                msg.textContent = 'Выберите PDF файл.';
-                msg.classList.add('is-visible', 'is-error');
-                return;
-            }
-
-            const submitBtn = form.querySelector('button[type="submit"]');
-            submitBtn.disabled = true;
-            submitBtn.textContent = '⏳ Загрузка...';
-
-            // Создаём прогресс
-            const wrapper = document.getElementById('materialPdfInput').closest('.file-input-wrapper');
-            const container = createFileProgress(file);
-            wrapper.parentNode.insertBefore(container, wrapper.nextSibling);
-
+            const fd = new FormData(form);
             try {
-                const base64 = await fileToBase64WithProgress(file, (percent, loaded, total) => {
-                    updateFileProgress(container, percent, loaded, total);
-                });
-                finishFileProgress(container, true);
-
-                const payload = {
-                    title: form.querySelector('input[name="title"]').value,
-                    description: form.querySelector('textarea[name="description"]').value || '',
-                    pdf: base64
-                };
-
+                const payload = { title: fd.get('title'), description: fd.get('description') || '' };
+                const pdfFile = fd.get('pdf');
+                if (pdfFile && pdfFile.size) payload.pdf = await fileToBase64(pdfFile);
                 await withAuth(() => Api.materials.create(payload));
                 setFormMsg(form, 'Материал создан.', false);
                 form.reset();
-                document.getElementById('materialFileLabel').textContent = '📁 Выберите файл';
                 loadMaterials();
-                container.remove();
-
             } catch (err) {
                 setFormMsg(form, err.message || 'Не удалось создать материал.', true);
-                finishFileProgress(container, false, err.message);
-                setTimeout(() => container.remove(), 3000);
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Создать';
             }
         });
 
@@ -2596,41 +2315,26 @@
 
             const submitBtn = form.querySelector('button[type="submit"]');
             submitBtn.disabled = true;
-            submitBtn.textContent = '⏳ Загрузка...';
-
-            // Создаём прогресс для каждого файла
-            const progressContainers = [];
-            const wrapper = fileInput.closest('.file-input-wrapper');
-
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i];
-                const container = createFileProgress(file);
-                wrapper.parentNode.insertBefore(container, wrapper.nextSibling);
-                progressContainers.push({ container, file, index: i });
-            }
+            submitBtn.textContent = 'Загрузка...';
 
             let successCount = 0;
             let errorCount = 0;
 
-            for (const p of progressContainers) {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const formData = new FormData();
+                formData.append('type', type);
+                formData.append('title', title || file.name);
+                formData.append('description', description);
+                formData.append('sort_order', String(sortOrder + i));
+                formData.append('file', file);
+
                 try {
-                    const formData = new FormData();
-                    formData.append('type', type);
-                    formData.append('title', title || p.file.name);
-                    formData.append('description', description);
-                    formData.append('sort_order', String(sortOrder + p.index));
-
-                    // Загружаем с прогрессом через XMLHttpRequest
-                    await uploadFileWithProgress(p.file, (percent, loaded, total) => {
-                        updateFileProgress(p.container, percent, loaded, total);
-                    }, formData);
-
-                    finishFileProgress(p.container, true);
+                    await withAuth(() => Api.media.create(formData));
                     successCount++;
                 } catch (err) {
                     errorCount++;
-                    finishFileProgress(p.container, false, err.message);
-                    console.error(`Ошибка загрузки ${p.file.name}:`, err);
+                    console.error(`Ошибка загрузки ${file.name}:`, err);
                 }
             }
 
@@ -2642,60 +2346,11 @@
                 msg.classList.add('is-visible', 'is-ok');
                 form.reset();
                 loadMedia();
-                setTimeout(() => {
-                    progressContainers.forEach(p => p.container.remove());
-                }, 1000);
             } else {
                 msg.textContent = `Загружено ${successCount}, ошибок ${errorCount}. Проверьте консоль.`;
                 msg.classList.add('is-visible', 'is-error');
-                setTimeout(() => {
-                    progressContainers.forEach(p => {
-                        const status = p.container.querySelector('.file-status');
-                        if (status && status.textContent.includes('Готово')) {
-                            // Оставляем успешные, удаляем только через 5 сек
-                        }
-                        setTimeout(() => p.container.remove(), 5000);
-                    });
-                }, 3000);
             }
         });
-
-        function uploadFileWithProgress(file, onProgress, formData) {
-            return new Promise((resolve, reject) => {
-                const xhr = new XMLHttpRequest();
-                xhr.open('POST', API_BASE + '/media', true);
-                xhr.withCredentials = true;
-
-                xhr.upload.onprogress = (event) => {
-                    if (event.lengthComputable && onProgress) {
-                        const percent = Math.round((event.loaded / event.total) * 100);
-                        onProgress(percent, event.loaded, event.total);
-                    }
-                };
-
-                xhr.onload = () => {
-                    if (xhr.status >= 200 && xhr.status < 300) {
-                        try {
-                            const data = JSON.parse(xhr.responseText);
-                            resolve(data);
-                        } catch {
-                            reject(new Error('Неверный ответ сервера'));
-                        }
-                    } else {
-                        let errorMsg = `Ошибка загрузки: ${xhr.status}`;
-                        try {
-                            const errData = JSON.parse(xhr.responseText);
-                            if (errData.message) errorMsg = errData.message;
-                            if (errData.error) errorMsg = errData.error;
-                        } catch {}
-                        reject(new Error(errorMsg));
-                    }
-                };
-
-                xhr.onerror = () => reject(new Error('Ошибка сети'));
-                xhr.send(formData);
-            });
-        }
 
         mediaBody.addEventListener('click', async (e) => {
             const editBtn = e.target.closest('[data-action="edit"]');
