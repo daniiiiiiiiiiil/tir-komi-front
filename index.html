@@ -2104,9 +2104,20 @@
     <div class="page" id="page-about">
         <section id="institute">
             <div class="container">
-                <div id="aboutContent">
-                    <!-- Контент будет загружен из API -->
+                <div class="map-wrap reveal" style="margin-top: 40px;">
+                    <div style="position:relative;overflow:hidden;">
+                        <div class="map-tag">📍 г. Сыктывкар, ул. Карла Маркса, д. 228/3</div>
+                        <iframe
+                                src="https://yandex.ru/map-widget/v1/?ll=50.822636%2C61.659996&z=17&pt=50.822636%2C61.659996"
+                                width="100%"
+                                height="420"
+                                frameborder="0"
+                                loading="lazy"
+                                allowfullscreen>
+                        </iframe>
+                    </div>
                 </div>
+
             </div>
         </section>
     </div>
@@ -2654,29 +2665,7 @@
             }
         });
 
-        html += '</div>';
-
-        // ===== КАРТА В САМОМ КОНЦЕ =====
-        html += `
-        <div class="map-wrap reveal" style="margin-top: 40px; border-radius: 8px; overflow: hidden; box-shadow: var(--shadow-sm);">
-            <div style="position:relative;overflow:hidden;">
-                <div class="map-tag" style="position:absolute;top:14px;left:14px;background:var(--bg-0);border:1px solid var(--coral);padding:.5em .9em;font-family:var(--f-mono);font-size:.7rem;letter-spacing:.1em;color:var(--coral);z-index:2;border-radius:var(--radius);">
-                    📍 г. Сыктывкар, ул. Карла Маркса, д. 228/3
-                </div>
-                <iframe
-                    src="https://yandex.ru/map-widget/v1/?ll=50.822636%2C61.659996&z=17&pt=50.822636%2C61.659996&what=map"
-                    width="100%"
-                    height="400"
-                    frameborder="0"
-                    loading="lazy"
-                    allowfullscreen
-                    style="border:0;">
-                </iframe>
-            </div>
-        </div>
-    `;
-
-        html += '</section>';
+        html += '</div></section>';
         aboutContainer.innerHTML = html;
     }
 
