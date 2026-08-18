@@ -824,17 +824,39 @@
             color:var(--coral);
         }
 
-        .hero-desc{
-            display:flex;
-            justify-content:space-between;
-            align-items:flex-end;
-            gap:40px;
-            margin-top:1.4em;
-            border-top:1px solid var(--line);
-            padding-top:1.4em;
+        .hero-desc {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 40px;
+            margin-top: 1.4em;
+            border-top: 1px solid var(--line);
+            padding-top: 1.4em;
         }
-        .hero-desc p{max-width:52ch;font-size:1.02rem;}
-        .hero-actions{display:flex;gap:1em;flex-wrap:wrap;flex:none;}
+        .hero-desc p {
+            max-width: 52ch;
+            font-size: 1.1rem;
+            color: var(--dark-blue);
+            font-weight: 500;
+            background: rgba(233, 237, 246, 0.75);
+            padding: 18px 22px;
+            border-radius: var(--radius);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            border-left: 4px solid var(--coral);
+            box-shadow: var(--shadow-sm);
+            line-height: 1.7;
+        }
+        .hero-desc p strong {
+            color: var(--coral);
+            font-weight: 700;
+        }
+        .hero-actions {
+            display: flex;
+            gap: 1em;
+            flex-wrap: wrap;
+            flex: none;
+        }
 
         .reticle-cursor{
             display:none !important;
@@ -1819,7 +1841,6 @@
                     <li><a href="tel:88212314060">+7 (8212) 31-40-60</a></li>
                     <li><a href="mailto:tirkomi@yandex.ru">tirkomi@yandex.ru</a></li>
                     <li><span style="color:var(--steel);">г. Сыктывкар, ул. Карла Маркса, д. 228/3</span></li>
-                    <li>Вход со стороны шлагбаума</li>
                 </ul>
             </div>
         </div>
