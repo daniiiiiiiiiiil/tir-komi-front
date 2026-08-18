@@ -2550,119 +2550,101 @@
         aboutContainer.innerHTML = html;
     }
 
+    // Добавить функцию загрузки
     async function loadAbout() {
         const aboutContainer = document.getElementById('page-about');
         if (!aboutContainer) return;
 
+        // 1. Сначала пытаемся показать кеш мгновенно
         const cached = localStorage.getItem('cache_about');
         let hasCache = false;
 
         if (cached) {
             try {
                 const data = JSON.parse(cached);
+                // Проверяем, что в кеше есть данные
                 const items = Array.isArray(data) ? data : (data && data.items ? data.items : []);
                 if (items.length > 0 && items[0]?.description) {
                     renderAbout(data);
                     hasCache = true;
+                    console.log('✅ Показан кеш страницы "О нас"');
                 }
-            } catch (e) {
-                console.warn('Ошибка чтения кеша:', e);
-            }
+            } catch {}
         }
 
         // 2. Если кеша нет — показываем скелетон
         if (!hasCache) {
             aboutContainer.innerHTML = `
-            <section id="institute">
-                <div class="container">
-                    <div class="section-head reveal">
-                        <div>
-                            <div class="eyebrow">О нас</div>
-                            <h2>Загрузка...</h2>
-                        </div>
-                    </div>
-                    <div class="skeleton-block" style="margin-top:40px;">
-                        <div class="skeleton-line short"></div>
-                        <div class="skeleton-line medium"></div>
-                        <div class="skeleton-line"></div>
-                        <div class="skeleton-line short"></div>
+            <div class="container">
+                <div class="section-head reveal">
+                    <div>
+                        <div class="eyebrow">О нас</div>
+                        <h2>Загрузка...</h2>
                     </div>
                 </div>
-            </section>
+                <div class="skeleton-block" style="height:200px;"></div>
+            </div>
         `;
         }
 
+        // 3. В фоне загружаем свежие данные
         try {
+            console.log('🔄 Загрузка свежих данных "О нас" из API...');
             const freshData = await Api.about.refresh();
 
+            // Проверяем, есть ли данные
             const items = Array.isArray(freshData) ? freshData : (freshData && freshData.items ? freshData.items : []);
             const hasData = items.length > 0 && items[0]?.description;
 
             if (hasData) {
-                console.log('Данные получены, обновляем страницу');
+                // ✅ Данные есть — обновляем страницу
+                console.log('✅ Данные получены, обновляем страницу');
                 renderAbout(freshData);
             } else {
-                console.warn('Сервер вернул пустые данные, оставляем кеш');
+                // ❌ Данных нет — НЕ перезаписываем страницу, оставляем кеш
+                console.warn('⚠️ Сервер вернул пустые данные, оставляем кеш');
 
+                // Если кеша не было и данных нет — показываем сообщение
                 if (!hasCache) {
                     aboutContainer.innerHTML = `
-                    <section id="institute">
-                        <div class="container">
-                            <div class="section-head reveal">
-                                <div>
-                                    <div class="eyebrow">О нас</div>
-                                    <h2>Информация о нас</h2>
-                                    <p class="lede">Контент страницы пока не заполнен.</p>
-                                </div>
-                            </div>
-                            <div class="state-block" style="max-width:600px;margin:40px auto;">
-                                <strong>Нет данных</strong>
-                                <p>Добавьте информацию через панель администратора.</p>
-                            </div>
-                        </div>
-                    </section>
-                `;
-                }
-            }
-        } catch (err) {
-            console.error(' Ошибка загрузки "О нас":', err);
-
-            if (!hasCache) {
-                aboutContainer.innerHTML = `
-                <section id="institute">
                     <div class="container">
                         <div class="section-head reveal">
                             <div>
                                 <div class="eyebrow">О нас</div>
-                                <h2>Ошибка загрузки</h2>
+                                <h2>Информация о нас</h2>
+                                <p class="lede">Контент страницы пока не заполнен.</p>
                             </div>
                         </div>
                         <div class="state-block" style="max-width:600px;margin:40px auto;">
-                            <strong>Не удалось загрузить данные</strong>
-                            <p>${escapeHtml(err.message || 'Попробуйте обновить страницу.')}</p>
+                            <strong>Нет данных</strong>
+                            <p>Добавьте информацию через панель администратора.</p>
                         </div>
                     </div>
-                </section>
+                `;
+                }
+            }
+        } catch (err) {
+            // ❌ Ошибка загрузки — НЕ перезаписываем страницу, оставляем кеш
+            console.error('❌ Ошибка загрузки "О нас":', err);
+
+            if (!hasCache) {
+                aboutContainer.innerHTML = `
+                <div class="container">
+                    <div class="section-head reveal">
+                        <div>
+                            <div class="eyebrow">О нас</div>
+                            <h2>Ошибка загрузки</h2>
+                        </div>
+                    </div>
+                    <div class="state-block" style="max-width:600px;margin:40px auto;">
+                        <strong>Не удалось загрузить данные</strong>
+                        <p>${escapeHtml(err.message || 'Попробуйте обновить страницу.')}</p>
+                        <button onclick="refreshAbout()" class="btn btn--sm" style="margin-top:12px;">🔄 Повторить</button>
+                    </div>
+                </div>
             `;
             }
         }
-    }
-        // Предзагрузка при переходе на страницу
-        document.addEventListener('DOMContentLoaded', () => {
-            const aboutLink = document.querySelector('[data-page="page-about"]');
-            if (aboutLink) {
-                aboutLink.addEventListener('click', () => {
-                    // Проверяем кеш при клике
-                    const cached = localStorage.getItem('cache_about');
-                    if (!cached) {
-                        // Если кеша нет — загружаем
-                        Api.about.get().then(data => {
-                            renderAbout(data);
-                        }).catch(() => {});
-                    }
-                });
-            }
-        });
     }
     loadAbout();
 
