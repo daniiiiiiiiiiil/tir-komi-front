@@ -1,4 +1,7 @@
 User-agent: *
 Allow: /
+Disallow: /admin*
+Disallow: /api*
+Disallow: /assets*
 
 Sitemap: https://tir-komi.vercel.app/sitemap.xml
