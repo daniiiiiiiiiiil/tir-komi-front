@@ -923,7 +923,7 @@
 
         .inn-img {
             max-width: 100%;
-            max-height: 600px;
+            max-height: 800px;
             width: auto;
             height: auto;
             border-radius: 8px;
@@ -933,6 +933,31 @@
             transition: all .4s var(--ease);
             object-fit: contain;
             background: var(--bg-1);
+        }
+
+        /* Добавляем контейнер для изображения, чтобы оно не вылезало */
+        .info-block .inn-img-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            overflow: hidden;
+            border-radius: 8px;
+            background: var(--bg-1);
+            padding: 8px;
+        }
+
+        /* Для мобильных устройств */
+        @media (max-width: 700px) {
+            .inn-img {
+                max-height: 500px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .inn-img {
+                max-height: 350px;
+            }
         }
 
         .inn-img:hover {
@@ -1466,9 +1491,11 @@
                 const imgSrc = value?.src || value || '';
                 const imgAlt = value?.alt || block.label || 'Изображение';
                 return `
-                <p class="value" style="margin-bottom: 4px;">${block.label || ''}</p>
-                <img src="${imgSrc}" alt="${imgAlt}" class="inn-img" style="max-height: 1000px; width: auto; max-width: 100%;">
-            `;
+        <p class="value" style="margin-bottom: 8px;">${block.label || ''}</p>
+        <div class="inn-img-wrapper">
+            <img src="${imgSrc}" alt="${imgAlt}" class="inn-img" loading="lazy">
+        </div>
+    `;
             }
 
             case 'image_grid': {

@@ -1059,12 +1059,42 @@
 
 
         .ads-rail{
-            display:grid;
-            grid-template-columns:repeat(auto-fill, minmax(280px, 1fr));
+            display:flex;
+            flex-direction:column;
             gap:24px;
             padding-bottom:14px;
+            max-width:800px;
+            margin:0 auto;
         }
-        .ads-rail .card{height:100%;}
+        .ads-rail .card{
+            width:100%;
+            max-width:100%;
+            margin:0;
+        }
+        .ads-rail .card .card-media{
+            aspect-ratio:16/9;
+            max-height:300px;
+        }
+        .ads-rail .card .card-body p{
+            display:block;
+            overflow:visible;
+            white-space:normal;
+            max-height:none;
+        }
+
+        @media (max-width: 620px) {
+            .ads-rail {
+                max-width:100%;
+                gap:16px;
+            }
+            .ads-rail .card .card-body {
+                padding:16px 18px 20px;
+            }
+            .ads-rail .card .card-media {
+                aspect-ratio:16/9;
+                max-height:200px;
+            }
+        }
 
         .rail-controls{display:flex;gap:.6em;}
         .rail-btn{
@@ -3060,12 +3090,14 @@
             if (!materialsGrid) return;
 
             const items = Array.isArray(data) ? data : (data && data.items ? data.items : []);
-            if (!items.length) {
+            const filteredItems = items.filter(m => m.pdf && m.pdf.length > 0);
+
+            if (!filteredItems.length) {
                 materialsGrid.innerHTML = stateBlock('Материалов пока нет', 'Методички появятся здесь по мере публикации.');
                 return;
             }
 
-            materialsGrid.innerHTML = items.map((m) => `
+            materialsGrid.innerHTML = filteredItems.map((m) => `
     <div class="doc-card">
       <div class="doc-ico">PDF</div>
       <div class="doc-info">
@@ -3074,7 +3106,7 @@
       </div>
       <div class="doc-meta">
         ${formatDate(m.create_at)}<br>
-        ${m.id ? `<a href="${API_BASE}/materials/${m.id}/pdf" class="btn--line" target="_blank" rel="noopener">Открыть</a>` : '—'}
+        <a href="${API_BASE}/materials/${m.id}/pdf" class="btn--line" target="_blank" rel="noopener">Открыть</a>
       </div>
     </div>`).join('');
             staggerChildren(materialsGrid);
