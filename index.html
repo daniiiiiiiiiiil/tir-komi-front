@@ -3039,7 +3039,7 @@
                         }
 
                         if (ad.id) {
-                            bodyHTML += `<a href="https://tir-komi.relaxdev.ru/api/v1/advertisements/${ad.id}/pdf" target="_blank" rel="noopener" class="btn btn--sm">📄 Скачать PDF</a></p>`;
+                            bodyHTML += `<a href="${API_BASE}/advertisements/${ad.id}/pdf" target="_blank" rel="noopener" class="btn btn--sm" download>📄 Скачать PDF</a></p>`;
                         }
 
                         if (ad.url) {
@@ -3074,7 +3074,7 @@
       </div>
       <div class="doc-meta">
         ${formatDate(m.create_at)}<br>
-        ${m.id ? `<a href="${API_BASE}/materials/${m.id}/pdf" class="btn--line" target="_blank" rel="noopener">Скачать</a>` : '—'}
+        ${m.id ? `<a href="${API_BASE}/materials/${m.id}/pdf" class="btn--line" target="_blank" rel="noopener">Открыть</a>` : '—'}
       </div>
     </div>`).join('');
             staggerChildren(materialsGrid);

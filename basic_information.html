@@ -1450,7 +1450,7 @@
 
                 return `
                 <p class="value" style="margin-bottom: 4px;">${block.label || ''}</p>
-                <a href="${url}" target="_blank" class="pdf-link" download>${label}</a>
+                <a href="${url}" target="_blank" class="pdf-link">${label}</a>
             `;
             }
 
@@ -1490,7 +1490,7 @@
                         <li>
                             <div class="label">${item.label || ''}</div>
                             <div class="value">${item.value || ''}</div>
-                            ${item.file_url ? `<div class="value"><a href="${item.file_url}" target="_blank" class="pdf-link">${item.file_label || 'Скачать'}</a></div>` : ''}
+                           ${item.file_url ? `<div class="value"><a href="${item.file_url}" target="_blank" class="pdf-link" download>${item.file_label || 'Скачать'}</a></div>` : ''}
                         </li>
                     `).join('')}
                 </ul>
