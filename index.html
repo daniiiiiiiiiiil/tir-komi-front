@@ -1029,9 +1029,9 @@
         }
         .card-media img {
             width: 100%;
-            height: auto;
+            height: 100%;
             max-height: 400px;
-            object-fit: contain;
+            object-fit: cover;  /* вместо contain */
             transition: transform .5s var(--ease);
             display: block;
         }
@@ -3062,16 +3062,14 @@
 
                 const hasImage = ad.image && ad.image.length > 0;
 
-                // Если есть картинка — показываем img, иначе — ничего
+                // Если есть картинка — создаём блок с картинкой, иначе — ничего
                 const mediaHtml = hasImage
-                    ? `<img src="${API_BASE}/advertisements/${ad.id}/image" alt="${escapeHtml(ad.title)}" loading="lazy" onerror="this.parentElement.innerHTML=''">`
+                    ? `<div class="card-media"><img src="${API_BASE}/advertisements/${ad.id}/image" alt="${escapeHtml(ad.title)}" loading="lazy" onerror="this.parentElement.innerHTML=''"></div>`
                     : '';
 
                 return `
     <article class="card" data-id="${ad.id}">
-      <div class="card-media">
-        ${mediaHtml}
-      </div>
+      ${mediaHtml}
       <div class="card-body">
         <span class="card-tag">Объявление</span>
         <h3>${escapeHtml(ad.title)}</h3>
